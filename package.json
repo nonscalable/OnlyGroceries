@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json"
@@ -25,7 +25,10 @@
     "vite": "^5.4.8"
   },
   "dependencies": {
+    "bits-ui": "^0.21.15",
     "clsx": "^2.1.1",
+    "lucide-svelte": "^0.446.0",
+    "paneforge": "^0.0.6",
     "tailwind-merge": "^2.5.2",
     "tailwind-variants": "^0.2.1"
   }
