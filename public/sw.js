@@ -25,13 +25,14 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       const hashedAssets = await getHashedAssets()
-      console.log(hashedAssets)
+
       return cache.addAll([
         '/',
         '/index.html',
         '/app.webmanifest',
         '/icon-192.png',
         '/icons-512.png',
+        '/icon.svg',
         ...hashedAssets
       ])
     })
