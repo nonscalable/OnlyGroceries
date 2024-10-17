@@ -22,7 +22,8 @@
   })
   setContextRepo(repo)
 
-  const rootDocUrl = `${document.location.hash.substring(1)}`
+  // const rootDocUrl = `${document.location.hash.substring(1)}`
+  const rootDocUrl = 'automerge:4TMTVaus7QPg2HBRAc2wa47fD3k'
   let handle
   if (isValidAutomergeUrl(rootDocUrl)) {
     handle = repo.find(rootDocUrl)
