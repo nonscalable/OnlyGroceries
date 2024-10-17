@@ -5,21 +5,59 @@
   import * as Tabs from '$lib/components/ui/tabs'
   import { Checkbox } from '$lib/components/ui/checkbox'
   import { Toggle } from '$lib/components/ui/toggle'
+  import type { ItemType, Item, ItemsList } from './types.ts'
 
-  type Item = {
-    text: string
-    inCart: boolean
-    purchased: boolean
-    type: ItemType
+  import { onDestroy } from 'svelte'
+
+  import {
+    document as automergeDocument,
+    setContextRepo
+  } from '@automerge/automerge-repo-svelte-store'
+  import { isValidAutomergeUrl, Repo } from '@automerge/automerge-repo'
+  import { IndexedDBStorageAdapter } from '@automerge/automerge-repo-storage-indexeddb'
+
+  const repo = new Repo({
+    storage: new IndexedDBStorageAdapter()
+    // network: new BroadcastChannelNetworkAdapter()
+  })
+  setContextRepo(repo)
+
+  const rootDocUrl = `${document.location.hash.substring(1)}`
+  let handle
+  if (isValidAutomergeUrl(rootDocUrl)) {
+    handle = repo.find(rootDocUrl)
+  } else {
+    handle = repo.create<ItemsList>({
+      items: [
+        {
+          text: 'Learn Automerge',
+          inCart: false,
+          purchased: false,
+          type: 'regular'
+        }
+      ]
+    })
   }
 
-  type ItemType = 'regular' | 'rare'
+  const docUrl = (document.location.hash = handle.url)
+  const doc = automergeDocument<ItemsList>(docUrl)
 
   let items = $state<Item[]>([])
   let text = $state('')
   let activeTab = $state('regular')
 
+  const unsubscribe = doc.subscribe(value => {
+    if (value !== undefined) {
+      items = value.items
+    }
+  })
+
+  onDestroy(() => {
+    unsubscribe()
+  })
+
   function add(type: ItemType) {
+    //TODO: handle the case in another way
     if (itemTexts.includes(text)) {
       text = ''
       return
@@ -32,16 +70,31 @@
       inCart: type === 'rare' ? true : false
     }
 
-    items = [...items, item]
+    doc.change(d => d.items.push(item))
     text = ''
   }
-  function toggleInCart(item: Item) {
-    item.inCart = !item.inCart
-    item.purchased = false
+
+  function toggleInCart(i: number) {
+    doc.change(d => {
+      if (i < 0 || i >= d.items.length) {
+        return
+      }
+
+      d.items[i].inCart = !d.items[i].inCart
+      d.items[i].purchased = false
+    })
   }
-  function togglePurchased(item: Item) {
-    item.purchased = !item.purchased
+
+  function togglePurchased(i: number) {
+    doc.change(d => {
+      if (i < 0 || i >= d.items.length) {
+        return
+      }
+
+      d.items[i].purchased = !d.items[i].purchased
+    })
   }
+
   let regularItems = $derived(items.filter(item => item.type === 'regular'))
   let cartItems = $derived(items.filter(item => item.inCart))
   let itemTexts = $derived(items.map(item => item.text))
@@ -69,13 +122,13 @@
     </div>
     <Tabs.Content value="regular">
       <ul>
-        {#each regularItems as item (item.text)}
+        {#each regularItems as item, index}
           <li>
             <Toggle
               variant="outline"
               class="mb-2 flex w-full items-center justify-between"
               bind:pressed={item.inCart}
-              on:click={() => toggleInCart(item)}
+              on:click={() => toggleInCart(index)}
             >
               <div class="flex items-center gap-2">
                 <span>{item.text}</span>
@@ -90,11 +143,11 @@
       </ul>
     </Tabs.Content>
     <Tabs.Content value="cart">
-      {#each cartItems as item (item.text)}
+      {#each cartItems as item, index}
         <li class="mb-2 flex items-center gap-2">
           <Checkbox
             checked={item.purchased}
-            onCheckedChange={() => togglePurchased(item)}
+            onCheckedChange={() => togglePurchased(index)}
           />
           <span class={item.purchased ? 'line-through' : ''}>{item.text}</span>
         </li>
