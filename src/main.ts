@@ -1,6 +1,7 @@
 import './app.css'
 import { mount } from 'svelte'
 import App from './App.svelte'
+import { getAutomergeKey, storeAutomergeKey } from './idb'
 
 // Service worker registration
 const registerServiceWorker = async () => {
@@ -24,6 +25,13 @@ const registerServiceWorker = async () => {
 }
 
 registerServiceWorker()
+const key = await getAutomergeKey()
 
 let target = document.getElementById('app')
-if (target) mount(App, { target })
+if (target)
+  mount(App, {
+    target,
+    props: {
+      key
+    }
+  })

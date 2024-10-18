@@ -13,20 +13,25 @@
     document as automergeDocument,
     setContextRepo
   } from '@automerge/automerge-repo-svelte-store'
-  import { isValidAutomergeUrl, Repo } from '@automerge/automerge-repo'
+  import { Repo } from '@automerge/automerge-repo'
   import { IndexedDBStorageAdapter } from '@automerge/automerge-repo-storage-indexeddb'
+  import type { AutomergeUrl } from 'node_modules/@automerge/automerge-repo/dist/types'
+  import { storeAutomergeKey } from './idb'
+
+  interface MyProps {
+    key: AutomergeUrl | null
+  }
+
+  let { key }: MyProps = $props()
 
   const repo = new Repo({
     storage: new IndexedDBStorageAdapter()
     // network: new BroadcastChannelNetworkAdapter()
   })
   setContextRepo(repo)
-
-  // const rootDocUrl = `${document.location.hash.substring(1)}`
-  const rootDocUrl = 'automerge:4TMTVaus7QPg2HBRAc2wa47fD3k'
   let handle
-  if (isValidAutomergeUrl(rootDocUrl)) {
-    handle = repo.find(rootDocUrl)
+  if (key) {
+    handle = repo.find(key)
   } else {
     handle = repo.create<ItemsList>({
       items: [
@@ -38,9 +43,10 @@
         }
       ]
     })
+    storeAutomergeKey(handle.url)
   }
 
-  const docUrl = (document.location.hash = handle.url)
+  const docUrl = handle.url
   const doc = automergeDocument<ItemsList>(docUrl)
 
   let items = $state<Item[]>([])
@@ -77,10 +83,6 @@
 
   function toggleInCart(i: number) {
     doc.change(d => {
-      if (i < 0 || i >= d.items.length) {
-        return
-      }
-
       d.items[i].inCart = !d.items[i].inCart
       d.items[i].purchased = false
     })
@@ -88,16 +90,19 @@
 
   function togglePurchased(i: number) {
     doc.change(d => {
-      if (i < 0 || i >= d.items.length) {
-        return
-      }
-
       d.items[i].purchased = !d.items[i].purchased
     })
   }
 
-  let regularItems = $derived(items.filter(item => item.type === 'regular'))
-  let cartItems = $derived(items.filter(item => item.inCart))
+  let regularItems = $derived(
+    items
+      .map((item, i) => ({ ...item, i }))
+      .filter(item => item.type === 'regular')
+  )
+  let cartItems = $derived(
+    items.map((item, i) => ({ ...item, i })).filter(item => item.inCart)
+  )
+
   let itemTexts = $derived(items.map(item => item.text))
 </script>
 
@@ -123,13 +128,13 @@
     </div>
     <Tabs.Content value="regular">
       <ul>
-        {#each regularItems as item, index}
+        {#each regularItems as item (item.i)}
           <li>
             <Toggle
               variant="outline"
               class="mb-2 flex w-full items-center justify-between"
-              bind:pressed={item.inCart}
-              on:click={() => toggleInCart(index)}
+              pressed={item.inCart}
+              on:click={() => toggleInCart(item.i)}
             >
               <div class="flex items-center gap-2">
                 <span>{item.text}</span>
@@ -144,11 +149,11 @@
       </ul>
     </Tabs.Content>
     <Tabs.Content value="cart">
-      {#each cartItems as item, index}
+      {#each cartItems as item (item.i)}
         <li class="mb-2 flex items-center gap-2">
           <Checkbox
             checked={item.purchased}
-            onCheckedChange={() => togglePurchased(index)}
+            onCheckedChange={() => togglePurchased(item.i)}
           />
           <span class={item.purchased ? 'line-through' : ''}>{item.text}</span>
         </li>
