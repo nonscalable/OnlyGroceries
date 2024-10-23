@@ -1,13 +1,12 @@
 import './app.css'
 import { mount } from 'svelte'
-import App from './App.svelte'
 
 import { getAutomergeKey, storeAutomergeKey } from './idb'
 import { Repo } from '@automerge/automerge-repo'
 import { IndexedDBStorageAdapter } from '@automerge/automerge-repo-storage-indexeddb'
 import { BrowserWebSocketClientAdapter } from '@automerge/automerge-repo-network-websocket'
-import { setContextRepo } from '@automerge/automerge-repo-svelte-store'
 import type { ItemsList } from './types'
+import Layout from './Layout.svelte'
 
 // Service worker registration
 const registerServiceWorker = async () => {
@@ -29,7 +28,6 @@ const registerServiceWorker = async () => {
     }
   }
 }
-
 registerServiceWorker()
 
 const repo = new Repo({
@@ -58,7 +56,7 @@ if (key) {
 
 let target = document.getElementById('app')
 if (target)
-  mount(App, {
+  mount(Layout, {
     target,
     props: {
       docUrl: handle.url,
