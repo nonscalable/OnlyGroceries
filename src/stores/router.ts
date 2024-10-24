@@ -1,6 +1,7 @@
 import { createRouter } from '@nanostores/router'
 
 export const router = createRouter({
-  home: '/',
-  occasional: '/occasional/:id?'
+  start: '/',
+  home: '/home/:id',
+  occasional: '/occasional'
 })

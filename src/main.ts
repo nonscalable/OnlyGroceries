@@ -2,7 +2,7 @@ import './app.css'
 import { mount } from 'svelte'
 
 import { getAutomergeKey, storeAutomergeKey } from './idb'
-import { Repo } from '@automerge/automerge-repo'
+import { Repo, type AutomergeUrl } from '@automerge/automerge-repo'
 import { IndexedDBStorageAdapter } from '@automerge/automerge-repo-storage-indexeddb'
 import { BrowserWebSocketClientAdapter } from '@automerge/automerge-repo-network-websocket'
 import type { ItemsList } from './types'
@@ -35,11 +35,12 @@ const repo = new Repo({
   network: [new BrowserWebSocketClientAdapter('wss://sync.automerge.org')]
 })
 
+// TODO: Remove repo find
 const key = await getAutomergeKey()
 
 let handle
 if (key) {
-  handle = repo.find(key)
+  handle = repo.find(key as AutomergeUrl)
 } else {
   handle = repo.create<ItemsList>({
     items: [
@@ -51,8 +52,8 @@ if (key) {
       }
     ]
   })
-  storeAutomergeKey(handle.url)
 }
+storeAutomergeKey(handle.url)
 
 let target = document.getElementById('app')
 if (target)

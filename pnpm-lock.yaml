@@ -24,8 +24,8 @@ importers:
         specifier: ^1.2.1
         version: 1.2.1(@automerge/automerge@2.2.8)(@types/node@22.7.4)(svelte@5.1.0)(typescript@5.6.2)
       '@nanostores/router':
-        specifier: ^0.15.1
-        version: 0.15.1(nanostores@0.11.3)
+        specifier: ^0.16.1
+        version: 0.16.1(nanostores@0.11.3)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -336,8 +336,8 @@ packages:
     peerDependencies:
       svelte: '>=3 <5'
 
-  '@nanostores/router@0.15.1':
-    resolution: {integrity: sha512-uEDiHPjkHGSrqEE4NRuqOLepR6lFmfLQ90c4sLLvwSNiWTY3MxejkD7tALmpj9cN4fmLnqt54r51tCNEHJL+mw==}
+  '@nanostores/router@0.16.1':
+    resolution: {integrity: sha512-An3REnN66g8jRA6Y4Lio5zj2vW7REqlqN+m1cgCTGFtV1EA0g80V2PmgH94KO/h14gPa1/AiU+6r0s+e9kBzPA==}
     engines: {node: ^18.0.0 || >=20.0.0}
     peerDependencies:
       nanostores: ^0.9.0 || ^0.10.0 || ^0.11.0
@@ -1488,7 +1488,7 @@ snapshots:
       nanoid: 5.0.7
       svelte: 5.1.0
 
-  '@nanostores/router@0.15.1(nanostores@0.11.3)':
+  '@nanostores/router@0.16.1(nanostores@0.11.3)':
     dependencies:
       nanostores: 0.11.3
 

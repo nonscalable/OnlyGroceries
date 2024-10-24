@@ -34,7 +34,7 @@
     "@automerge/automerge-repo-network-websocket": "^1.2.1",
     "@automerge/automerge-repo-storage-indexeddb": "^1.2.1",
     "@automerge/automerge-repo-svelte-store": "^1.2.1",
-    "@nanostores/router": "^0.15.1",
+    "@nanostores/router": "^0.16.1",
     "clsx": "^2.1.1",
     "idb": "^8.0.0",
     "nanostores": "^0.11.3",

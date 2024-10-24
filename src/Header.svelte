@@ -7,30 +7,29 @@
   import SquareMenu from 'lucide-svelte/icons/square-menu'
   import FolderSync from 'lucide-svelte/icons/folder-sync'
   import { getContext } from 'svelte'
+  import { getContextRepo } from '@automerge/automerge-repo-svelte-store'
+  import { router } from './stores/router'
+  import { getPagePath, openPage } from '@nanostores/router'
+  import { storeAutomergeKey } from './idb'
+  import { stripAutomergePrefix } from './utils'
 
   const docUrl = getContext('docUrl')
-  async function copyUrl() {
+  const repo = getContextRepo()
+
+  async function invite() {
     await navigator.share({
-      // title: 'Your Automerge ID',
-      text: docUrl as string,
-      url: 'heh.ru'
+      text: stripAutomergePrefix(docUrl as string)
     })
   }
 
   let joinUrl = $state('')
-  function join() {
-    //try to  join
+  async function join() {
+    await storeAutomergeKey(joinUrl)
 
-    //close all drawers
+    openPage(router, 'home', { id: joinUrl })
+
     isJoinDrawerOpen = !isJoinDrawerOpen
 
-    //navigate too new list
-
-    // const handle = repo.find<ItemsList>(joinUrl as AutomergeUrl)
-    // const audoc = handle.docSync()
-    // if (audoc) {
-    //   items = audoc.items
-    // }
     joinUrl = ''
   }
 
@@ -51,8 +50,12 @@
     </Sheet.Trigger>
     <Sheet.Content side="left" class="flex flex-col justify-center">
       <nav class="flex flex-col gap-2 p-4 pt-0">
-        <Button variant="link" href="/" class="flex flex-col items-start">
-          Home
+        <Button
+          variant="link"
+          href={getPagePath(router, 'start')}
+          class="flex flex-col items-start"
+        >
+          Start
         </Button>
         <Button
           variant="link"
@@ -78,7 +81,7 @@
       <DropdownMenu.Label>Options</DropdownMenu.Label>
       <DropdownMenu.Separator />
 
-      <DropdownMenu.Item onclick={copyUrl}>
+      <DropdownMenu.Item onclick={invite}>
         <span>Invite</span>
       </DropdownMenu.Item>
 
@@ -116,7 +119,7 @@
             bind:value={joinUrl}
             onkeydown={e => handleKeydown(e)}
           />
-          <Button onclick={join}>Submit</Button>
+          <Button href="/home" onclick={join}>Submit</Button>
         </div>
       </div>
     </Drawer.Content>

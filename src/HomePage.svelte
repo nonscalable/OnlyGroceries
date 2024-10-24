@@ -5,13 +5,18 @@
   import * as Tabs from '$lib/components/ui/tabs'
   import { Checkbox } from '$lib/components/ui/checkbox'
   import { Toggle } from '$lib/components/ui/toggle'
-  import { getContext } from 'svelte'
   import { document } from '@automerge/automerge-repo-svelte-store'
   import { type AutomergeUrl } from '@automerge/automerge-repo/slim'
   import type { ItemType, ItemsList } from './types.ts'
+  import { addAutomergePrefix } from './utils'
+  interface Props {
+    id: string
+  }
+  let { id }: Props = $props()
 
-  const docUrl: AutomergeUrl = getContext('docUrl')
-  let doc = document<ItemsList>(docUrl)
+  let docUrl = addAutomergePrefix(id)
+  let doc = document<ItemsList>(docUrl as AutomergeUrl)
+
   let regularItems = $derived(
     $doc?.items
       .map((item, i) => ({ ...item, i }))
