@@ -26,7 +26,9 @@
   async function join() {
     await storeAutomergeKey(joinUrl)
 
-    router.open(`/home#${joinUrl}`)
+    // router.open(`/#${joinUrl}`)
+
+    document.location.hash = joinUrl
 
     isJoinDrawerOpen = !isJoinDrawerOpen
 
@@ -119,7 +121,7 @@
             bind:value={joinUrl}
             onkeydown={e => handleKeydown(e)}
           />
-          <Button href="/home" onclick={join}>Submit</Button>
+          <Button href="/" onclick={join}>Submit</Button>
         </div>
       </div>
     </Drawer.Content>

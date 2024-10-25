@@ -19,19 +19,23 @@
 
   setContextRepo(repo)
   setContext('docUrl', docUrl)
-  router.open(`/home#${docHash}`)
+  // router.open(`/#${docHash}`)
+
+  document.location.hash = docHash
 </script>
 
 <Header />
 
-<main>
+<!-- <main>
   {#if !$router}
     <p>Not found</p>
   {:else if $router.route === 'start'}
-    <p>Start</p>
-  {:else if $router.route === 'home'}
     <HomePage id={docHash} />
   {:else if $router.route === 'occasional'}
     <EventsPage />
   {/if}
+</main> -->
+
+<main>
+  <HomePage id={docHash} />
 </main>

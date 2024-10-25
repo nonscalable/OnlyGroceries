@@ -53,7 +53,7 @@ if (key) {
     ]
   })
 }
-storeAutomergeKey(handle.url)
+await storeAutomergeKey(handle.url)
 
 let target = document.getElementById('app')
 if (target)

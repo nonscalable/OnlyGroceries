@@ -31,7 +31,6 @@ self.addEventListener('install', event => {
         '/index.html',
         '/app.webmanifest',
         '/icon-192.png',
-        '/icons-512.png',
         '/icon.svg',
         ...hashedAssets
       ])
@@ -63,6 +62,7 @@ self.addEventListener('fetch', event => {
 
   // Check if the request is a navigation request (e.g., for dynamic routes)
   if (event.request.mode === 'navigate') {
+    console.log('navigate. requestURL: ', requestURL)
     event.respondWith(
       caches.match('/index.html').then(cachedResponse => {
         return (
