@@ -59,9 +59,26 @@ self.addEventListener('activate', event => {
 
 // Fetch event: respond with cache first, then network if not cached
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(cachedResponse => {
-      return cachedResponse || fetch(event.request)
-    })
-  )
+  const requestURL = new URL(event.request.url)
+
+  // Check if the request is a navigation request (e.g., for dynamic routes)
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      caches.match('/index.html').then(cachedResponse => {
+        return (
+          cachedResponse ||
+          fetch(event.request).catch(() => {
+            return caches.match('/index.html')
+          })
+        )
+      })
+    )
+  } else {
+    // For other requests (assets, APIs, etc.), use cache-first strategy
+    event.respondWith(
+      caches.match(event.request).then(cachedResponse => {
+        return cachedResponse || fetch(event.request)
+      })
+    )
+  }
 })
