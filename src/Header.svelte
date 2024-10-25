@@ -26,7 +26,7 @@
   async function join() {
     await storeAutomergeKey(joinUrl)
 
-    openPage(router, 'home', { id: joinUrl })
+    router.open(`/home#${joinUrl}`)
 
     isJoinDrawerOpen = !isJoinDrawerOpen
 

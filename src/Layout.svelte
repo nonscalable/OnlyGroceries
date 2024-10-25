@@ -19,7 +19,7 @@
 
   setContextRepo(repo)
   setContext('docUrl', docUrl)
-  openPage(router, 'home', { id: docHash })
+  router.open(`/home#${docHash}`)
 </script>
 
 <Header />
@@ -30,7 +30,7 @@
   {:else if $router.route === 'start'}
     <p>Start</p>
   {:else if $router.route === 'home'}
-    <HomePage id={$router.params.id} />
+    <HomePage id={docHash} />
   {:else if $router.route === 'occasional'}
     <EventsPage />
   {/if}
