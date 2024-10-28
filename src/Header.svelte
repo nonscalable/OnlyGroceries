@@ -26,8 +26,6 @@
   async function join() {
     await storeAutomergeKey(joinUrl)
 
-    // router.open(`/#${joinUrl}`)
-
     document.location.hash = joinUrl
 
     isJoinDrawerOpen = !isJoinDrawerOpen

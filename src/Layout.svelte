@@ -1,12 +1,9 @@
 <script lang="ts">
-  import { router } from './stores/router'
   import { setContext } from 'svelte'
   import { setContextRepo } from '@automerge/automerge-repo-svelte-store'
   import Header from './Header.svelte'
   import HomePage from './HomePage.svelte'
-  import EventsPage from './EventsPage.svelte'
   import type { AutomergeUrl, Repo } from '@automerge/automerge-repo'
-  import { openPage } from '@nanostores/router'
   import { stripAutomergePrefix } from './utils'
 
   interface Props {
@@ -19,23 +16,11 @@
 
   setContextRepo(repo)
   setContext('docUrl', docUrl)
-  // router.open(`/#${docHash}`)
 
   document.location.hash = docHash
 </script>
 
 <Header />
-
-<!-- <main>
-  {#if !$router}
-    <p>Not found</p>
-  {:else if $router.route === 'start'}
-    <HomePage id={docHash} />
-  {:else if $router.route === 'occasional'}
-    <EventsPage />
-  {/if}
-</main> -->
-
 <main>
   <HomePage id={docHash} />
 </main>

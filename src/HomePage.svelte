@@ -9,6 +9,8 @@
   import { type AutomergeUrl } from '@automerge/automerge-repo/slim'
   import type { ItemType, ItemsList } from './types.ts'
   import { addAutomergePrefix } from './utils'
+  import ShoppingBasket from 'lucide-svelte/icons/shopping-basket'
+  import Trash2 from 'lucide-svelte/icons/trash-2'
   interface Props {
     id: string
   }
@@ -66,6 +68,12 @@
       action()
     }
   }
+
+  function remove(i: number) {
+    doc.change(d => {
+      d.items.splice(i, 1)
+    })
+  }
 </script>
 
 <div class="container pt-2 sm:w-[350px]">
@@ -88,21 +96,28 @@
     <Tabs.Content value="regular">
       <ul>
         {#each regularItems as item (item.i)}
-          <li>
+          <li class="flex gap-2">
             <Toggle
               variant="default"
-              class="mb-2 flex w-full items-center justify-between"
+              class="mb-2 flex w-full justify-start"
               pressed={item.inCart}
               onclick={() => toggleInCart(item.i)}
             >
+              {#if item.inCart}
+                <ShoppingBasket class="mr-2 h-4 w-4" />
+              {:else}
+                <div class="mr-2 h-4 w-4"></div>
+              {/if}
               <div class="flex items-center gap-2">
                 <span>{item.text}</span>
               </div>
-
-              <span class=" text-sm text-gray-500">
-                {item.inCart ? 'In Cart' : ''}
-              </span>
             </Toggle>
+            <Button
+              variant="ghost"
+              size="icon"
+              class="hover:bg-red-200"
+              onclick={() => remove(item.i)}><Trash2 class="h-4 w-4" /></Button
+            >
           </li>
         {/each}
       </ul>
