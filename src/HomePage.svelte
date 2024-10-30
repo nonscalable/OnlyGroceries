@@ -11,6 +11,8 @@
   import { addAutomergePrefix } from './utils'
   import ShoppingBasket from 'lucide-svelte/icons/shopping-basket'
   import Trash2 from 'lucide-svelte/icons/trash-2'
+  import GripVertical from 'lucide-svelte/icons/grip-vertical'
+  import { SortableList } from '@jhubbardsf/svelte-sortablejs'
   interface Props {
     id: string
   }
@@ -74,6 +76,14 @@
       d.items.splice(i, 1)
     })
   }
+
+  function handleSort(old: number, curr: number) {
+    doc.change(d => {
+      console.log(old, curr)
+      const [removed] = d.items.splice(old, 1)
+      d.items.splice(curr, 0, removed)
+    })
+  }
 </script>
 
 <div class="container pt-2 sm:w-[350px]">
@@ -94,15 +104,27 @@
     </div>
 
     <Tabs.Content value="regular">
-      <ul>
-        {#each regularItems as item (item.i)}
+      <SortableList
+        class="list-group"
+        handle=".cursor-grab"
+        animation={150}
+        onEnd={e => {
+          handleSort(e.oldIndex, e.newIndex)
+        }}
+      >
+        {#each regularItems as item, index (item.i)}
           <li class="flex gap-2">
+            <Button class="cursor-grab" size="icon" variant="ghost"
+              ><GripVertical class="h-4 w-4" /></Button
+            >
             <Toggle
               variant="default"
               class="mb-2 flex w-full justify-start"
               pressed={item.inCart}
               onclick={() => toggleInCart(item.i)}
             >
+              {index}
+              {item.i}
               {#if item.inCart}
                 <ShoppingBasket class="mr-2 h-4 w-4" />
               {:else}
@@ -120,7 +142,7 @@
             >
           </li>
         {/each}
-      </ul>
+      </SortableList>
     </Tabs.Content>
     <Tabs.Content value="rare">
       {#each cartItems as item (item.i)}

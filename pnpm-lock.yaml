@@ -42,6 +42,9 @@ importers:
         specifier: ^0.2.1
         version: 0.2.1(tailwindcss@3.4.13(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2)))
     devDependencies:
+      '@jhubbardsf/svelte-sortablejs':
+        specifier: ^1.1.0
+        version: 1.1.0
       '@sveltejs/vite-plugin-svelte':
         specifier: 4.0.0
         version: 4.0.0(svelte@5.1.0)(vite@5.4.9(@types/node@22.7.4))
@@ -309,6 +312,9 @@ packages:
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
     engines: {node: '>=12'}
+
+  '@jhubbardsf/svelte-sortablejs@1.1.0':
+    resolution: {integrity: sha512-5hA0vsdGjChpuaacNSnwr20TesKIwRcSaKFUe3tR0mz1i7AFcyrjKtOqS+MZVy2I1yWv6Exz81fvb3ABd0Ligw==}
 
   '@jridgewell/gen-mapping@0.3.5':
     resolution: {integrity: sha512-IzL8ZoEDIBRWEzlCcRhOaCupYyN5gdIK+Q6fbFdPDg6HqX6jpkItn7DFIpW9LQzXG6Df9sA7+OKnq0qlz/GaQg==}
@@ -1065,6 +1071,9 @@ packages:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
 
+  sortablejs@1.15.3:
+    resolution: {integrity: sha512-zdK3/kwwAK1cJgy1rwl1YtNTbRmc8qW/+vgXf75A7NHag5of4pyI6uK86ktmQETyWRH7IGaE73uZOOBcGxgqZg==}
+
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
@@ -1455,6 +1464,10 @@ snapshots:
       strip-ansi-cjs: strip-ansi@6.0.1
       wrap-ansi: 8.1.0
       wrap-ansi-cjs: wrap-ansi@7.0.0
+
+  '@jhubbardsf/svelte-sortablejs@1.1.0':
+    dependencies:
+      sortablejs: 1.15.3
 
   '@jridgewell/gen-mapping@0.3.5':
     dependencies:
@@ -2089,6 +2102,8 @@ snapshots:
   shebang-regex@3.0.0: {}
 
   signal-exit@4.1.0: {}
+
+  sortablejs@1.15.3: {}
 
   source-map-js@1.2.1: {}
 
