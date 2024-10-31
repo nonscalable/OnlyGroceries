@@ -5,6 +5,10 @@ export type Item = {
   purchased: boolean
   type: ItemType
 }
-export type ItemsList = {
-  items: Item[]
+export type Items = Record<string, Item>
+export type ItemsOrder = string[]
+
+export type GroceryData = {
+  items: Items
+  ids: ItemsOrder
 }

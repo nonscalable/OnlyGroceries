@@ -4,30 +4,26 @@
   import Input from '$lib/components/ui/input/input.svelte'
   import * as Tabs from '$lib/components/ui/tabs'
   import { Checkbox } from '$lib/components/ui/checkbox'
-  import { Toggle } from '$lib/components/ui/toggle'
   import { document } from '@automerge/automerge-repo-svelte-store'
   import { type AutomergeUrl } from '@automerge/automerge-repo/slim'
-  import type { ItemType, ItemsList } from './types.ts'
+  import type { GroceryData, ItemType } from './types.ts'
   import { addAutomergePrefix } from './utils'
-  import ShoppingBasket from 'lucide-svelte/icons/shopping-basket'
-  import Trash2 from 'lucide-svelte/icons/trash-2'
+  import { SortableList } from '@jhubbardsf/svelte-sortablejs'
+  import { nanoid } from 'nanoid'
+  import Item from './Item.svelte'
   interface Props {
     id: string
   }
   let { id }: Props = $props()
 
   let docUrl = addAutomergePrefix(id)
-  let doc = document<ItemsList>(docUrl as AutomergeUrl)
+  let doc = document<GroceryData>(docUrl as AutomergeUrl)
 
-  let regularItems = $derived(
-    $doc?.items
-      .map((item, i) => ({ ...item, i }))
-      .filter(item => item.type === 'regular')
+  let regularIds = $derived(
+    $doc?.ids.filter(id => $doc.items[id].type === 'regular')
   )
-  let cartItems = $derived(
-    $doc?.items.map((item, i) => ({ ...item, i })).filter(item => item.inCart)
-  )
-  let itemTexts = $derived($doc?.items.map(item => item.text))
+  let cartIds = $derived($doc?.ids.filter(id => $doc.items[id].inCart))
+  let itemTexts = $derived($doc.ids.map(id => $doc.items[id].text))
 
   let text = $state('')
   let activeTab = $state<ItemType>('regular')
@@ -45,21 +41,18 @@
       purchased: false,
       inCart: activeTab === 'rare' ? true : false
     }
+    let id = nanoid()
 
-    doc.change(d => d.items.push(item))
+    doc.change(d => {
+      d.items[id] = item
+      d.ids.push(id)
+    })
     text = ''
   }
 
-  function toggleInCart(i: number) {
+  function togglePurchased(id: string) {
     doc.change(d => {
-      d.items[i].inCart = !d.items[i].inCart
-      d.items[i].purchased = false
-    })
-  }
-
-  function togglePurchased(i: number) {
-    doc.change(d => {
-      d.items[i].purchased = !d.items[i].purchased
+      d.items[id].purchased = !d.items[id].purchased
     })
   }
 
@@ -69,9 +62,15 @@
     }
   }
 
-  function remove(i: number) {
+  function handleSort(old: number, curr: number) {
+    let oldId = regularIds[old]
+    let currId = regularIds[curr]
+
     doc.change(d => {
-      d.items.splice(i, 1)
+      let oldPos = d.ids.findIndex(v => v === oldId)
+      let currPos = d.ids.findIndex(v => v === currId)
+
+      ;[d.ids[oldPos], d.ids[currPos]] = [d.ids[currPos], d.ids[oldPos]]
     })
   }
 </script>
@@ -94,42 +93,27 @@
     </div>
 
     <Tabs.Content value="regular">
-      <ul>
-        {#each regularItems as item (item.i)}
-          <li class="flex gap-2">
-            <Toggle
-              variant="default"
-              class="mb-2 flex w-full justify-start"
-              pressed={item.inCart}
-              onclick={() => toggleInCart(item.i)}
-            >
-              {#if item.inCart}
-                <ShoppingBasket class="mr-2 h-4 w-4" />
-              {:else}
-                <div class="mr-2 h-4 w-4"></div>
-              {/if}
-              <div class="flex items-center gap-2">
-                <span>{item.text}</span>
-              </div>
-            </Toggle>
-            <Button
-              variant="ghost"
-              size="icon"
-              class="hover:bg-red-200"
-              onclick={() => remove(item.i)}><Trash2 class="h-4 w-4" /></Button
-            >
-          </li>
+      <SortableList
+        class="list-group"
+        handle=".cursor-grab"
+        animation={150}
+        onEnd={e => handleSort(e.oldIndex, e.newIndex)}
+      >
+        {#each regularIds as itemId (itemId)}
+          <Item docUrl={docUrl as AutomergeUrl} id={itemId} />
         {/each}
-      </ul>
+      </SortableList>
     </Tabs.Content>
     <Tabs.Content value="rare">
-      {#each cartItems as item (item.i)}
+      {#each cartIds as id, index}
         <li class="mb-2 flex items-center gap-2">
           <Checkbox
-            checked={item.purchased}
-            onCheckedChange={() => togglePurchased(item.i)}
+            checked={$doc.items[id].purchased}
+            onCheckedChange={() => togglePurchased(id)}
           />
-          <span class={item.purchased ? 'line-through' : ''}>{item.text}</span>
+          <span class={$doc.items[id].purchased ? 'line-through' : ''}
+            >{$doc.items[id].text}</span
+          >
         </li>
       {/each}
     </Tabs.Content>
