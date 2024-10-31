@@ -32,6 +32,9 @@ importers:
       idb:
         specifier: ^8.0.0
         version: 8.0.0
+      nanoid:
+        specifier: ^5.0.8
+        version: 5.0.8
       nanostores:
         specifier: ^0.11.3
         version: 0.11.3
@@ -857,8 +860,8 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  nanoid@5.0.7:
-    resolution: {integrity: sha512-oLxFY2gd2IqnjcYyOXD8XGCftpGtZP2AbHbOkthDkvRywH5ayNtPVy9YlOPcHckXzbLTCHpkb7FB+yuxKV13pQ==}
+  nanoid@5.0.8:
+    resolution: {integrity: sha512-TcJPw+9RV9dibz1hHUzlLVy8N4X9TnwirAjrU08Juo6BNKggzVfP2ZJ/3ZUSq15Xl5i85i+Z89XBO90pB2PghQ==}
     engines: {node: ^18 || >=20}
     hasBin: true
 
@@ -1498,7 +1501,7 @@ snapshots:
       '@internationalized/date': 3.5.6
       dequal: 2.0.3
       focus-trap: 7.6.0
-      nanoid: 5.0.7
+      nanoid: 5.0.8
       svelte: 5.1.0
 
   '@nanostores/router@0.16.1(nanostores@0.11.3)':
@@ -1669,7 +1672,7 @@ snapshots:
     dependencies:
       '@internationalized/date': 3.5.6
       '@melt-ui/svelte': 0.76.2(svelte@5.1.0)
-      nanoid: 5.0.7
+      nanoid: 5.0.8
       svelte: 5.1.0
 
   brace-expansion@2.0.1:
@@ -1956,7 +1959,7 @@ snapshots:
 
   nanoid@3.3.7: {}
 
-  nanoid@5.0.7: {}
+  nanoid@5.0.8: {}
 
   nanostores@0.11.3: {}
 

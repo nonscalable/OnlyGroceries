@@ -5,8 +5,9 @@ import { getAutomergeKey, storeAutomergeKey } from './idb'
 import { Repo, type AutomergeUrl } from '@automerge/automerge-repo'
 import { IndexedDBStorageAdapter } from '@automerge/automerge-repo-storage-indexeddb'
 import { BrowserWebSocketClientAdapter } from '@automerge/automerge-repo-network-websocket'
-import type { ItemsList } from './types'
+import type { GroceryData } from './types'
 import Layout from './Layout.svelte'
+import { nanoid } from 'nanoid'
 
 // Service worker registration
 const registerServiceWorker = async () => {
@@ -42,15 +43,17 @@ let handle
 if (key) {
   handle = repo.find(key as AutomergeUrl)
 } else {
-  handle = repo.create<ItemsList>({
-    items: [
-      {
+  const id = nanoid()
+  handle = repo.create<GroceryData>({
+    items: {
+      [id]: {
         text: 'Learn Automerge',
         inCart: false,
         purchased: false,
         type: 'regular'
       }
-    ]
+    },
+    ids: [id]
   })
 }
 await storeAutomergeKey(handle.url)
