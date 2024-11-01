@@ -25,13 +25,13 @@
   let cartIds = $derived($doc?.ids.filter(id => $doc.items[id].inCart))
   let itemTexts = $derived($doc.ids.map(id => $doc.items[id].text))
 
-  let text = $state('')
   let activeTab = $state<ItemType>('regular')
+  let text = $state('')
+  let showMessage = $state(false)
 
   function add() {
-    //TODO: handle the case in another way
-    if (itemTexts.includes(text)) {
-      text = ''
+    if (!text) {
+      showMessage = true
       return
     }
 
@@ -56,9 +56,9 @@
     })
   }
 
-  function handleKeydown(event: KeyboardEvent, action: () => void) {
+  function handleKeydown(event: KeyboardEvent) {
     if (event.key === 'Enter') {
-      action()
+      add()
     }
   }
 
@@ -81,15 +81,24 @@
       <Tabs.Trigger value="regular">Regular Items</Tabs.Trigger>
       <Tabs.Trigger value="rare">Shopping Cart</Tabs.Trigger>
     </Tabs.List>
-    <div class="mb-4 mt-4 flex flex-col gap-2">
+    <div class="mb-4 mt-4 flex flex-col gap-1">
       <Input
         autofocus
-        class="text-md"
+        class="text-md focus-visible:ring-offset-1"
         bind:value={text}
-        onkeydown={e => handleKeydown(e, add)}
+        onkeydown={e => handleKeydown(e)}
+        oninput={() => (showMessage = false)}
         placeholder={`Add ${activeTab} item`}
+        required
       />
-      <Button disabled={!text.trim()} onclick={add}>Add</Button>
+      <p
+        class="h-5 text-sm text-red-700 transition-opacity"
+        class:opacity-100={showMessage}
+        class:opacity-0={!showMessage}
+      >
+        You have to enter something
+      </p>
+      <Button onclick={add} size="lg">Add</Button>
     </div>
 
     <Tabs.Content value="regular">
