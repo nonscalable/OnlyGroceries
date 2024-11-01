@@ -10,7 +10,6 @@
     "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json"
   },
   "devDependencies": {
-    "@jhubbardsf/svelte-sortablejs": "^1.1.0",
     "@sveltejs/vite-plugin-svelte": "4.0.0",
     "@tsconfig/svelte": "^5.0.4",
     "@types/node": "^22.7.4",
@@ -35,6 +34,7 @@
     "@automerge/automerge-repo-network-websocket": "^1.2.1",
     "@automerge/automerge-repo-storage-indexeddb": "^1.2.1",
     "@automerge/automerge-repo-svelte-store": "^1.2.1",
+    "@jhubbardsf/svelte-sortablejs": "^1.1.0",
     "@nanostores/router": "^0.16.1",
     "clsx": "^2.1.1",
     "idb": "^8.0.0",
