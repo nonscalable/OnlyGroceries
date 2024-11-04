@@ -44,7 +44,7 @@
     pressed={item.inCart}
     onclick={toggleInCart}
   >
-    <Button class="cursor-grab px-4" size="lg" variant="ghost"
+    <Button class="grab px-4" size="lg" variant="ghost"
       ><GripVertical class="size-4" /></Button
     >
 

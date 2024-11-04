@@ -64,6 +64,7 @@ if (target)
     target,
     props: {
       docUrl: handle.url,
-      repo
+      repo,
+      handle
     }
   })

@@ -8,9 +8,10 @@
   import { type AutomergeUrl } from '@automerge/automerge-repo/slim'
   import type { GroceryData, ItemType } from './types.ts'
   import { addAutomergePrefix } from './utils'
-  import { SortableList } from '@jhubbardsf/svelte-sortablejs'
   import { nanoid } from 'nanoid'
   import Item from './Item.svelte'
+  import { onMount } from 'svelte'
+  import Sortable from 'sortablejs'
   interface Props {
     id: string
   }
@@ -20,9 +21,9 @@
   let doc = document<GroceryData>(docUrl as AutomergeUrl)
 
   let regularIds = $derived(
-    $doc?.ids.filter(id => $doc.items[id].type === 'regular')
+    $doc.ids.filter(id => $doc.items[id].type === 'regular')
   )
-  let cartIds = $derived($doc?.ids.filter(id => $doc.items[id].inCart))
+  let cartIds = $derived($doc.ids.filter(id => $doc.items[id].inCart))
   let itemTexts = $derived($doc.ids.map(id => $doc.items[id].text))
 
   let activeTab = $state<ItemType>('regular')
@@ -61,16 +62,35 @@
       add()
     }
   }
-
-  function handleSort(old: number, curr: number) {
-    let oldId = regularIds[old]
-    let currId = regularIds[curr]
+  let sortable: HTMLUListElement
+  onMount(function () {
+    Sortable.create(sortable, {
+      sort: true,
+      // handle: '.grab',
+      onEnd: handleSort,
+      animation: 200,
+      direction: 'vertical',
+      forceFallback: false,
+      delay: 50,
+      delayOnTouchOnly: true
+    })
+  })
+  function handleSort(e: Sortable.SortableEvent) {
+    if (e.oldIndex === undefined || e.newIndex === undefined) {
+      return
+    }
+    let oldId = regularIds[e.oldIndex]
 
     doc.change(d => {
       let oldPos = d.ids.findIndex(v => v === oldId)
-      let currPos = d.ids.findIndex(v => v === currId)
+      let [movedItem] = d.ids.splice(oldPos, 1)
 
-      ;[d.ids[oldPos], d.ids[currPos]] = [d.ids[currPos], d.ids[oldPos]]
+      let currPos =
+        e.newIndex !== undefined && e.newIndex < d.ids.length
+          ? e.newIndex
+          : d.ids.length
+
+      d.ids.splice(currPos, 0, movedItem)
     })
   }
 </script>
@@ -102,17 +122,12 @@
     </div>
 
     <Tabs.Content value="regular">
-      <SortableList
-        class="list-group"
-        handle=".cursor-grab"
-        animation={150}
-        onEnd={e => handleSort(e.oldIndex, e.newIndex)}
-      >
-        {#each regularIds as itemId (itemId)}
-          <Item docUrl={docUrl as AutomergeUrl} id={itemId} />
+      <ul bind:this={sortable}>
+        {#each regularIds as id, i (id)}
+          <Item docUrl={docUrl as AutomergeUrl} {id} />
         {/each}
-      </SortableList>
-    </Tabs.Content>
+      </ul></Tabs.Content
+    >
     <Tabs.Content value="rare">
       {#each cartIds as id, index}
         <li class="mb-2 flex items-center gap-2">
