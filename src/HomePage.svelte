@@ -21,10 +21,10 @@
   let docUrl = addAutomergePrefix(id) as AutomergeUrl
   let doc = document<GroceryData>(docUrl)
 
-  let regularIds = $derived(
-    $doc.ids.filter(id => $doc.items[id].type === 'regular')
-  )
-  let cartIds = $derived($doc.ids.filter(id => $doc.items[id].inCart))
+  let cartIds = $derived([
+    ...$doc.regularIds.filter(id => $doc.items[id].inCart),
+    ...$doc.rareIds
+  ])
   // let itemTexts = $derived($doc.ids.map(id => $doc.items[id].text))
 
   let activeTab = $state<ItemType>('regular')
@@ -47,7 +47,7 @@
 
     doc.change(d => {
       d.items[id] = item
-      d.ids.push(id)
+      activeTab === 'rare' ? d.rareIds.push(id) : d.regularIds.push(id)
     })
     text = ''
   }
@@ -70,8 +70,8 @@
     if (typeof oldIndex !== 'number' || typeof newIndex !== 'number') return
 
     doc.change(d => {
-      const [movedItem] = d.ids.splice(oldIndex, 1)
-      d.ids.splice(newIndex, 0, movedItem)
+      const [movedItem] = d.regularIds.splice(oldIndex, 1)
+      d.regularIds.splice(newIndex, 0, movedItem)
     })
   }
 </script>
@@ -103,9 +103,9 @@
     </div>
 
     <Tabs.Content value="regular">
-      {#key $doc.ids}
+      {#key $doc.regularIds}
         <ul use:sortable={options}>
-          {#each regularIds as id (id)}
+          {#each $doc.regularIds as id (id)}
             <RegularItem {docUrl} {id} />
           {/each}
         </ul>

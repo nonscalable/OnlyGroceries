@@ -25,11 +25,11 @@
 
   function remove() {
     doc.change(d => {
-      delete d.items[id]
-      d.ids.splice(
-        d.ids.findIndex(v => v === id),
+      d.regularIds.splice(
+        d.regularIds.findIndex(v => v === id),
         1
       )
+      delete d.items[id]
     })
   }
 </script>

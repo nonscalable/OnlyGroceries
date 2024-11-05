@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button'
   import { Checkbox } from '$lib/components/ui/checkbox'
-  import Trash2 from 'lucide-svelte/icons/trash-2'
+  import CircleX from 'lucide-svelte/icons/circle-x'
   import type { AutomergeUrl } from '@automerge/automerge-repo/slim'
   import { document } from '@automerge/automerge-repo-svelte-store'
   import type { GroceryData } from './types'
@@ -22,11 +22,16 @@
 
   function remove() {
     doc.change(d => {
-      delete d.items[id]
-      d.ids.splice(
-        d.ids.findIndex(v => v === id),
-        1
-      )
+      let index = d.regularIds.findIndex(regId => regId === id)
+      if (index !== -1) {
+        d.items[id].inCart = false
+      } else {
+        index = d.rareIds.findIndex(rareId => rareId === id)
+        if (index !== -1) {
+          d.rareIds.splice(index, 1)
+        }
+        delete d.items[id]
+      }
     })
   }
 </script>
@@ -49,6 +54,6 @@
     variant="ghost"
     size="lg"
     class="px-4 text-slate-500 hover:bg-red-100"
-    onclick={remove}><Trash2 class="size-4" /></Button
+    onclick={remove}><CircleX class="size-4" /></Button
   >
 </li>

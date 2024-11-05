@@ -53,7 +53,8 @@ if (key) {
         type: 'regular'
       }
     },
-    ids: [id]
+    regularIds: [id],
+    rareIds: []
   })
 }
 await storeAutomergeKey(handle.url)

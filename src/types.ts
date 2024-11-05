@@ -10,5 +10,6 @@ export type ItemsOrder = string[]
 
 export type GroceryData = {
   items: Items
-  ids: ItemsOrder
+  regularIds: ItemsOrder
+  rareIds: ItemsOrder
 }
