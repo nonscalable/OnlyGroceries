@@ -4,21 +4,21 @@
   import Input from '$lib/components/ui/input/input.svelte'
   import * as Tabs from '$lib/components/ui/tabs'
   import { Checkbox } from '$lib/components/ui/checkbox'
-  import { document } from '@automerge/automerge-repo-svelte-store'
+  import { document as automergeDocument } from '@automerge/automerge-repo-svelte-store'
   import { type AutomergeUrl } from '@automerge/automerge-repo/slim'
   import type { GroceryData, ItemType } from './types.ts'
   import { addAutomergePrefix } from './utils'
   import { nanoid } from 'nanoid'
   import Item from './Item.svelte'
-  import { onMount } from 'svelte'
-  import Sortable from 'sortablejs'
+  import Sortable, { type SortableEvent } from 'sortablejs'
+  import { sortable } from './sortable'
   interface Props {
     id: string
   }
   let { id }: Props = $props()
 
   let docUrl = addAutomergePrefix(id)
-  let doc = document<GroceryData>(docUrl as AutomergeUrl)
+  let doc = automergeDocument<GroceryData>(docUrl as AutomergeUrl)
 
   let regularIds = $derived(
     $doc.ids.filter(id => $doc.items[id].type === 'regular')
@@ -62,35 +62,21 @@
       add()
     }
   }
-  let sortable: HTMLUListElement
-  onMount(function () {
-    Sortable.create(sortable, {
-      sort: true,
-      // handle: '.grab',
-      onEnd: handleSort,
-      animation: 200,
-      direction: 'vertical',
-      forceFallback: false,
-      delay: 50,
-      delayOnTouchOnly: true
-    })
-  })
-  function handleSort(e: Sortable.SortableEvent) {
-    if (e.oldIndex === undefined || e.newIndex === undefined) {
-      return
-    }
-    let oldId = regularIds[e.oldIndex]
+
+  const options: Sortable.SortableOptions = {
+    animation: 200,
+    onEnd: handleSort,
+    forceFallback: false,
+    delay: 50,
+    delayOnTouchOnly: true
+  }
+  function handleSort(event: SortableEvent) {
+    const { oldIndex, newIndex } = event
+    if (typeof oldIndex !== 'number' || typeof newIndex !== 'number') return
 
     doc.change(d => {
-      let oldPos = d.ids.findIndex(v => v === oldId)
-      let [movedItem] = d.ids.splice(oldPos, 1)
-
-      let currPos =
-        e.newIndex !== undefined && e.newIndex < d.ids.length
-          ? e.newIndex
-          : d.ids.length
-
-      d.ids.splice(currPos, 0, movedItem)
+      const [movedItem] = d.ids.splice(oldIndex, 1)
+      d.ids.splice(newIndex, 0, movedItem)
     })
   }
 </script>
@@ -122,12 +108,14 @@
     </div>
 
     <Tabs.Content value="regular">
-      <ul bind:this={sortable}>
-        {#each regularIds as id, i (id)}
-          <Item docUrl={docUrl as AutomergeUrl} {id} />
-        {/each}
-      </ul></Tabs.Content
-    >
+      {#key $doc.ids}
+        <ul use:sortable={options}>
+          {#each regularIds as id, i (id)}
+            <Item docUrl={docUrl as AutomergeUrl} {id} />
+          {/each}
+        </ul>
+      {/key}
+    </Tabs.Content>
     <Tabs.Content value="rare">
       {#each cartIds as id, index}
         <li class="mb-2 flex items-center gap-2">
