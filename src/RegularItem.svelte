@@ -14,15 +14,13 @@
   }
   let { docUrl, id }: Props = $props()
   let doc = document<GroceryData>(docUrl)
-  let item = $state($doc.items[id])
+  const item = $doc.items[id]
 
   function toggleInCart() {
     doc.change(d => {
       d.items[id].inCart = !d.items[id].inCart
       d.items[id].purchased = false
     })
-
-    item.inCart = !item.inCart
   }
 
   function remove() {
