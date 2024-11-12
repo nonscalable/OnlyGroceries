@@ -25,10 +25,3 @@ registerRoute(
 
 self.skipWaiting()
 clientsClaim()
-
-// can be removed if use virtual:pwa-register somewhere
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register(
-    import.meta.env.MODE === 'production' ? '/sw.js' : '/dev-sw.js?dev-sw'
-  )
-}

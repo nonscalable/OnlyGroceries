@@ -34,20 +34,28 @@
       join()
     }
   }
+
   let isJoinDrawerOpen = $state(false)
   let isDropdownOpen = $state(false)
+  let isSheetOpen = $state(false)
 </script>
 
 <header class="flex flex-row justify-between border-b p-2">
-  <Sheet.Root>
+  <Sheet.Root
+    open={isSheetOpen}
+    onOpenChange={() => (isSheetOpen = !isSheetOpen)}
+  >
     <Sheet.Trigger>
       <Button variant="ghost" size="icon"><SquareMenu class="h-5 w-5" /></Button
       >
     </Sheet.Trigger>
     <Sheet.Content side="left" class="flex flex-col justify-center">
       <nav class="flex flex-col gap-2 p-4 pt-0">
-        <Button href="/" variant="link" class="flex flex-col items-start"
-          >Start</Button
+        <Button
+          href="/"
+          variant="link"
+          class="onclick flex flex-col items-start"
+          onclick={() => (isSheetOpen = false)}>Start</Button
         >
         <Button variant="link" disabled class="flex flex-col items-start"
           >Main (WIP)</Button

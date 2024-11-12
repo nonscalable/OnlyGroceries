@@ -9,6 +9,7 @@
 
   import { IndexedDBStorageAdapter } from '@automerge/automerge-repo-storage-indexeddb'
   import { BrowserWebSocketClientAdapter } from '@automerge/automerge-repo-network-websocket'
+  import PwaBadge from '$lib/components/PWABadge.svelte'
 
   const repo = new Repo({
     storage: new IndexedDBStorageAdapter(),
@@ -32,3 +33,5 @@
     <HomePage id={$router.params.id} />
   {/await}
 {/if}
+
+<PwaBadge />
