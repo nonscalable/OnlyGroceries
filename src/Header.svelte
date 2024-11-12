@@ -8,7 +8,10 @@
   import FolderSync from 'lucide-svelte/icons/folder-sync'
   import { getContext } from 'svelte'
   import { storeAutomergeKey } from './idb'
-  import { stripAutomergePrefix } from './utils'
+  import { addAutomergePrefix, stripAutomergePrefix } from './utils'
+  import { openPage } from '@nanostores/router'
+  import { router } from './stores/router'
+  import { isValidAutomergeUrl } from '@automerge/automerge-repo'
 
   const docUrl = getContext('docUrl')
 
@@ -19,11 +22,16 @@
   }
 
   let joinUrl = $state('')
+  let showMessage = $state(false)
   async function join() {
+    if (!isValidAutomergeUrl(addAutomergePrefix(joinUrl))) {
+      showMessage = true
+      return
+    }
+
     await storeAutomergeKey(joinUrl)
 
-    document.location.hash = joinUrl
-
+    openPage(router, 'main', { id: joinUrl })
     isJoinDrawerOpen = !isJoinDrawerOpen
 
     joinUrl = ''
@@ -120,6 +128,13 @@
             bind:value={joinUrl}
             onkeydown={e => handleKeydown(e)}
           />
+          <p
+            class="h-5 text-sm text-red-700 transition-opacity"
+            class:opacity-100={showMessage}
+            class:opacity-0={!showMessage}
+          >
+            You have to enter valid ID
+          </p>
           <Button href="/" onclick={join}>Submit</Button>
         </div>
       </div>

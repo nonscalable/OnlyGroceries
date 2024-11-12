@@ -2,14 +2,17 @@
   import { setContextRepo } from '@automerge/automerge-repo-svelte-store'
   import Header from './Header.svelte'
   import HomePage from './HomePage.svelte'
-  import { Repo } from '@automerge/automerge-repo'
-  import { addAutomergePrefix } from './utils'
+  import { Repo, type AutomergeUrl } from '@automerge/automerge-repo'
+  import { addAutomergePrefix, stripAutomergePrefix } from './utils'
   import { router } from './stores/router'
   import Start from './Start.svelte'
 
   import { IndexedDBStorageAdapter } from '@automerge/automerge-repo-storage-indexeddb'
   import { BrowserWebSocketClientAdapter } from '@automerge/automerge-repo-network-websocket'
   import PwaBadge from '$lib/components/PWABadge.svelte'
+  import { onMount } from 'svelte'
+  import { getAutomergeKey } from './idb'
+  import { openPage } from '@nanostores/router'
 
   const repo = new Repo({
     storage: new IndexedDBStorageAdapter(),
@@ -18,8 +21,16 @@
 
   setContextRepo(repo)
 
+  let key
+  onMount(async () => {
+    key = await getAutomergeKey()
+    if (key) {
+      openPage(router, 'main', { id: stripAutomergePrefix(key) })
+    }
+  })
+
   function getHandle(id: string) {
-    return repo.find(addAutomergePrefix(id))
+    return repo.find(addAutomergePrefix(id) as AutomergeUrl)
   }
 </script>
 
