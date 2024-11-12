@@ -23,6 +23,7 @@
     "@types/sortablejs": "^1.15.8",
     "autoprefixer": "^10.4.20",
     "bits-ui": "0.21.16",
+    "clsx": "^2.1.1",
     "lucide-svelte": "^0.446.0",
     "prettier": "^3.3.3",
     "prettier-plugin-svelte": "^3.2.7",
@@ -30,7 +31,10 @@
     "size-limit": "^11.1.6",
     "svelte": "5.1.9",
     "svelte-check": "^4.0.5",
+    "tailwind-merge": "^2.5.4",
+    "tailwind-variants": "^0.2.1",
     "tailwindcss": "^3.4.13",
+    "tailwindcss-animate": "^1.0.7",
     "tslib": "^2.7.0",
     "typescript": "^5.6.2",
     "vaul-svelte": "0.3.2",
@@ -51,12 +55,9 @@
     "@automerge/automerge-repo-storage-indexeddb": "^1.2.1",
     "@automerge/automerge-repo-svelte-store": "^1.2.1",
     "@nanostores/router": "^0.16.1",
-    "clsx": "^2.1.1",
     "idb": "^8.0.0",
     "nanoid": "^5.0.8",
     "nanostores": "^0.11.3",
-    "sortablejs": "^1.15.3",
-    "tailwind-merge": "^2.5.2",
-    "tailwind-variants": "^0.2.1"
+    "sortablejs": "^1.15.3"
   }
 }
