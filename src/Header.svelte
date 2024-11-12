@@ -49,10 +49,7 @@
 </script>
 
 <header class="flex flex-row justify-between border-b p-2">
-  <Sheet.Root
-    open={isSheetOpen}
-    onOpenChange={() => (isSheetOpen = !isSheetOpen)}
-  >
+  <Sheet.Root bind:open={isSheetOpen}>
     <Sheet.Trigger>
       <Button variant="ghost" size="icon"><SquareMenu class="h-5 w-5" /></Button
       >
@@ -77,10 +74,7 @@
 
   <h1 class="text-4xl font-extrabold tracking-tight">Hello!</h1>
 
-  <DropdownMenu.Root
-    open={isDropdownOpen}
-    onOpenChange={() => (isDropdownOpen = !isDropdownOpen)}
-  >
+  <DropdownMenu.Root bind:open={isDropdownOpen}>
     <DropdownMenu.Trigger>
       <Button variant="ghost" size="icon" class="justify-self-end">
         <FolderSync class="h-5 w-5" />
@@ -96,7 +90,6 @@
 
       <DropdownMenu.Item
         onclick={() => {
-          isDropdownOpen = false
           isJoinDrawerOpen = true
         }}
       >
@@ -109,10 +102,7 @@
     </DropdownMenu.Content>
   </DropdownMenu.Root>
 
-  <Drawer.Root
-    open={isJoinDrawerOpen}
-    onOpenChange={() => (isJoinDrawerOpen = !isJoinDrawerOpen)}
-  >
+  <Drawer.Root bind:open={isJoinDrawerOpen}>
     <Drawer.Content>
       <div class="mx-auto mb-4 w-full max-w-sm">
         <Drawer.Header>
@@ -126,7 +116,7 @@
             type="text"
             class="text-md"
             bind:value={joinUrl}
-            onkeydown={e => handleKeydown(e)}
+            onkeydown={(e: KeyboardEvent) => handleKeydown(e)}
           />
           <p
             class="h-5 text-sm text-red-700 transition-opacity"
@@ -135,7 +125,7 @@
           >
             You have to enter valid ID
           </p>
-          <Button href="/" onclick={join}>Submit</Button>
+          <Button onclick={join}>Submit</Button>
         </div>
       </div>
     </Drawer.Content>

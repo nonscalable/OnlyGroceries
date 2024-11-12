@@ -87,7 +87,7 @@
         autofocus
         class="text-md focus-visible:ring-offset-1"
         bind:value={text}
-        onkeydown={e => handleKeydown(e)}
+        onkeydown={(e: KeyboardEvent) => handleKeydown(e)}
         oninput={() => (showMessage = false)}
         placeholder={`Add ${activeTab} item`}
         required
