@@ -7,14 +7,10 @@
   import SquareMenu from 'lucide-svelte/icons/square-menu'
   import FolderSync from 'lucide-svelte/icons/folder-sync'
   import { getContext } from 'svelte'
-  import { getContextRepo } from '@automerge/automerge-repo-svelte-store'
-  import { router } from './stores/router'
-  import { getPagePath, openPage } from '@nanostores/router'
   import { storeAutomergeKey } from './idb'
   import { stripAutomergePrefix } from './utils'
 
   const docUrl = getContext('docUrl')
-  const repo = getContextRepo()
 
   async function invite() {
     await navigator.share({
@@ -50,17 +46,14 @@
     </Sheet.Trigger>
     <Sheet.Content side="left" class="flex flex-col justify-center">
       <nav class="flex flex-col gap-2 p-4 pt-0">
-        <Button
-          variant="link"
-          href={getPagePath(router, 'start')}
-          class="flex flex-col items-start"
+        <Button href="/" variant="link" class="flex flex-col items-start"
+          >Start</Button
         >
-          Start
-        </Button>
-        <Button
-          variant="link"
-          href="/occasional"
-          class="flex flex-col items-start">Occasional</Button
+        <Button variant="link" disabled class="flex flex-col items-start"
+          >Main (WIP)</Button
+        >
+        <Button variant="link" disabled class="flex flex-col items-start"
+          >Special (WIP)</Button
         >
       </nav>
     </Sheet.Content>

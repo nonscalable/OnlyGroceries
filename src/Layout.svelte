@@ -1,29 +1,34 @@
 <script lang="ts">
-  import { setContext } from 'svelte'
   import { setContextRepo } from '@automerge/automerge-repo-svelte-store'
   import Header from './Header.svelte'
   import HomePage from './HomePage.svelte'
-  import type { AutomergeUrl, DocHandle, Repo } from '@automerge/automerge-repo'
-  import { stripAutomergePrefix } from './utils'
+  import { Repo } from '@automerge/automerge-repo'
+  import { addAutomergePrefix } from './utils'
+  import { router } from './stores/router'
+  import Start from './Start.svelte'
 
-  interface Props {
-    docUrl: AutomergeUrl
-    repo: Repo
-    handle: DocHandle<unknown>
-  }
-  let { docUrl, repo, handle }: Props = $props()
+  import { IndexedDBStorageAdapter } from '@automerge/automerge-repo-storage-indexeddb'
+  import { BrowserWebSocketClientAdapter } from '@automerge/automerge-repo-network-websocket'
 
-  const docHash = stripAutomergePrefix(docUrl)
+  const repo = new Repo({
+    storage: new IndexedDBStorageAdapter(),
+    network: [new BrowserWebSocketClientAdapter('wss://sync.automerge.org')]
+  })
 
   setContextRepo(repo)
-  setContext('docUrl', docUrl)
 
-  document.location.hash = docHash
+  function getHandle(id: string) {
+    return repo.find(addAutomergePrefix(id))
+  }
 </script>
 
 <Header />
-{#await handle.whenReady()}
-  <div>Loading...</div>
-{:then _}
-  <HomePage id={docHash} />
-{/await}
+{#if !$router}
+  <p>router not found</p>
+{:else if $router.route === 'start'}
+  <Start />
+{:else if $router.route === 'main'}
+  {#await getHandle($router.params.id).whenReady() then _}
+    <HomePage id={$router.params.id} />
+  {/await}
+{/if}

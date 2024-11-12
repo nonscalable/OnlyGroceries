@@ -6,6 +6,7 @@
       "$lib": ["./src/lib"],
       "$lib/*": ["./src/lib/*"]
     },
+    "lib": ["WebWorker"],
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",
