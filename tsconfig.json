@@ -1,7 +1,6 @@
 {
   "extends": "@tsconfig/svelte/tsconfig.json",
   "compilerOptions": {
-    "types": ["vite-plugin-pwa/svelte"],
     "baseUrl": ".",
     "paths": {
       "$lib": ["./src/lib"],
