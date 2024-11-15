@@ -23,6 +23,9 @@ importers:
       '@automerge/automerge-repo-svelte-store':
         specifier: ^1.2.1
         version: 1.2.1(@automerge/automerge@2.2.8)(@types/node@22.9.0)(svelte@5.1.9)(typescript@5.6.3)
+      '@nanostores/persistent':
+        specifier: ^0.10.2
+        version: 0.10.2(nanostores@0.11.3)
       '@nanostores/router':
         specifier: ^0.16.1
         version: 0.16.1(nanostores@0.11.3)
@@ -871,6 +874,12 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
+
+  '@nanostores/persistent@0.10.2':
+    resolution: {integrity: sha512-BEndnLhRC+yP7gXTESepBbSj8XNl8OXK9hu4xAgKC7MWJHKXnEqJMqY47LUyHxK6vYgFnisyHmqq+vq8AUFyIg==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    peerDependencies:
+      nanostores: ^0.9.0 || ^0.10.0 || ^0.11.0
 
   '@nanostores/router@0.16.1':
     resolution: {integrity: sha512-An3REnN66g8jRA6Y4Lio5zj2vW7REqlqN+m1cgCTGFtV1EA0g80V2PmgH94KO/h14gPa1/AiU+6r0s+e9kBzPA==}
@@ -3767,6 +3776,10 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
+
+  '@nanostores/persistent@0.10.2(nanostores@0.11.3)':
+    dependencies:
+      nanostores: 0.11.3
 
   '@nanostores/router@0.16.1(nanostores@0.11.3)':
     dependencies:

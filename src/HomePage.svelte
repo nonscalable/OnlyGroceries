@@ -25,6 +25,8 @@
     ...$doc.regularIds.filter(id => $doc.items[id].inCart),
     ...$doc.rareIds
   ])
+  // TODO: validate item for uniqueness
+  // TODO: before adding a rare item to the cart, check if the same item exists in the regular items, and then add it
   // let itemTexts = $derived($doc.ids.map(id => $doc.items[id].text))
 
   let activeTab = $state<ItemType>('regular')

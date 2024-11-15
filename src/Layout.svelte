@@ -10,10 +10,9 @@
   import { IndexedDBStorageAdapter } from '@automerge/automerge-repo-storage-indexeddb'
   import { BrowserWebSocketClientAdapter } from '@automerge/automerge-repo-network-websocket'
   import PwaBadge from '$lib/components/PWABadge.svelte'
-  import { onMount } from 'svelte'
-  import { getAutomergeKey } from './idb'
   import { openPage } from '@nanostores/router'
-
+  import { mainId } from './stores/docs'
+  //TODO: make 'delete document' feature. Clear automerge idb, store
   const repo = new Repo({
     storage: new IndexedDBStorageAdapter(),
     network: [new BrowserWebSocketClientAdapter('wss://sync.automerge.org')]
@@ -21,19 +20,16 @@
 
   setContextRepo(repo)
 
-  let key
-  onMount(async () => {
-    key = await getAutomergeKey()
-    if (key) {
-      openPage(router, 'main', { id: stripAutomergePrefix(key) })
-    }
-  })
+  if ($mainId) {
+    openPage(router, 'main', { id: $mainId })
+  }
 
   function getHandle(id: string) {
     return repo.find(addAutomergePrefix(id) as AutomergeUrl)
   }
 </script>
 
+//TODO: figure out if its ok to call repo.find and .whenReady everytime
 <Header />
 {#if !$router}
   <p>router not found</p>

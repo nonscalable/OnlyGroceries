@@ -1,6 +1,5 @@
 import './app.css'
 import { mount } from 'svelte'
-import { openPage } from '@nanostores/router'
 
 import Layout from './Layout.svelte'
 
