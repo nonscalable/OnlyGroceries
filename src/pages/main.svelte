@@ -1,17 +1,17 @@
 <script lang="ts">
-  import './app.css'
+  import '../app.css'
   import Button from '$lib/components/ui/button/button.svelte'
   import Input from '$lib/components/ui/input/input.svelte'
   import * as Tabs from '$lib/components/ui/tabs'
   import { document } from '@automerge/automerge-repo-svelte-store'
   import { type AutomergeUrl } from '@automerge/automerge-repo/slim'
-  import type { GroceryData, ItemType } from './types.ts'
-  import { addAutomergePrefix } from './utils'
+  import type { GroceryData, ItemType } from '../types'
+  import { addAutomergePrefix } from '../utils'
   import { nanoid } from 'nanoid'
-  import RegularItem from './RegularItem.svelte'
+  import RegularItem from '../lib/components/regular-item.svelte'
   import Sortable, { type SortableEvent } from 'sortablejs'
-  import { sortable } from './sortable'
-  import CartItem from './CartItem.svelte'
+  import { sortable } from '../sortable'
+  import CartItem from '../lib/components/cart-item.svelte'
 
   interface Props {
     id: string

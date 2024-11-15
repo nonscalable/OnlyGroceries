@@ -1,11 +1,11 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button'
   import { getContextRepo } from '@automerge/automerge-repo-svelte-store'
-  import type { GroceryData } from './types'
-  import { router } from './stores/router'
-  import { stripAutomergePrefix } from './utils'
+  import type { GroceryData } from '../types'
+  import { router } from '../stores/router'
+  import { stripAutomergePrefix } from '../utils'
   import { getPagePath, openPage } from '@nanostores/router'
-  import { mainId, setMainId } from './stores/docs'
+  import { mainId, setMainId } from '../stores/docs'
 
   let repo = getContextRepo()
 

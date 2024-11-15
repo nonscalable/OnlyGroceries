@@ -8,17 +8,18 @@
   import Input from '$lib/components/ui/input/input.svelte'
   import SquareMenu from 'lucide-svelte/icons/square-menu'
   import FolderSync from 'lucide-svelte/icons/folder-sync'
-  import { storeAutomergeKey } from './idb'
-  import { addAutomergePrefix } from './utils'
-  import { openPage } from '@nanostores/router'
-  import { router } from './stores/router'
+  import { storeAutomergeKey } from '../../idb'
+  import { addAutomergePrefix } from '../../utils'
+  import { getPagePath, openPage } from '@nanostores/router'
+  import { router } from '../../stores/router'
   import { isValidAutomergeUrl } from '@automerge/automerge-repo'
+  import { mainId } from '../../stores/docs'
 
+  // TODO: copy text if web?
   async function invite() {
-    const route = router.get()
-    if (route && route.route === 'main') {
+    if ($router && $router.route === 'main') {
       await navigator.share({
-        text: route.params.id
+        text: $router.params.id
       })
     }
   }
@@ -26,6 +27,7 @@
   let joinUrl = $state('')
   let showMessage = $state(false)
   async function join() {
+    //TODO: check if its the same automerge url that already exist on this peer
     if (!isValidAutomergeUrl(addAutomergePrefix(joinUrl))) {
       showMessage = true
       return
@@ -43,6 +45,15 @@
     if (event.key === 'Enter') {
       join()
     }
+  }
+
+  function goToStart() {
+    openPage(router, 'start')
+    isSheetOpen = false
+  }
+  function goToMain(id: string) {
+    openPage(router, 'main', { id: id })
+    isSheetOpen = false
   }
 
   let isJoinDrawerOpen = $state(false)
@@ -64,15 +75,17 @@
       <Sheet.Content side="left" class="flex flex-col justify-center">
         <nav class="flex flex-col gap-2 p-4 pt-0">
           <Button
-            href="/"
             variant="link"
             class="onclick flex flex-col items-start"
-            onclick={() => (isSheetOpen = false)}>Start</Button
+            onclick={goToStart}>Start</Button
           >
-
-          <Button variant="link" disabled class="flex flex-col items-start"
-            >Main (WIP)</Button
-          >
+          {#if $mainId}
+            <Button
+              onclick={() => goToMain($mainId)}
+              variant="link"
+              class="flex flex-col items-start">Main</Button
+            >
+          {/if}
 
           <Button variant="link" disabled class="flex flex-col items-start"
             >Special (WIP)</Button

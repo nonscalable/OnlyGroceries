@@ -1,15 +1,15 @@
 <script lang="ts">
   import { setContextRepo } from '@automerge/automerge-repo-svelte-store'
-  import Header from './Header.svelte'
-  import HomePage from './HomePage.svelte'
+  import Header from './lib/components/header.svelte'
+  import Main from './pages/main.svelte'
   import { Repo, type AutomergeUrl } from '@automerge/automerge-repo'
   import { addAutomergePrefix, stripAutomergePrefix } from './utils'
   import { router } from './stores/router'
-  import Start from './Start.svelte'
+  import Start from './pages/start.svelte'
 
   import { IndexedDBStorageAdapter } from '@automerge/automerge-repo-storage-indexeddb'
   import { BrowserWebSocketClientAdapter } from '@automerge/automerge-repo-network-websocket'
-  import PwaBadge from '$lib/components/PWABadge.svelte'
+  import PwaBadge from '$lib/components/pwa-badge.svelte'
   import { openPage } from '@nanostores/router'
   import { mainId } from './stores/docs'
   //TODO: make 'delete document' feature. Clear automerge idb, store
@@ -29,7 +29,7 @@
   }
 </script>
 
-//TODO: figure out if its ok to call repo.find and .whenReady everytime
+<!-- TODO: figure out if its ok to call repo.find and .whenReady everytime -->
 <Header />
 {#if !$router}
   <p>router not found</p>
@@ -37,7 +37,7 @@
   <Start />
 {:else if $router.route === 'main'}
   {#await getHandle($router.params.id).whenReady() then _}
-    <HomePage id={$router.params.id} />
+    <Main id={$router.params.id} />
   {/await}
 {/if}
 
