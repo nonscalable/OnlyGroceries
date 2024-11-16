@@ -4,7 +4,7 @@
   import CircleX from 'lucide-svelte/icons/circle-x'
   import type { AutomergeUrl } from '@automerge/automerge-repo/slim'
   import { document } from '@automerge/automerge-repo-svelte-store'
-  import type { GroceryData } from '../../types'
+  import type { GroceryData } from '$src/types'
 
   interface Props {
     docUrl: AutomergeUrl

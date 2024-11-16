@@ -1,6 +1,6 @@
 <script lang="ts">
   import { setContextRepo } from '@automerge/automerge-repo-svelte-store'
-  import Header from './lib/components/header.svelte'
+  import Header from './lib/components/header/header.svelte'
   import Main from './pages/main.svelte'
   import { Repo, type AutomergeUrl } from '@automerge/automerge-repo'
   import { addAutomergePrefix, stripAutomergePrefix } from './utils'

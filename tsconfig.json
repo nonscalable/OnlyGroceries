@@ -3,8 +3,12 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "$src": ["./src"],
+      "$src/*": ["./src/*"],
       "$lib": ["./src/lib"],
-      "$lib/*": ["./src/lib/*"]
+      "$lib/*": ["./src/lib/*"],
+      "$stores/": ["./src/stores/"],
+      "$stores/*": ["./src/stores/*"]
     },
     "lib": ["WebWorker"],
     "target": "ESNext",

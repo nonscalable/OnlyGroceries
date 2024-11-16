@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button'
   import { Toggle } from '$lib/components/ui/toggle'
-  import type { GroceryData } from '../../types'
+  import type { GroceryData } from '$src/types'
   import type { AutomergeUrl } from '@automerge/automerge-repo'
   import { document } from '@automerge/automerge-repo-svelte-store'
   import GripVertical from 'lucide-svelte/icons/grip-vertical'
