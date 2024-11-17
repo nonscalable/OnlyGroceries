@@ -1,3 +1,5 @@
+// TODO: add ability to update app
+
 import {
   cleanupOutdatedCaches,
   createHandlerBoundToURL,

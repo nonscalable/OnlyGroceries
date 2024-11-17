@@ -25,22 +25,44 @@
     ...$doc.regularIds.filter(id => $doc.items[id].inCart),
     ...$doc.rareIds
   ])
-  // TODO: validate item for uniqueness
-  // TODO: before adding a rare item to the cart, check if the same item exists in the regular items, and then add it
-  // let itemTexts = $derived($doc.ids.map(id => $doc.items[id].text))
+  let itemTexts = $derived(
+    $doc.regularIds.map(id => $doc.items[id].text.toLowerCase())
+  )
 
   let activeTab = $state<ItemType>('regular')
   let text = $state('')
   let showMessage = $state(false)
+  let errorMessage = $state('')
 
   function add() {
-    if (!text) {
+    let formattedTxt = text.toLowerCase().trim()
+    if (!formattedTxt) {
+      errorMessage = 'You have to type something'
       showMessage = true
       return
     }
 
+    if (itemTexts.includes(formattedTxt)) {
+      if (activeTab === 'regular') {
+        errorMessage = 'Item is already in the list'
+        showMessage = true
+        return
+      } else {
+        for (const [id, item] of Object.entries($doc.items)) {
+          if (item.text.toLowerCase() === formattedTxt) {
+            doc.change(d => {
+              d.items[id].inCart = !d.items[id].inCart
+              d.items[id].purchased = false
+            })
+          }
+        }
+        text = ''
+        return
+      }
+    }
+
     let item = {
-      text,
+      text: text.trim(),
       type: activeTab,
       purchased: false,
       inCart: activeTab === 'rare' ? true : false
@@ -99,7 +121,7 @@
         class:opacity-100={showMessage}
         class:opacity-0={!showMessage}
       >
-        You have to enter something
+        {errorMessage}
       </p>
       <Button onclick={add} size="lg">Add</Button>
     </div>
