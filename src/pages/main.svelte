@@ -33,6 +33,7 @@
     onEnd: handleSort,
     forceFallback: true,
     fallbackClass: 'fallback',
+    fallbackTolerance: 1,
     delay: 80,
     delayOnTouchOnly: true
   }

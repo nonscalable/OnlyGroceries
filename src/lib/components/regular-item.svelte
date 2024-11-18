@@ -33,8 +33,7 @@
   }
 </script>
 
-<!-- TODO: fix a bug onRemove item (probably by removing button wrapper from whole
-item) -->
+<!-- FIX: fix hover behaviour on toggle -->
 
 <li class="flex">
   <Button
@@ -55,8 +54,13 @@ item) -->
       {/if}
     </div>
 
-    <Button variant="ghost" class="px-4 text-slate-500 " onclick={remove}
-      ><Trash2 class="size-4" /></Button
+    <Button
+      variant="ghost"
+      class="px-4 text-slate-500 "
+      onclick={e => {
+        e.stopPropagation()
+        remove()
+      }}><Trash2 class="size-4" /></Button
     >
   </Button>
 </li>
