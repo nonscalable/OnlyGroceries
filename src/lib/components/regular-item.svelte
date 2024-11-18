@@ -1,6 +1,5 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button'
-  import { Toggle } from '$lib/components/ui/toggle'
   import type { GroceryData } from '$src/types'
   import type { AutomergeUrl } from '@automerge/automerge-repo'
   import { document } from '@automerge/automerge-repo-svelte-store'
@@ -34,30 +33,30 @@
   }
 </script>
 
-<li class="flex gap-2">
-  <Toggle
+<!-- TODO: fix a bug onRemove item (probably by removing button wrapper from whole
+item) -->
+
+<li class="flex">
+  <Button
     size="lg"
-    variant="default"
-    class="mb-2 grid w-full grid-cols-[auto_1fr_auto] pl-0"
-    pressed={item.inCart}
+    variant="outline"
+    class="grid w-full grid-cols-[auto_1fr_auto_auto] gap-0 px-0 {item.inCart
+      ? 'bg-slate-100'
+      : ''}"
+    aria-pressed={item.inCart}
     onclick={toggleInCart}
   >
-    <Button class="grab px-4" size="lg" variant="ghost"
-      ><GripVertical class="size-4" /></Button
-    >
+    <GripVertical class="mx-2 size-4" />
 
-    <div class="flex items-center gap-2">
+    <div class="flex items-center justify-between">
       <span>{item.text}</span>
+      {#if item.inCart}
+        <ShoppingBasket class="size-4" />
+      {/if}
     </div>
 
-    {#if item.inCart}
-      <ShoppingBasket class="mr-2 size-4" />
-    {/if}
-  </Toggle>
-  <Button
-    variant="ghost"
-    size="lg"
-    class="px-4 text-slate-500 hover:bg-red-100"
-    onclick={remove}><Trash2 class="size-4" /></Button
-  >
+    <Button variant="ghost" class="px-4 text-slate-500 " onclick={remove}
+      ><Trash2 class="size-4" /></Button
+    >
+  </Button>
 </li>

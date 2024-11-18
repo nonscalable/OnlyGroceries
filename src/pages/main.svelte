@@ -1,19 +1,15 @@
 <script lang="ts">
   import '../app.css'
-  import Button from '$lib/components/ui/button/button.svelte'
-  import Input from '$lib/components/ui/input/input.svelte'
   import * as Tabs from '$lib/components/ui/tabs'
-
+  import AddItemBlock from '$lib/components/add-item-block.svelte'
+  import RegularItem from '$lib/components/regular-item.svelte'
+  import CartItem from '$lib/components/cart-item.svelte'
   import { document } from '@automerge/automerge-repo-svelte-store'
   import { type AutomergeUrl } from '@automerge/automerge-repo/slim'
-  import type { GroceryData, ItemType } from '../types'
-  import { addAutomergePrefix } from '../utils'
-  import { nanoid } from 'nanoid'
-  import RegularItem from '../lib/components/regular-item.svelte'
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { sortable } from '../sortable'
-  import CartItem from '../lib/components/cart-item.svelte'
-  import AddItemBlock from '$src/lib/components/add-item-block.svelte'
+  import type { GroceryData, ItemType } from '../types'
+  import { addAutomergePrefix } from '../utils'
 
   interface Props {
     id: string
@@ -31,10 +27,13 @@
   let activeTab = $state<ItemType>('regular')
 
   const options: Sortable.SortableOptions = {
-    animation: 200,
+    animation: 150,
+    swapThreshold: 0.5,
+    ghostClass: 'ghost',
     onEnd: handleSort,
-    forceFallback: false,
-    delay: 50,
+    forceFallback: true,
+    fallbackClass: 'fallback',
+    delay: 80,
     delayOnTouchOnly: true
   }
   function handleSort(event: SortableEvent) {
@@ -54,7 +53,7 @@
 
     <Tabs.Content value="regular">
       {#key $doc.regularIds}
-        <ul use:sortable={options}>
+        <ul use:sortable={options} class="grid gap-2">
           {#each $doc.regularIds as id (id)}
             <RegularItem {docUrl} {id} />
           {/each}
@@ -70,3 +69,26 @@
     </Tabs.Content>
   </Tabs.Root>
 </div>
+
+<style>
+  :global(.ghost) {
+    position: relative;
+  }
+
+  :global(.ghost)::before {
+    border-radius: 8px;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: #f1f5f9;
+  }
+
+  :global(.fallback) {
+    border-radius: 8px;
+    transform: rotate(4deg);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  }
+</style>
