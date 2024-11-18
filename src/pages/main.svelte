@@ -3,6 +3,7 @@
   import Button from '$lib/components/ui/button/button.svelte'
   import Input from '$lib/components/ui/input/input.svelte'
   import * as Tabs from '$lib/components/ui/tabs'
+
   import { document } from '@automerge/automerge-repo-svelte-store'
   import { type AutomergeUrl } from '@automerge/automerge-repo/slim'
   import type { GroceryData, ItemType } from '../types'
@@ -12,6 +13,7 @@
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { sortable } from '../sortable'
   import CartItem from '../lib/components/cart-item.svelte'
+  import AddItemBlock from '$src/lib/components/add-item-block.svelte'
 
   interface Props {
     id: string
@@ -25,62 +27,8 @@
     ...$doc.regularIds.filter(id => $doc.items[id].inCart),
     ...$doc.rareIds
   ])
-  let itemTexts = $derived(
-    $doc.regularIds.map(id => $doc.items[id].text.toLowerCase())
-  )
 
   let activeTab = $state<ItemType>('regular')
-  let text = $state('')
-  let showMessage = $state(false)
-  let errorMessage = $state('')
-
-  function add() {
-    let formattedTxt = text.toLowerCase().trim()
-    if (!formattedTxt) {
-      errorMessage = 'You have to type something'
-      showMessage = true
-      return
-    }
-
-    if (itemTexts.includes(formattedTxt)) {
-      if (activeTab === 'regular') {
-        errorMessage = 'Item is already in the list'
-        showMessage = true
-        return
-      } else {
-        for (const [id, item] of Object.entries($doc.items)) {
-          if (item.text.toLowerCase() === formattedTxt) {
-            doc.change(d => {
-              d.items[id].inCart = !d.items[id].inCart
-              d.items[id].purchased = false
-            })
-          }
-        }
-        text = ''
-        return
-      }
-    }
-
-    let item = {
-      text: text.trim(),
-      type: activeTab,
-      purchased: false,
-      inCart: activeTab === 'rare' ? true : false
-    }
-    let id = nanoid()
-
-    doc.change(d => {
-      d.items[id] = item
-      activeTab === 'rare' ? d.rareIds.push(id) : d.regularIds.push(id)
-    })
-    text = ''
-  }
-
-  function handleKeydown(event: KeyboardEvent) {
-    if (event.key === 'Enter') {
-      add()
-    }
-  }
 
   const options: Sortable.SortableOptions = {
     animation: 200,
@@ -102,29 +50,7 @@
 
 <div class="container pt-2 sm:w-[350px]">
   <Tabs.Root bind:value={activeTab}>
-    <Tabs.List class="grid w-full grid-cols-2">
-      <Tabs.Trigger value="regular">Regular Items</Tabs.Trigger>
-      <Tabs.Trigger value="rare">Shopping Cart</Tabs.Trigger>
-    </Tabs.List>
-    <div class="mb-4 mt-4 flex flex-col gap-1">
-      <Input
-        autofocus
-        class="text-md focus-visible:ring-offset-1"
-        bind:value={text}
-        onkeydown={(e: KeyboardEvent) => handleKeydown(e)}
-        oninput={() => (showMessage = false)}
-        placeholder={`Add ${activeTab} item`}
-        required
-      />
-      <p
-        class="h-5 text-sm text-red-700 transition-opacity"
-        class:opacity-100={showMessage}
-        class:opacity-0={!showMessage}
-      >
-        {errorMessage}
-      </p>
-      <Button onclick={add} size="lg">Add</Button>
-    </div>
+    <AddItemBlock {activeTab} {docUrl} />
 
     <Tabs.Content value="regular">
       {#key $doc.regularIds}
