@@ -3,6 +3,9 @@ import type { Config } from 'tailwindcss'
 import tailwindcssAnimate from 'tailwindcss-animate'
 
 const config: Config = {
+  future: {
+    hoverOnlyWhenSupported: true
+  },
   darkMode: ['class'],
   content: ['./src/**/*.{html,js,svelte,ts}'],
   safelist: ['dark'],
