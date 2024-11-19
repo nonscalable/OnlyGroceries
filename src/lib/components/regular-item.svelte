@@ -40,12 +40,12 @@
     size="lg"
     variant="outline"
     class="grid w-full grid-cols-[auto_1fr_auto_auto] gap-0 px-0 {item.inCart
-      ? 'bg-slate-100'
+      ? 'bg-slate-200'
       : ''}"
     aria-pressed={item.inCart}
     onclick={toggleInCart}
   >
-    <GripVertical class="mx-2 size-4" />
+    <GripVertical class="mx-2 size-4 text-slate-500" />
 
     <div class="flex items-center justify-between">
       <span>{item.text}</span>

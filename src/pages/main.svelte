@@ -77,7 +77,7 @@
   }
 
   :global(.ghost)::before {
-    border-radius: 8px;
+    border-radius: calc(var(--radius) - 2px);
     content: '';
     position: absolute;
     top: 0;
