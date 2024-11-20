@@ -12,6 +12,7 @@
   import PwaBadge from '$lib/components/pwa-badge.svelte'
   import { openPage } from '@nanostores/router'
   import { mainId } from './stores/docs'
+  import Settings from './pages/settings.svelte'
   //TODO: make 'delete document' feature. Clear automerge idb, store
   const repo = new Repo({
     storage: new IndexedDBStorageAdapter(),
@@ -39,6 +40,8 @@
   {#await getHandle($router.params.id).whenReady() then _}
     <Main id={$router.params.id} />
   {/await}
+{:else if $router.route === 'settings'}
+  <Settings />
 {/if}
 
 <PwaBadge />

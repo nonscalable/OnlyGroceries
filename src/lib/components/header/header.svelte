@@ -6,10 +6,8 @@
   } from '$lib/components/ui/button/button.svelte'
   import SquareMenu from 'lucide-svelte/icons/square-menu'
   import FolderSync from 'lucide-svelte/icons/folder-sync'
-  import { storeAutomergeKey } from '$src/idb'
-  import { addAutomergePrefix } from '$src/utils'
-  import { getPagePath, openPage } from '@nanostores/router'
-  import { router } from '$stores/router'
+  import { openPage } from '@nanostores/router'
+  import { router, type RouteName } from '$stores/router'
   import { mainId } from '$stores/docs'
   import HeaderDrawer from './header-drawer.svelte'
 
@@ -22,12 +20,8 @@
     }
   }
 
-  function goToStart() {
-    openPage(router, 'start')
-    isSheetOpen = false
-  }
-  function goToMain(id: string) {
-    openPage(router, 'main', { id: id })
+  function goTo(name: RouteName, params = {}) {
+    openPage(router, name, params)
     isSheetOpen = false
   }
 
@@ -51,16 +45,23 @@
         <nav class="flex flex-col gap-2 p-4 pt-0">
           <Button
             variant="link"
-            class="onclick flex flex-col items-start"
-            onclick={goToStart}>Start</Button
+            class="flex flex-col items-start"
+            onclick={() => goTo('start')}>Start</Button
           >
+
           {#if $mainId}
             <Button
-              onclick={() => goToMain($mainId)}
+              onclick={() => goTo('main', { id: $mainId })}
               variant="link"
               class="flex flex-col items-start">Main</Button
             >
           {/if}
+
+          <Button
+            onclick={() => goTo('settings')}
+            variant="link"
+            class="flex flex-col items-start">Settings</Button
+          >
 
           <Button variant="link" disabled class="flex flex-col items-start"
             >Special (WIP)</Button

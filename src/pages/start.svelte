@@ -73,16 +73,20 @@
   }
 </script>
 
-<div class="mx-auto max-w-sm py-4">
-  <p>Start</p>
-  {#if $mainId}
-    <p>You alredy created a list</p>
-    <Button
-      href={getPagePath(router, 'main', { id: stripAutomergePrefix($mainId) })}
-      variant="link">Link</Button
-    >
-  {:else}
-    <p>Create your first list</p>
-    <Button onclick={createDoc}>Create</Button>
-  {/if}
+<div class="container pt-2 sm:w-[350px]">
+  <h2 class="text-3xl font-semibold tracking-tight">Start</h2>
+  <div class="mt-5 flex">
+    {#if $mainId}
+      <Button
+        href={getPagePath(router, 'main', {
+          id: stripAutomergePrefix($mainId)
+        })}
+        variant="outline">Go to your main list</Button
+      >
+    {:else}
+      <Button onclick={createDoc} variant="outline"
+        >Create your main list</Button
+      >
+    {/if}
+  </div>
 </div>

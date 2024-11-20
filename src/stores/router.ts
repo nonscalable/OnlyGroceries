@@ -1,6 +1,11 @@
 import { createRouter } from '@nanostores/router'
 
-export const router = createRouter({
+const routes = {
   start: '/',
-  main: '/main/:id'
-})
+  main: '/main/:id',
+  settings: '/settings'
+} as const
+
+export const router = createRouter(routes)
+
+export type RouteName = keyof typeof routes
