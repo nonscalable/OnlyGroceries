@@ -1,15 +1,11 @@
 <script lang="ts">
-  import * as Sheet from '$lib/components/ui/sheet'
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu'
-  import Button, {
-    buttonVariants
-  } from '$lib/components/ui/button/button.svelte'
-  import SquareMenu from 'lucide-svelte/icons/square-menu'
+  import { buttonVariants } from '$lib/components/ui/button/button.svelte'
   import FolderSync from 'lucide-svelte/icons/folder-sync'
-  import { openPage } from '@nanostores/router'
-  import { router, type RouteName } from '$stores/router'
-  import { mainId } from '$stores/docs'
+  import { router } from '$stores/router'
   import HeaderDrawer from './header-drawer.svelte'
+  import HeaderSheet from './header-sheet.svelte'
+  import { mainId } from '$stores/docs'
 
   // TODO: copy text if web?
   async function invite() {
@@ -20,61 +16,19 @@
     }
   }
 
-  function goTo(name: RouteName, params = {}) {
-    openPage(router, name, params)
-    isSheetOpen = false
-  }
-
   let isJoinDrawerOpen = $state(false)
   let isDropdownOpen = $state(false)
-  let isSheetOpen = $state(false)
 </script>
 
 <header class="border-b p-2">
   <div class="mx-auto grid grid-cols-3 sm:w-[350px]">
-    <Sheet.Root bind:open={isSheetOpen}>
-      <Sheet.Trigger
-        class="justify-self-start {buttonVariants({
-          variant: 'ghost',
-          size: 'icon'
-        })} [&_svg]:size-5"
-      >
-        <SquareMenu />
-      </Sheet.Trigger>
-      <Sheet.Content side="left" class="flex flex-col justify-center">
-        <nav class="flex flex-col gap-2 p-4 pt-0">
-          <Button
-            variant="link"
-            class="flex flex-col items-start"
-            onclick={() => goTo('start')}>Start</Button
-          >
-
-          {#if $mainId}
-            <Button
-              onclick={() => goTo('main', { id: $mainId })}
-              variant="link"
-              class="flex flex-col items-start">Main</Button
-            >
-          {/if}
-
-          <Button
-            onclick={() => goTo('settings')}
-            variant="link"
-            class="flex flex-col items-start">Settings</Button
-          >
-
-          <Button variant="link" disabled class="flex flex-col items-start"
-            >Special (WIP)</Button
-          >
-        </nav>
-      </Sheet.Content>
-    </Sheet.Root>
+    <HeaderSheet mainId={$mainId} />
 
     <h1 class="justify-self-center text-4xl font-extrabold tracking-tight">
       Hello!
     </h1>
 
-    {#if $router?.route !== 'start'}
+    {#if $router?.route === 'main'}
       <!-- FIXME: Figure out icons sizes (get rid of [&_svg]:size-5) -->
       <DropdownMenu.Root bind:open={isDropdownOpen}>
         <DropdownMenu.Trigger
