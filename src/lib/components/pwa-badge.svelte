@@ -3,7 +3,7 @@
   import { toast } from 'svelte-sonner'
   import { Toaster } from '$lib/components/ui/sonner'
 
-  // check for updates every hour
+  // check for updates every 3 minutes
   const period = 1 * 3 * 1000
 
   /**
@@ -56,7 +56,13 @@
     if (value) {
       toast('New content available. Click on reload button to update.', {
         duration: Number.POSITIVE_INFINITY,
-        action: { label: 'Reload', onClick: () => updateServiceWorker(true) }
+        action: {
+          label: 'Reload',
+          onClick: () => {
+            updateServiceWorker()
+            window.location.reload()
+          }
+        }
       })
     }
   })
