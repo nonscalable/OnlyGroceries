@@ -28,7 +28,7 @@
     <HeaderSheet {mainId} />
 
     <h1 class="justify-self-center text-4xl font-extrabold tracking-tight">
-      Hello
+      {formattedDate}
     </h1>
 
     {#if $router?.route === 'main'}
