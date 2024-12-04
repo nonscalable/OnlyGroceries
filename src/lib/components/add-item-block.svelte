@@ -71,8 +71,8 @@
 </script>
 
 <TabsList class="grid w-full grid-cols-2">
-  <TabsTrigger value="regular">Regular Items</TabsTrigger>
-  <TabsTrigger value="rare">Shopping Cart</TabsTrigger>
+  <TabsTrigger value="regular">Staples</TabsTrigger>
+  <TabsTrigger value="rare">Shopping List</TabsTrigger>
 </TabsList>
 <div class="mb-4 mt-4 flex flex-col gap-1">
   <Input
@@ -81,7 +81,7 @@
     bind:value={text}
     onkeydown={(e: KeyboardEvent) => handleKeydown(e)}
     oninput={() => (showMessage = false)}
-    placeholder={`Add ${activeTab} item`}
+    placeholder={`Add ${activeTab === 'regular' ? 'regular' : 'occasional'} item`}
     required
   />
   <p
