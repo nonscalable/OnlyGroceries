@@ -76,7 +76,6 @@
 </TabsList>
 <div class="mb-4 mt-4 flex flex-col gap-1">
   <Input
-    autofocus
     class="text-md focus-visible:ring-offset-1"
     bind:value={text}
     onkeydown={(e: KeyboardEvent) => handleKeydown(e)}

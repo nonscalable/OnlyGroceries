@@ -42,7 +42,6 @@
   })
 
   offlineReady.subscribe(value => {
-    console.log('offlineReady', value)
     if (value) {
       toast('App is ready to work offline.', {
         duration: Number.POSITIVE_INFINITY,
@@ -52,7 +51,6 @@
   })
 
   needRefresh.subscribe(value => {
-    console.log('needRefresh', value)
     if (value) {
       toast('New content available. Click on reload button to update.', {
         duration: Number.POSITIVE_INFINITY,
