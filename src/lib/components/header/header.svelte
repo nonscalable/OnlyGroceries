@@ -5,27 +5,30 @@
   import { router } from '$stores/router'
   import HeaderDrawer from './header-drawer.svelte'
   import HeaderSheet from './header-sheet.svelte'
-  import { mainId } from '$stores/docs'
+  type Props = {
+    mainId?: string
+  }
+  let { mainId }: Props = $props()
 
-  // TODO: copy text if web?
   async function invite() {
-    if ($router && $router.route === 'main') {
-      await navigator.share({
-        text: $router.params.id
-      })
-    }
+    await navigator.share({
+      text: mainId
+    })
   }
 
   let isJoinDrawerOpen = $state(false)
   let isDropdownOpen = $state(false)
+
+  const date = new Date()
+  const formattedDate = `${date.getDate()}.${date.getMonth() + 1}`
 </script>
 
 <header class="border-b p-2">
   <div class="mx-auto grid grid-cols-3 sm:w-[350px]">
-    <HeaderSheet mainId={$mainId} />
+    <HeaderSheet {mainId} />
 
     <h1 class="justify-self-center text-4xl font-extrabold tracking-tight">
-      Hello!
+      {formattedDate}
     </h1>
 
     {#if $router?.route === 'main'}
