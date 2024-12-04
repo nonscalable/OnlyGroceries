@@ -18,6 +18,9 @@
 
   let isJoinDrawerOpen = $state(false)
   let isDropdownOpen = $state(false)
+
+  const date = new Date()
+  const formattedDate = `${date.getDate()}.${date.getMonth() + 1}`
 </script>
 
 <header class="border-b p-2">
@@ -25,7 +28,7 @@
     <HeaderSheet {mainId} />
 
     <h1 class="justify-self-center text-4xl font-extrabold tracking-tight">
-      Hello!
+      {formattedDate}
     </h1>
 
     {#if $router?.route === 'main'}
