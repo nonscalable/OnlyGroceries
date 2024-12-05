@@ -32,7 +32,6 @@
     </h1>
 
     {#if $router?.route === 'main'}
-      <!-- FIXME: Figure out icons sizes (get rid of [&_svg]:size-5) -->
       <DropdownMenu.Root bind:open={isDropdownOpen}>
         <DropdownMenu.Trigger
           class="justify-self-end {buttonVariants({
