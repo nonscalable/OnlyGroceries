@@ -5,15 +5,29 @@
   import { router } from '$stores/router'
   import HeaderDrawer from './header-drawer.svelte'
   import HeaderSheet from './header-sheet.svelte'
-  type Props = {
-    mainId?: string
-  }
-  let { mainId }: Props = $props()
+  import { mainId } from '$stores/docs'
+
+  // function isPWA() {
+  //   const isStandalone =
+  //     window.matchMedia('(display-mode: standalone)').matches ||
+  //     (window.navigator as any).standalone ||
+  //     document.referrer === ''
+  //   return isStandalone
+  // }
 
   async function invite() {
-    await navigator.share({
-      text: mainId
-    })
+    const id = $mainId ? $mainId : ''
+
+    if (navigator.share) {
+      await navigator.share({
+        text: id
+      })
+    } else {
+      await navigator.clipboard.writeText(id)
+      toast.success('List ID has been copied to clipboard', {
+        description: 'Send it to your friend'
+      })
+    }
   }
 
   let isJoinDrawerOpen = $state(false)
