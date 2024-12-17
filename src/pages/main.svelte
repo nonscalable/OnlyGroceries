@@ -10,6 +10,7 @@
   import { sortable } from '../sortable'
   import type { GroceryData, ItemType } from '../types'
   import { addAutomergePrefix } from '../utils'
+  import { Toaster } from '$src/lib/components/ui/sonner'
 
   interface Props {
     id: string
@@ -70,6 +71,8 @@
     </Tabs.Content>
   </Tabs.Root>
 </div>
+
+<Toaster />
 
 <style>
   :global(.ghost) {

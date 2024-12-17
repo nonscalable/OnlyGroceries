@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { Toaster } from '$lib/components/ui/sonner/index.js'
   import { toast } from 'svelte-sonner'
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu'
   import { buttonVariants } from '$lib/components/ui/button/button.svelte'
@@ -31,7 +30,6 @@
   const formattedDate = `${date.getDate()}.${date.getMonth() + 1}`
 </script>
 
-<Toaster />
 <header class="border-b p-2">
   <div class="mx-auto grid grid-cols-3 sm:w-[350px]">
     <HeaderSheet mainId={$mainId} />

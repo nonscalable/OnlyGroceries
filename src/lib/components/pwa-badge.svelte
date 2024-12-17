@@ -1,7 +1,6 @@
 <script lang="ts">
   import { useRegisterSW } from 'virtual:pwa-register/svelte'
   import { toast } from 'svelte-sonner'
-  import { Toaster } from '$lib/components/ui/sonner'
 
   // check for updates every 3 minutes
   const period = 1 * 3 * 1000
@@ -69,5 +68,3 @@
     needRefresh.set(false)
   }
 </script>
-
-<Toaster />
