@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { Toaster } from '$lib/components/ui/sonner/index.js'
+  import { toast } from 'svelte-sonner'
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu'
   import { buttonVariants } from '$lib/components/ui/button/button.svelte'
   import FolderSync from 'lucide-svelte/icons/folder-sync'
@@ -6,14 +8,6 @@
   import HeaderDrawer from './header-drawer.svelte'
   import HeaderSheet from './header-sheet.svelte'
   import { mainId } from '$stores/docs'
-
-  // function isPWA() {
-  //   const isStandalone =
-  //     window.matchMedia('(display-mode: standalone)').matches ||
-  //     (window.navigator as any).standalone ||
-  //     document.referrer === ''
-  //   return isStandalone
-  // }
 
   async function invite() {
     const id = $mainId ? $mainId : ''
@@ -37,9 +31,10 @@
   const formattedDate = `${date.getDate()}.${date.getMonth() + 1}`
 </script>
 
+<Toaster />
 <header class="border-b p-2">
   <div class="mx-auto grid grid-cols-3 sm:w-[350px]">
-    <HeaderSheet {mainId} />
+    <HeaderSheet mainId={$mainId} />
 
     <h1 class="justify-self-center text-4xl font-extrabold tracking-tight">
       {formattedDate}
