@@ -31,7 +31,7 @@
 </script>
 
 <!-- TODO: figure out if its ok to call repo.find and .whenReady everytime -->
-<Header mainId={$mainId} />
+<Header />
 {#if !$router}
   <p>router not found</p>
 {:else if $router.route === 'start'}

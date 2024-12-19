@@ -10,11 +10,8 @@
   import ListTodo from 'lucide-svelte/icons/list-todo'
   import Settings from 'lucide-svelte/icons/settings'
   import FolderOpen from 'lucide-svelte/icons/folder-open'
+  import { mainId } from '$stores/docs'
 
-  type Props = {
-    mainId: string | undefined
-  }
-  let { mainId }: Props = $props()
   let isSheetOpen = $state(false)
 
   function goTo(name: RouteName, params = {}) {
@@ -41,7 +38,7 @@
         ><House class="size-4" />Home</Button
       >
 
-      {#if mainId}
+      {#if $mainId}
         <Button
           onclick={() => goTo('main', { id: mainId })}
           variant="ghost"

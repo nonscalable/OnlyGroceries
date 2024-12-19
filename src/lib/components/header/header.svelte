@@ -6,11 +6,8 @@
   import { router } from '$stores/router'
   import HeaderDrawer from './header-drawer.svelte'
   import HeaderSheet from './header-sheet.svelte'
-  import { mainId } from '$stores/docs'
 
-  async function invite() {
-    const id = $mainId ? $mainId : ''
-
+  async function invite(id: string) {
     if (navigator.share) {
       await navigator.share({
         text: id
@@ -32,7 +29,7 @@
 
 <header class="border-b p-2">
   <div class="mx-auto grid grid-cols-3 sm:w-[350px]">
-    <HeaderSheet mainId={$mainId} />
+    <HeaderSheet />
 
     <h1 class="justify-self-center text-4xl font-extrabold tracking-tight">
       {formattedDate}
@@ -52,7 +49,7 @@
           <DropdownMenu.Label>Options</DropdownMenu.Label>
           <DropdownMenu.Separator />
 
-          <DropdownMenu.Item onclick={invite}>
+          <DropdownMenu.Item onclick={() => invite($router.params.id)}>
             <span>Invite</span>
           </DropdownMenu.Item>
 
