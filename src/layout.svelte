@@ -3,7 +3,7 @@
   import Header from './lib/components/header/header.svelte'
   import Main from './pages/main.svelte'
   import { Repo, type AutomergeUrl } from '@automerge/automerge-repo'
-  import { addAutomergePrefix, stripAutomergePrefix } from './utils'
+  import { addAutomergePrefix } from './utils'
   import { router } from './stores/router'
   import Start from './pages/start.svelte'
 
