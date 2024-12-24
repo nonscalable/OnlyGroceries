@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button'
-  import type { GroceryData } from '$src/types'
+  import type { GroceryData, Item } from '$src/types'
   import type { AutomergeUrl } from '@automerge/automerge-repo'
   import { document } from '@automerge/automerge-repo-svelte-store'
   import GripVertical from 'lucide-svelte/icons/grip-vertical'
@@ -8,12 +8,12 @@
   import Trash2 from 'lucide-svelte/icons/trash-2'
 
   interface Props {
+    item: Item
     docUrl: AutomergeUrl
     id: string
   }
-  let { docUrl, id }: Props = $props()
+  let { item, docUrl, id }: Props = $props()
   let doc = document<GroceryData>(docUrl)
-  const item = $doc.items[id]
 
   function toggleInCart() {
     doc.change(d => {
@@ -32,8 +32,6 @@
     })
   }
 </script>
-
-<!-- FIX: fix hover behaviour on toggle -->
 
 <li class="flex">
   <Button
