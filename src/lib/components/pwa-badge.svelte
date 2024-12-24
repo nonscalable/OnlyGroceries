@@ -3,41 +3,12 @@
   import { toast } from 'svelte-sonner'
   import { Toaster } from '$src/lib/components/ui/sonner'
 
-  // check for updates every 3 minutes
-  const period = 1 * 3 * 1000
-
-  /**
-   * This function will register a periodic sync check every hour, you can modify the interval as needed.
-   */
-  function registerPeriodicSync(swUrl: string, r: ServiceWorkerRegistration) {
-    if (period <= 0) return
-
-    setInterval(async () => {
-      if ('onLine' in navigator && !navigator.onLine) return
-
-      const resp = await fetch(swUrl, {
-        cache: 'no-store',
-        headers: {
-          'cache': 'no-store',
-          'cache-control': 'no-cache'
-        }
-      })
-
-      if (resp?.status === 200) await r.update()
-    }, period)
-  }
-
   const { offlineReady, needRefresh, updateServiceWorker } = useRegisterSW({
-    onRegisteredSW(swUrl, r) {
-      if (period <= 0) return
-      if (r?.active?.state === 'activated') {
-        registerPeriodicSync(swUrl, r)
-      } else if (r?.installing) {
-        r.installing.addEventListener('statechange', e => {
-          const sw = e.target as ServiceWorker
-          if (sw.state === 'activated') registerPeriodicSync(swUrl, r)
-        })
-      }
+    onRegistered(swr) {
+      console.log(`SW registered: ${swr}`)
+    },
+    onRegisterError(error) {
+      console.log('SW registration error', error)
     }
   })
 
