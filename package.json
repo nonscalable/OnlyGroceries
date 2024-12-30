@@ -16,8 +16,6 @@
     "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json"
   },
   "devDependencies": {
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
     "@size-limit/preset-app": "^11.1.6",
     "@sveltejs/vite-plugin-svelte": "5.0.3",
     "@tsconfig/svelte": "^5.0.4",
@@ -31,7 +29,6 @@
     "prettier": "^3.4.2",
     "prettier-plugin-svelte": "^3.3.2",
     "prettier-plugin-tailwindcss": "^0.6.9",
-    "semantic-release": "^24.2.0",
     "size-limit": "^11.1.6",
     "svelte": "5.15.0",
     "svelte-check": "^4.1.1",
