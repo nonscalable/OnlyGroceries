@@ -16,7 +16,7 @@
     if (value) {
       toast('App is ready to work offline.', {
         duration: Number.POSITIVE_INFINITY,
-        action: { label: 'Close', onClick: () => close() }
+        cancel: { label: 'Close' }
       })
     }
   })
@@ -31,6 +31,9 @@
             updateServiceWorker()
             window.location.reload()
           }
+        },
+        cancel: {
+          label: 'Not now'
         }
       })
     }
@@ -41,4 +44,10 @@
   }
 </script>
 
-<Toaster />
+<Toaster position="bottom-center" />
+
+<style>
+  :global([data-sonner-toaster][data-y-position='bottom']) {
+    bottom: 48px !important;
+  }
+</style>
