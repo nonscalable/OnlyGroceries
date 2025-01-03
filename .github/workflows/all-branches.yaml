@@ -2,8 +2,8 @@ name: All branches
 
 on:
   push:
-    branches:
-      - "*"
+    branches-ignore:
+      - main
 
 jobs:
   build:
