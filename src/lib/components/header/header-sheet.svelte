@@ -40,7 +40,7 @@
 
       {#if $mainId}
         <Button
-          onclick={() => goTo('main', { id: mainId })}
+          onclick={() => goTo('main', { id: $mainId })}
           variant="ghost"
           class="flex items-center justify-start"
           ><ListTodo class="size-4" />Main List</Button
