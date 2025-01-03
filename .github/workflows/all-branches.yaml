@@ -9,4 +9,4 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: ./.github/actions/build.yaml@release-workflow
+      - uses: ./.github/workflows/build.yaml@release-workflow
