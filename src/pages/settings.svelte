@@ -33,7 +33,7 @@
   }
 </script>
 
-<main class="min-h-screen space-y-6 p-6">
+<main class="container space-y-6 p-6 pt-2 sm:w-[350px]">
   <section class="space-y-6">
     <h1 class="text-3xl font-bold">Settings</h1>
 

@@ -9,14 +9,21 @@
   import House from 'lucide-svelte/icons/house'
   import ListTodo from 'lucide-svelte/icons/list-todo'
   import Settings from 'lucide-svelte/icons/settings'
-  import FolderOpen from 'lucide-svelte/icons/folder-open'
-  import { mainId } from '$stores/docs'
+  import Plus from 'lucide-svelte/icons/plus'
+  import { mainId, specialLists } from '$stores/docs'
+  import HeaderSheetDrawer from './header-sheet-drawer.svelte'
 
   let isSheetOpen = $state(false)
+  let isDrawerOpen = $state(false)
 
   function goTo(name: RouteName, params = {}) {
     openPage(router, name, params)
     isSheetOpen = false
+  }
+
+  function createSpecialList() {
+    isDrawerOpen = !isDrawerOpen
+    isSheetOpen = !isSheetOpen
   }
 </script>
 
@@ -30,7 +37,7 @@
     <SquareMenu />
   </Sheet.Trigger>
   <Sheet.Content side="left" class="flex flex-col justify-center">
-    <nav class="grid items-start gap-2">
+    <nav class="grid items-start gap-1">
       <Button
         onclick={() => goTo('start')}
         variant="ghost"
@@ -47,16 +54,37 @@
         >
       {/if}
 
+      <div class="mt-4 flex items-center justify-between">
+        <h2 class="px-4 font-semibold tracking-tight">Special Lists</h2>
+        <Button
+          size="icon"
+          class="size-8"
+          variant="secondary"
+          onclick={createSpecialList}><Plus /></Button
+        >
+      </div>
+
+      {#if $specialLists}
+        <div class="ml-4">
+          {#each $specialLists as list, i}
+            <Button
+              onclick={() => goTo('special', { id: list.id })}
+              variant="ghost"
+              class="flex items-center justify-start"
+              ><ListTodo class="size-4" />{list.name}</Button
+            >
+          {/each}
+        </div>
+      {/if}
+
       <Button
         onclick={() => goTo('settings')}
         variant="ghost"
-        class="flex items-center justify-start"
+        class="mt-4 flex items-center justify-start"
         ><Settings class="size-4" />Settings</Button
-      >
-
-      <Button variant="ghost" disabled class="flex items-center justify-start"
-        ><FolderOpen class="size-4" />Special (WIP)</Button
       >
     </nav>
   </Sheet.Content>
 </Sheet.Root>
+
+<HeaderSheetDrawer bind:isOpen={isDrawerOpen} />
