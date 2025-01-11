@@ -1,3 +1,5 @@
+<!-- TODO: figure out if its ok to call repo.find and .whenReady everytime -->
+
 <script lang="ts">
   import { setContextRepo } from '@automerge/automerge-repo-svelte-store'
   import Header from './lib/components/header/header.svelte'
@@ -6,6 +8,8 @@
   import { addAutomergePrefix } from './utils'
   import { router } from './stores/router'
   import Start from './pages/start.svelte'
+  import * as Sidebar from '$lib/components/ui/sidebar/index.js'
+  import AppSidebar from '$src/lib/components/app-sidebar.svelte'
 
   import { IndexedDBStorageAdapter } from '@automerge/automerge-repo-storage-indexeddb'
   import { BrowserWebSocketClientAdapter } from '@automerge/automerge-repo-network-websocket'
@@ -13,6 +17,9 @@
   import { openPage } from '@nanostores/router'
   import { mainId } from './stores/docs'
   import Settings from './pages/settings.svelte'
+  import Special from './pages/special.svelte'
+  import HeaderSheetDrawer from './lib/components/header/header-sheet-drawer.svelte'
+
   //TODO: make 'delete document' feature. Clear automerge idb, store
   const repo = new Repo({
     storage: new IndexedDBStorageAdapter(),
@@ -28,20 +35,35 @@
   function getHandle(id: string) {
     return repo.find(addAutomergePrefix(id) as AutomergeUrl)
   }
+
+  let isDrawerOpen = $state(false)
 </script>
 
-<!-- TODO: figure out if its ok to call repo.find and .whenReady everytime -->
-<Header />
-{#if !$router}
-  <p>router not found</p>
-{:else if $router.route === 'start'}
-  <Start />
-{:else if $router.route === 'main'}
-  {#await getHandle($router.params.id).whenReady() then _}
-    <Main id={$router.params.id} />
-  {/await}
-{:else if $router.route === 'settings'}
-  <Settings />
-{/if}
+<Sidebar.Provider>
+  <AppSidebar bind:isDrawerOpen />
 
-<PwaBadge />
+  <Sidebar.Inset>
+    <Header />
+    {#if !$router}
+      <p>router not found</p>
+    {:else if $router.route === 'start'}
+      <Start />
+    {:else if $router.route === 'main'}
+      {#await getHandle($router.params.id).whenReady() then _}
+        <Main id={$router.params.id} />
+      {/await}
+    {:else if $router.route === 'special'}
+      {#await getHandle($router.params.id).whenReady() then _}
+        <Special id={$router.params.id} />
+      {/await}
+    {:else if $router.route === 'settings'}
+      <Settings />
+    {/if}
+
+    <PwaBadge />
+    <HeaderSheetDrawer bind:isOpen={isDrawerOpen} />
+    <div
+      class="z-1 fixed bottom-0 left-0 h-20 w-full bg-gradient-to-t from-white"
+    ></div>
+  </Sidebar.Inset>
+</Sidebar.Provider>

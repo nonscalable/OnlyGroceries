@@ -5,7 +5,7 @@
   import FolderSync from 'lucide-svelte/icons/folder-sync'
   import { router } from '$stores/router'
   import HeaderDrawer from './header-drawer.svelte'
-  import HeaderSheet from './header-sheet.svelte'
+  import SidebarTrigger from '../ui/sidebar/sidebar-trigger.svelte'
 
   async function invite(id: string) {
     if (navigator.share) {
@@ -29,7 +29,12 @@
 
 <header class="border-b p-2">
   <div class="mx-auto grid grid-cols-3 sm:w-[350px]">
-    <HeaderSheet />
+    <SidebarTrigger
+      class="justify-self-start {buttonVariants({
+        variant: 'ghost',
+        size: 'icon'
+      })} [&_svg]:size-5"
+    />
 
     <h1 class="justify-self-center text-4xl font-extrabold tracking-tight">
       {formattedDate}

@@ -22,14 +22,11 @@
   })
 
   async function join() {
-    //TODO: if main has been created show message that it will be replaced by new list
-    //TODO: check if its the same automerge url that already exist on this peer
     if (!isValidAutomergeUrl(addAutomergePrefix(joinID))) {
       showMessage = true
       return
     }
 
-    // await storeAutomergeKey(joinUrl)
     setMainId(joinID)
 
     openPage(router, 'main', { id: joinID })
