@@ -27,6 +27,7 @@
   const formattedDate = `${date.getDate()}.${date.getMonth() + 1}`
 </script>
 
+<!-- TODO: refactor header-drawer and header-sheet-drawer to make one component with different content -->
 <header class="border-b p-2">
   <div class="mx-auto grid grid-cols-3 sm:w-[350px]">
     <SidebarTrigger

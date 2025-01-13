@@ -49,7 +49,7 @@
 </script>
 
 <div class="container pt-2 sm:w-[350px]">
-  <Tabs.Root bind:value={activeTab} class="touch-pan-y pb-24">
+  <Tabs.Root bind:value={activeTab}>
     <AddItemBlock {activeTab} {docUrl} />
 
     <Tabs.Content value="regular">

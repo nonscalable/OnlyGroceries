@@ -42,7 +42,7 @@
 <Sidebar.Provider>
   <AppSidebar bind:isDrawerOpen />
 
-  <Sidebar.Inset>
+  <Sidebar.Inset class="touch-pan-y pb-24">
     <Header />
     {#if !$router}
       <p>router not found</p>
