@@ -48,7 +48,7 @@
   }
 </script>
 
-<div class="container pt-2 sm:w-[350px]">
+<div class="container pt-2">
   <Tabs.Root bind:value={activeTab}>
     <AddItemBlock {activeTab} {docUrl} />
 
