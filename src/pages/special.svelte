@@ -44,10 +44,11 @@
       purchased: false
     }
     let id = nanoid()
-
     doc.change(d => {
       d.items[id] = item
+      d.ids.push(id)
     })
+
     text = ''
   }
 
@@ -98,13 +99,11 @@
     <Button onclick={add} size="lg">Add</Button>
   </div>
 
-  {#key $doc.ids}
-    <ul use:sortable={options} class="grid gap-2">
-      {#each $doc.ids as id (id)}
-        <SpecialItem item={$doc.items[id]} {docUrl} {id} />
-      {/each}
-    </ul>
-  {/key}
+  <ul use:sortable={options} class="grid gap-2">
+    {#each $doc.ids as id (id)}
+      <SpecialItem item={$doc.items[id]} {docUrl} {id} />
+    {/each}
+  </ul>
 </div>
 
 <style>

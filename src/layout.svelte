@@ -18,9 +18,9 @@
   import { mainId } from './stores/docs'
   import Settings from './pages/settings.svelte'
   import Special from './pages/special.svelte'
-  import HeaderSheetDrawer from './lib/components/header/header-sheet-drawer.svelte'
+  import CreateDrawer from './lib/components/create-drawer.svelte'
+  import RemoveDrawer from './lib/components/remove-drawer.svelte'
 
-  //TODO: make 'delete document' feature. Clear automerge idb, store
   const repo = new Repo({
     storage: new IndexedDBStorageAdapter(),
     network: [new BrowserWebSocketClientAdapter('wss://sync.automerge.org')]
@@ -35,14 +35,26 @@
   function getHandle(id: string) {
     return repo.find(addAutomergePrefix(id) as AutomergeUrl)
   }
+  let open = $state(true)
+  let isCreateDrawerOpen = $state(false)
+  let isRemoveDrawerOpen = $state(false)
 
-  let isDrawerOpen = $state(false)
+  let removedId = $state<string | null>(null)
+  let removedName = $state<string | null>(null)
+  function openRemoveDrawer(id: string, name: string) {
+    isRemoveDrawerOpen = !isRemoveDrawerOpen
+    removedId = id
+    removedName = name
+  }
+  function openCreateDrawer() {
+    isCreateDrawerOpen = !isCreateDrawerOpen
+  }
 </script>
 
-<Sidebar.Provider>
-  <AppSidebar bind:isDrawerOpen />
+<Sidebar.Provider bind:open>
+  <AppSidebar {openRemoveDrawer} {openCreateDrawer} />
 
-  <Sidebar.Inset>
+  <Sidebar.Inset class="touch-pan-y pb-24">
     <Header />
     {#if !$router}
       <p>router not found</p>
@@ -61,7 +73,15 @@
     {/if}
 
     <PwaBadge />
-    <HeaderSheetDrawer bind:isOpen={isDrawerOpen} />
+
+    {#if removedId && removedName}
+      <RemoveDrawer
+        bind:isOpen={isRemoveDrawerOpen}
+        id={removedId}
+        name={removedName}
+      />
+    {/if}
+    <CreateDrawer bind:isOpen={isCreateDrawerOpen} />
     <div
       class="z-1 fixed bottom-0 left-0 h-20 w-full bg-gradient-to-t from-white"
     ></div>

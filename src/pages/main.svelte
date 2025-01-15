@@ -48,18 +48,16 @@
   }
 </script>
 
-<div class="container pt-2 sm:w-[350px]">
-  <Tabs.Root bind:value={activeTab} class="touch-pan-y pb-24">
+<div class="container pt-2">
+  <Tabs.Root bind:value={activeTab}>
     <AddItemBlock {activeTab} {docUrl} />
 
     <Tabs.Content value="regular">
-      {#key $doc.regularIds}
-        <ul use:sortable={options} class="grid gap-2">
-          {#each $doc.regularIds as id (id)}
-            <RegularItem item={$doc.items[id]} {docUrl} {id} />
-          {/each}
-        </ul>
-      {/key}
+      <ul use:sortable={options} class="grid gap-2">
+        {#each $doc.regularIds as id (id)}
+          <RegularItem item={$doc.items[id]} {docUrl} {id} />
+        {/each}
+      </ul>
     </Tabs.Content>
     <Tabs.Content value="rare">
       <ul>
