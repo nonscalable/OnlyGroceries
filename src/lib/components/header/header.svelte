@@ -24,12 +24,12 @@
   let isDropdownOpen = $state(false)
 
   const date = new Date()
-  const formattedDate = `${date.getDate()}.${date.getMonth() + 1}`
+  const formattedDate = `${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}`
 </script>
 
 <!-- TODO: refactor header-drawer and header-sheet-drawer to make one component with different content -->
 <header class="border-b p-2">
-  <div class="mx-auto grid grid-cols-3 sm:w-[350px]">
+  <div class="grid grid-cols-3">
     <SidebarTrigger
       class="justify-self-start {buttonVariants({
         variant: 'ghost',
