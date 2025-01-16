@@ -33,7 +33,7 @@
   }
 </script>
 
-<main class="container space-y-6 p-6 pt-2 sm:w-[350px]">
+<main class="container pt-2">
   <section class="space-y-6">
     <h1 class="text-3xl font-bold">Settings</h1>
 

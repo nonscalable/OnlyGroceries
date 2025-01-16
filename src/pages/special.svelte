@@ -9,6 +9,7 @@
   import SpecialItem from '$src/lib/components/special-item.svelte'
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { sortable } from '../sortable'
+  import { getSpecialListName } from '$src/stores/docs'
 
   interface Props {
     id: string
@@ -16,6 +17,7 @@
   let { id }: Props = $props()
   let docUrl = addAutomergePrefix(id) as AutomergeUrl
   let doc = document<SpecialListData>(docUrl)
+  let name = getSpecialListName(id)
 
   let text = $state('')
   let message = $state('')
@@ -80,7 +82,8 @@
   }
 </script>
 
-<div class="container pt-2 sm:w-[350px]">
+<div class="container pt-2">
+  <h1 class="text-3xl font-bold">{name}</h1>
   <div class="mb-4 mt-4 flex flex-col gap-1">
     <Input
       class="text-md focus-visible:ring-offset-1"
