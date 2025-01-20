@@ -1,0 +1,30 @@
+{
+  "name": "@onlygroceries/server",
+  "private": true,
+  "version": "0.0.1",
+  "description": "An automerge-repo-sync-server with dead simple authorization",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "node --loader ts-node/esm --no-warnings=ExperimentalWarning src/index.ts",
+    "preview": "node ./dist/index.js"
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "dependencies": {
+    "@automerge/automerge-repo": "^1.2.1",
+    "@automerge/automerge-repo-network-websocket": "^1.2.1",
+    "@automerge/automerge-repo-storage-nodefs": "^1.2.1",
+    "dotenv": "^16.4.7",
+    "eventemitter3": "^5.0.1",
+    "express": "^4.21.2",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/ws": "^8.5.13",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  }
+}
