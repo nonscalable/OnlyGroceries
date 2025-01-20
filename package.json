@@ -3,16 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "size-limit": [
-    {
-      "path": "dist/assets/index-*.js"
-    }
-  ],
   "scripts": {
     "dev": "pnpm run -F web -F server dev",
     "build": "pnpm run -r build",
-    "preview": "pnpm run -r preview",
-    "size": "vite build && size-limit",
-    "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json"
+    "preview": "pnpm run -r preview"
   }
 }
