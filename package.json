@@ -1,66 +1,11 @@
 {
-  "name": "grocery-list",
+  "name": "onlygroceries",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "size-limit": [
-    {
-      "path": "dist/assets/index-*.js"
-    }
-  ],
   "scripts": {
-    "dev": "vite --host",
-    "build": "vite build",
-    "size": "vite build && size-limit",
-    "preview": "vite preview --host",
-    "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json"
-  },
-  "devDependencies": {
-    "@size-limit/preset-app": "^11.1.6",
-    "@sveltejs/vite-plugin-svelte": "5.0.3",
-    "@tsconfig/svelte": "^5.0.4",
-    "@types/node": "^22.10.2",
-    "@types/sortablejs": "^1.15.8",
-    "autoprefixer": "^10.4.20",
-    "bits-ui": "1.0.0-next.77",
-    "clsx": "^2.1.1",
-    "lucide-svelte": "^0.469.0",
-    "mode-watcher": "^0.5.0",
-    "prettier": "^3.4.2",
-    "prettier-plugin-svelte": "^3.3.2",
-    "prettier-plugin-tailwindcss": "^0.6.9",
-    "size-limit": "^11.1.6",
-    "svelte": "5.15.0",
-    "svelte-check": "^4.1.1",
-    "svelte-sonner": "^0.3.28",
-    "tailwind-merge": "^2.5.5",
-    "tailwind-variants": "^0.3.0",
-    "tailwindcss": "^3.4.17",
-    "tailwindcss-animate": "^1.0.7",
-    "tslib": "^2.8.1",
-    "typescript": "^5.7.2",
-    "vaul-svelte": "1.0.0-next.2",
-    "vite": "^6.0.5",
-    "vite-plugin-pwa": "^0.21.1",
-    "vite-plugin-wasm": "^3.4.1",
-    "workbox-background-sync": "^7.3.0",
-    "workbox-core": "^7.3.0",
-    "workbox-precaching": "^7.3.0",
-    "workbox-routing": "^7.3.0",
-    "workbox-strategies": "^7.3.0",
-    "workbox-window": "^7.3.0"
-  },
-  "dependencies": {
-    "@automerge/automerge": "^2.2.8",
-    "@automerge/automerge-repo": "^1.2.1",
-    "@automerge/automerge-repo-network-websocket": "^1.2.1",
-    "@automerge/automerge-repo-storage-indexeddb": "^1.2.1",
-    "@automerge/automerge-repo-svelte-store": "^1.2.1",
-    "@nanostores/persistent": "^0.10.2",
-    "@nanostores/router": "^0.16.1",
-    "idb": "^8.0.1",
-    "nanoid": "^5.0.9",
-    "nanostores": "^0.11.3",
-    "sortablejs": "^1.15.6"
+    "dev": "pnpm run -F web -F server dev",
+    "build": "pnpm run -r build",
+    "preview": "pnpm run -r preview"
   }
 }

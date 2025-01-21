@@ -23,7 +23,8 @@
 
   const repo = new Repo({
     storage: new IndexedDBStorageAdapter(),
-    network: [new BrowserWebSocketClientAdapter('wss://sync.automerge.org')]
+    // network: [new BrowserWebSocketClientAdapter('wss://sync.automerge.org')]
+    network: [new BrowserWebSocketClientAdapter('ws://localhost:8080?access-token=og')]
   })
 
   setContextRepo(repo)
