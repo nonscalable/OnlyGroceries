@@ -73,8 +73,8 @@
   }
 </script>
 
-<div class="container pt-2 sm:w-[350px]">
-  <h2 class="text-3xl font-semibold tracking-tight">Start</h2>
+<div class="container pt-2">
+  <h2 class="text-3xl font-bold">Home</h2>
   <div class="mt-5 flex">
     {#if $mainId}
       <Button

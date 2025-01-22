@@ -7,7 +7,7 @@
   import { Repo, type AutomergeUrl } from '@automerge/automerge-repo'
   import { addAutomergePrefix } from './utils'
   import { router } from './stores/router'
-  import Start from './pages/start.svelte'
+  import Home from './pages/home.svelte'
   import * as Sidebar from '$lib/components/ui/sidebar/index.js'
   import AppSidebar from '$src/lib/components/app-sidebar.svelte'
 
@@ -24,7 +24,9 @@
   const repo = new Repo({
     storage: new IndexedDBStorageAdapter(),
     // network: [new BrowserWebSocketClientAdapter('wss://sync.automerge.org')]
-    network: [new BrowserWebSocketClientAdapter('ws://localhost:8080?access-token=og')]
+    network: [
+      new BrowserWebSocketClientAdapter('ws://localhost:8080?access-token=og')
+    ]
   })
 
   setContextRepo(repo)
@@ -59,8 +61,8 @@
     <Header />
     {#if !$router}
       <p>router not found</p>
-    {:else if $router.route === 'start'}
-      <Start />
+    {:else if $router.route === 'home'}
+      <Home />
     {:else if $router.route === 'main'}
       {#await getHandle($router.params.id).whenReady() then _}
         <Main id={$router.params.id} />

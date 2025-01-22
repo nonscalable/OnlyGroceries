@@ -3,7 +3,7 @@
   import Button from '$lib/components/ui/button/button.svelte'
   import { getContextRepo } from '@automerge/automerge-repo-svelte-store'
   import type { AutomergeUrl } from '@automerge/automerge-repo/slim'
-  import { mainId, removeSpecialList } from '$stores/docs'
+  import { mainId, removeMainId, removeSpecialList } from '$stores/docs'
   import { toast } from 'svelte-sonner'
   import { addAutomergePrefix } from '$src/utils'
   import { openPage } from '@nanostores/router'
@@ -20,14 +20,19 @@
 
   function remove() {
     repo.delete(addAutomergePrefix(id) as AutomergeUrl)
-    removeSpecialList(id)
+
+    if (id === $mainId) {
+      removeMainId(id)
+    } else {
+      removeSpecialList(id)
+    }
 
     $mainId
       ? openPage(router, 'main', { id: $mainId })
-      : openPage(router, 'start')
+      : openPage(router, 'home')
 
     isOpen = !isOpen
-    toast(`Special list ${name} has been deleted`, {
+    toast(`${name} has been deleted`, {
       cancel: { label: 'Close' }
     })
   }

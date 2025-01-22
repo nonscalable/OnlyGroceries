@@ -1,15 +1,21 @@
 <script lang="ts">
   import * as Drawer from '$lib/components/ui/drawer'
   import Input from '$lib/components/ui/input/input.svelte'
-  import { isValidAutomergeUrl } from '@automerge/automerge-repo/slim'
+  import {
+    isValidAutomergeUrl,
+    type AutomergeUrl
+  } from '@automerge/automerge-repo/slim'
   import Button from '$lib/components/ui/button/button.svelte'
   import { openPage } from '@nanostores/router'
   import { router } from '$stores/router'
-  import { setMainId } from '$stores/docs'
+  import { mainId, setMainId } from '$stores/docs'
   import { addAutomergePrefix } from '$src/utils'
+  import { getContextRepo } from '@automerge/automerge-repo-svelte-store'
+
   type Props = {
     isOpen: boolean
   }
+  let repo = getContextRepo()
   let { isOpen = $bindable(false) } = $props()
   let joinID = $state('')
   let showMessage = $state(false)
@@ -27,6 +33,9 @@
       return
     }
 
+    if ($mainId) {
+      repo.delete(addAutomergePrefix($mainId) as AutomergeUrl)
+    }
     setMainId(joinID)
 
     openPage(router, 'main', { id: joinID })

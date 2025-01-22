@@ -3,6 +3,7 @@
   import { getPagePath } from '@nanostores/router'
   import Command from 'lucide-svelte/icons/command'
   import House from 'lucide-svelte/icons/house'
+  import Star from 'lucide-svelte/icons/star'
   import ListTodo from 'lucide-svelte/icons/list-todo'
   import Settings from 'lucide-svelte/icons/settings'
   import { router } from '$src/stores/router'
@@ -35,24 +36,6 @@
     toggleSidebarIfMobile()
     openCreateDrawer()
   }
-
-  let items = $derived([
-    {
-      title: 'Home',
-      url: getPagePath(router, 'start'),
-      icon: House,
-      isActive: false
-    },
-    ...($mainId
-      ? [
-          {
-            title: 'The List',
-            url: getPagePath(router, 'main', { id: $mainId }),
-            icon: ListTodo
-          }
-        ]
-      : [])
-  ])
 </script>
 
 <Sidebar.Root class="border-r-0" variant="inset">
@@ -63,7 +46,7 @@
           {#snippet child({ props })}
             <a href="##" {...props}>
               <div
-                class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
+                class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg"
               >
                 <Command class="size-4" />
               </div>
@@ -76,22 +59,43 @@
         </Sidebar.MenuButton>
       </Sidebar.MenuItem>
 
-      {#each items as item, i}
+      <Sidebar.MenuItem>
+        <Sidebar.MenuButton
+          size="lg"
+          isActive={$router?.route === 'home'}
+          onclick={toggleSidebarIfMobile}
+        >
+          {#snippet child({ props })}
+            <a href={getPagePath(router, 'home')} {...props}>
+              <House />
+              <span class="truncate leading-tight">Home</span>
+            </a>
+          {/snippet}
+        </Sidebar.MenuButton>
+      </Sidebar.MenuItem>
+
+      {#if $mainId}
         <Sidebar.MenuItem>
           <Sidebar.MenuButton
-            isActive={item.isActive}
             size="lg"
+            isActive={$router?.route === 'main'}
             onclick={toggleSidebarIfMobile}
           >
             {#snippet child({ props })}
-              <a href={item.url} {...props}>
-                <item.icon />
-                <span class="truncate leading-tight">{item.title}</span>
+              <a href={getPagePath(router, 'main', { id: $mainId })} {...props}>
+                <Star />
+                <span class="truncate leading-tight">The List</span>
               </a>
             {/snippet}
           </Sidebar.MenuButton>
+          <Sidebar.MenuAction
+            title="Remove List"
+            onclick={() => onRemove($mainId, 'The List')}
+          >
+            <Trash2 />
+          </Sidebar.MenuAction>
         </Sidebar.MenuItem>
-      {/each}
+      {/if}
     </Sidebar.Menu>
   </Sidebar.Header>
 
@@ -106,7 +110,12 @@
           {#if $specialLists?.length > 0}
             {#each $specialLists as list, i}
               <Sidebar.MenuItem>
-                <Sidebar.MenuButton onclick={toggleSidebarIfMobile} size="lg">
+                <Sidebar.MenuButton
+                  size="lg"
+                  onclick={toggleSidebarIfMobile}
+                  isActive={$router?.route === 'special' &&
+                    $router.params.id === list.id}
+                >
                   {#snippet child({ props })}
                     <a
                       href={getPagePath(router, 'special', { id: list.id })}
@@ -127,10 +136,10 @@
               </Sidebar.MenuItem>
             {/each}
           {:else}
-            <Sidebar.MenuItem>
-              <Sidebar.MenuButton size="lg">
-                <span>No special list yet</span>
-              </Sidebar.MenuButton>
+            <Sidebar.MenuItem
+              class="text-sidebar-foreground/65 text-center text-xs italic leading-10"
+            >
+              No special lists yet
             </Sidebar.MenuItem>
           {/if}
         </SidebarMenu>
