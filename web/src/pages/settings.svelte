@@ -3,10 +3,10 @@
   import { toast } from 'svelte-sonner'
   import { useRegisterSW } from 'virtual:pwa-register/svelte'
 
-  const { offlineReady, needRefresh, updateServiceWorker } = useRegisterSW({})
+  const { needRefresh, updateServiceWorker } = useRegisterSW({})
 
   let version = $state('1.0.0 (WIP)')
-  let buildDate = $state('02.01.2025 at 12:48 (WIP)')
+  let buildTime = $state(__BUILD_TIME__)
 
   async function checkForUpdates() {
     if ($needRefresh) {
@@ -16,7 +16,6 @@
           label: 'Update Now',
           onClick: () => {
             updateServiceWorker()
-            window.location.reload()
           }
         },
         cancel: {
@@ -47,7 +46,7 @@
         </div>
         <div class="flex justify-between">
           <dt class="text-gray-700">Build Date:</dt>
-          <dd class="text-gray-900">{buildDate}</dd>
+          <dd class="text-gray-900">{buildTime}</dd>
         </div>
       </dl>
 

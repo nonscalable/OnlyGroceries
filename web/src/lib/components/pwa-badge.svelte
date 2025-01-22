@@ -4,7 +4,7 @@
   import { Toaster } from '$src/lib/components/ui/sonner'
 
   const { offlineReady, needRefresh, updateServiceWorker } = useRegisterSW({
-    onRegistered(swr) {
+    onRegisteredSW(swr) {
       console.log(`SW registered: ${swr}`)
     },
     onRegisterError(error) {
@@ -29,7 +29,6 @@
           label: 'Reload',
           onClick: () => {
             updateServiceWorker()
-            window.location.reload()
           }
         },
         cancel: {
