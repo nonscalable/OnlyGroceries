@@ -7,16 +7,24 @@ export function setMainId(id: string): void {
   mainId.set(id)
 }
 
+export function removeMainId(id: string): void {
+  mainId.set(undefined)
+}
+
 // store for special lists
 type SpecialList = {
   name: string
   id: string
 }
 
-export const specialLists = persistentAtom<SpecialList[]>('specialLists', [], {
-  encode: JSON.stringify,
-  decode: JSON.parse
-})
+export const specialLists = persistentAtom<SpecialList[]>(
+  'onlygroceries:specialLists',
+  [],
+  {
+    encode: JSON.stringify,
+    decode: JSON.parse
+  }
+)
 
 export function setSpecialList({ name, id }: SpecialList): void {
   specialLists.set([...specialLists.get(), { name, id }])
