@@ -15,7 +15,6 @@
     "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json"
   },
   "devDependencies": {
-    "@size-limit/preset-app": "^11.1.6",
     "@sveltejs/vite-plugin-svelte": "5.0.3",
     "@tsconfig/svelte": "^5.0.4",
     "@types/node": "^22.10.2",
