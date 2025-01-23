@@ -20,13 +20,11 @@
   import Special from './pages/special.svelte'
   import CreateDrawer from './lib/components/create-drawer.svelte'
   import RemoveDrawer from './lib/components/remove-drawer.svelte'
+  import { syncServerUrl } from './stores/settings'
 
   const repo = new Repo({
     storage: new IndexedDBStorageAdapter(),
-    // network: [new BrowserWebSocketClientAdapter('wss://sync.automerge.org')]
-    network: [
-      new BrowserWebSocketClientAdapter('ws://localhost:8080?access-token=og')
-    ]
+    network: [new BrowserWebSocketClientAdapter($syncServerUrl)]
   })
 
   setContextRepo(repo)

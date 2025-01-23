@@ -1,5 +1,8 @@
 <script lang="ts">
   import Button from '$src/lib/components/ui/button/button.svelte'
+  import Input from '$src/lib/components/ui/input/input.svelte'
+  import { Label } from '$src/lib/components/ui/label'
+  import { syncServerUrl } from '$src/stores/settings'
   import { toast } from 'svelte-sonner'
   import { useRegisterSW } from 'virtual:pwa-register/svelte'
 
@@ -7,6 +10,7 @@
 
   let version = $state('1.0.0 (WIP)')
   let buildTime = $state(__BUILD_TIME__)
+  let url = $state($syncServerUrl)
 
   async function checkForUpdates() {
     if ($needRefresh) {
@@ -30,6 +34,13 @@
       })
     }
   }
+
+  function save() {
+    $syncServerUrl = url
+    toast.success('The new sync server URL has been saved', {
+      description: `Use the same one on another peer`
+    })
+  }
 </script>
 
 <main class="container pt-2">
@@ -50,9 +61,23 @@
         </div>
       </dl>
 
-      <Button onclick={checkForUpdates} size="sm" class="mt-3 w-full"
+      <Button onclick={checkForUpdates} class="mt-3 w-full"
         >Check for Updates</Button
       >
+    </section>
+
+    <section class="rounded-lg border p-4">
+      <h2 class="mb-3 text-xl font-semibold">Hosting</h2>
+
+      <Label for="url">Sync Server URL</Label>
+      <Input
+        type="url"
+        id="url"
+        placeholder="wss://my-super-server"
+        bind:value={url}
+      />
+
+      <Button class="mt-3 w-full" onclick={save}>Save</Button>
     </section>
   </section>
 </main>
