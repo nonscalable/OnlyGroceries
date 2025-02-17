@@ -2,37 +2,32 @@
   import * as Drawer from '$lib/components/ui/drawer'
   import Input from '$lib/components/ui/input/input.svelte'
   import Button from '$lib/components/ui/button/button.svelte'
-  import { isNamePresent, setSpecialList } from '$src/stores/docs'
-  import { getContextRepo } from '@automerge/automerge-repo-svelte-store'
+
   import type { SpecialItems, SpecialListData } from '$src/types'
-  import { nanoid } from 'nanoid'
   import { stripAutomergePrefix } from '$src/utils'
-  import { router } from '$src/stores/router'
+  import { nanoid } from 'nanoid'
   import { openPage } from '@nanostores/router'
 
-  type Props = {
-    isOpen: boolean
-  }
+  import { router } from '$stores/router'
+  import { Autodoc } from '$stores/autodoc.svelte'
+  import { createDrawer as drawer } from '$stores/create-drawer.svelte'
+  import { g } from '$stores/global.svelte'
 
-  let repo = getContextRepo()
-
-  let { isOpen = $bindable(false) } = $props()
   let name = $state('')
   let showMessage = $state(false)
 
   $effect(() => {
-    if (isOpen === false) {
+    if (drawer.isOpen) {
       name = ''
       showMessage = false
     }
   })
 
   async function createList() {
-    if (!name.trim() || isNamePresent(name)) {
+    if (!name.trim()) {
       showMessage = true
       return
     }
-
     let items: SpecialItems = {
       [nanoid()]: {
         text: 'Bratwurst 🌭✨',
@@ -51,16 +46,20 @@
         purchased: false
       }
     }
-    let handle = repo.create<SpecialListData>({
-      items,
-      ids: Object.keys(items)
+    let doc = new Autodoc<SpecialListData>({
+      initial: {
+        items,
+        ids: Object.keys(items)
+      }
+    })
+    let id = stripAutomergePrefix(doc.handle.url)
+    g.specialDocs[id] = doc
+    g.rootDoc?.change(d => {
+      d.specialInfos.push({ name, id })
     })
 
-    const id = stripAutomergePrefix(handle.url)
-    setSpecialList({ name, id })
-
     openPage(router, 'special', { id })
-    isOpen = !isOpen
+    drawer.close()
   }
 
   function handleKeydown(event: KeyboardEvent) {
@@ -70,7 +69,7 @@
   }
 </script>
 
-<Drawer.Root bind:open={isOpen}>
+<Drawer.Root bind:open={drawer.isOpen}>
   <Drawer.Content>
     <div class="mx-auto mb-4 w-full max-w-sm">
       <Drawer.Header>
@@ -90,7 +89,7 @@
           class:opacity-100={showMessage}
           class:opacity-0={!showMessage}
         >
-          You have to give a name and it shouldn't be used
+          You have to give a name
         </p>
         <Button onclick={createList}>Submit</Button>
       </div>

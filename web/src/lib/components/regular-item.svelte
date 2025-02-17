@@ -1,29 +1,27 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button'
-  import type { GroceryData, Item } from '$src/types'
-  import type { AutomergeUrl } from '@automerge/automerge-repo'
-  import { document } from '@automerge/automerge-repo-svelte-store'
   import GripVertical from 'lucide-svelte/icons/grip-vertical'
   import ShoppingBasket from 'lucide-svelte/icons/shopping-basket'
   import Trash2 from 'lucide-svelte/icons/trash-2'
+  import type { Item } from '$src/types'
+
+  import { g } from '$stores/global.svelte'
 
   interface Props {
     item: Item
-    docUrl: AutomergeUrl
     id: string
   }
-  let { item, docUrl, id }: Props = $props()
-  let doc = document<GroceryData>(docUrl)
+  let { item, id }: Props = $props()
 
   function toggleInCart() {
-    doc.change(d => {
+    g.mainDoc?.change(d => {
       d.items[id].inCart = !d.items[id].inCart
       d.items[id].purchased = false
     })
   }
 
   function remove() {
-    doc.change(d => {
+    g.mainDoc?.change(d => {
       d.regularIds.splice(
         d.regularIds.findIndex(v => v === id),
         1

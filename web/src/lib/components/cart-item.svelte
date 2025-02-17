@@ -2,26 +2,22 @@
   import { Button } from '$lib/components/ui/button'
   import { Checkbox } from '$lib/components/ui/checkbox'
   import CircleX from 'lucide-svelte/icons/circle-x'
-  import type { AutomergeUrl } from '@automerge/automerge-repo/slim'
-  import { document } from '@automerge/automerge-repo-svelte-store'
-  import type { GroceryData } from '$src/types'
 
+  import { g } from '$src/stores/global.svelte'
   interface Props {
-    docUrl: AutomergeUrl
     id: string
     i: number
   }
-  let { docUrl, id, i }: Props = $props()
-  let doc = document<GroceryData>(docUrl)
+  let { id, i }: Props = $props()
 
   function togglePurchased() {
-    doc.change(d => {
+    g.mainDoc?.change(d => {
       d.items[id].purchased = !d.items[id].purchased
     })
   }
 
   function remove() {
-    doc.change(d => {
+    g.mainDoc?.change(d => {
       let index = d.regularIds.findIndex(regId => regId === id)
       if (index !== -1) {
         d.items[id].inCart = false
@@ -36,24 +32,27 @@
   }
 </script>
 
-<li class="mb-2 flex justify-between">
-  <label
-    for={`rare-${i}`}
-    class="item.purchased flex w-full items-center
+{#if g.mainDoc && g.mainDoc.state}
+  {@const item = g.mainDoc.state.items[id]}
+  <li class="mb-2 flex justify-between">
+    <label
+      for={`rare-${i}`}
+      class="item.purchased flex w-full items-center
    gap-2 leading-8"
-    class:line-through={$doc.items[id].purchased}
-  >
-    <Checkbox
-      id={`rare-${i}`}
-      checked={$doc.items[id].purchased}
-      onCheckedChange={togglePurchased}
-    />
-    {$doc.items[id].text}
-  </label>
-  <Button
-    variant="ghost"
-    size="lg"
-    class="px-4 text-slate-500 hover:bg-red-100"
-    onclick={remove}><CircleX class="size-4" /></Button
-  >
-</li>
+      class:line-through={item.purchased}
+    >
+      <Checkbox
+        id={`rare-${i}`}
+        checked={item.purchased}
+        onCheckedChange={togglePurchased}
+      />
+      {item.text}
+    </label>
+    <Button
+      variant="ghost"
+      size="lg"
+      class="px-4 text-slate-500 hover:bg-red-100"
+      onclick={remove}><CircleX class="size-4" /></Button
+    >
+  </li>
+{/if}

@@ -1,43 +1,31 @@
 <script lang="ts">
   import Input from '$lib/components/ui/input/input.svelte'
   import Button from '$lib/components/ui/button/button.svelte'
-  import type { SpecialListData } from '$src/types'
-  import { addAutomergePrefix } from '$src/utils'
-  import { document } from '@automerge/automerge-repo-svelte-store'
-  import type { AutomergeUrl } from '@automerge/automerge-repo'
+  import SpecialItem from '$lib/components/special-item.svelte'
+
   import { nanoid } from 'nanoid'
-  import SpecialItem from '$src/lib/components/special-item.svelte'
-  import Sortable, { type SortableEvent } from 'sortablejs'
   import { sortable } from '../sortable'
-  import { getSpecialListName } from '$src/stores/docs'
+  import Sortable, { type SortableEvent } from 'sortablejs'
+
+  import { g } from '$stores/global.svelte'
 
   interface Props {
     id: string
   }
-  let { id }: Props = $props()
-  let docUrl = addAutomergePrefix(id) as AutomergeUrl
-  let doc = document<SpecialListData>(docUrl)
-  let name = getSpecialListName(id)
-
+  let { id: docID }: Props = $props()
+  let title = $derived(
+    g.rootDoc?.state?.specialInfos.find(info => info.id === docID)?.name
+  )
+  let doc = $derived(g.specialDocs[docID])
   let text = $state('')
   let message = $state('')
   let showMessage = $state(false)
-  let itemTexts = $derived(
-    $doc.ids.map(id => $doc.items[id].text.toLowerCase())
-  )
 
   function add() {
     let formatted = text.toLowerCase().trim()
     if (!formatted) {
       message = 'You have to type something'
       showMessage = true
-      return
-    }
-
-    if (itemTexts.includes(formatted)) {
-      message = 'Item is already in the list'
-      showMessage = true
-
       return
     }
 
@@ -83,7 +71,7 @@
 </script>
 
 <div class="container pt-2">
-  <h1 class="text-3xl font-bold">{name}</h1>
+  <h1 class="text-3xl font-bold">{title}</h1>
   <div class="mb-4 mt-4 flex flex-col gap-1">
     <Input
       class="text-md focus-visible:ring-offset-1"
@@ -103,9 +91,11 @@
   </div>
 
   <ul use:sortable={options} class="grid gap-2">
-    {#each $doc.ids as id (id)}
-      <SpecialItem item={$doc.items[id]} {docUrl} {id} />
-    {/each}
+    {#if doc?.state && doc.state.ids}
+      {#each doc.state.ids as id (id)}
+        <SpecialItem item={doc.state.items[id]} {docID} {id} />
+      {/each}
+    {/if}
   </ul>
 </div>
 

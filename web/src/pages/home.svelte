@@ -1,14 +1,14 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button'
-  import { getContextRepo } from '@automerge/automerge-repo-svelte-store'
-  import type { GroceryData, Items } from '../types'
-  import { router } from '../stores/router'
+  import type { Items } from '../types'
   import { stripAutomergePrefix } from '../utils'
   import { getPagePath, openPage } from '@nanostores/router'
-  import { mainId, setMainId } from '../stores/docs'
   import { nanoid } from 'nanoid'
 
-  let repo = getContextRepo()
+  import { router } from '$stores/router'
+  import { Autodoc } from '$stores/autodoc.svelte'
+  import { g } from '$stores/global.svelte'
+
   let items: Items = {
     [nanoid()]: {
       text: 'Milk 🥛',
@@ -60,14 +60,17 @@
     }
   }
   async function createDoc() {
-    let handle = repo.create<GroceryData>({
-      items,
-      regularIds: Object.keys(items),
-      rareIds: []
+    g.mainDoc = new Autodoc({
+      initial: {
+        items,
+        regularIds: Object.keys(items),
+        rareIds: []
+      }
     })
-
-    const id = stripAutomergePrefix(handle.url)
-    setMainId(id)
+    const id = stripAutomergePrefix(g.mainDoc.handle.url)
+    g.rootDoc?.change(d => {
+      d.mainID = id
+    })
 
     openPage(router, 'main', { id })
   }
@@ -76,10 +79,10 @@
 <div class="container pt-2">
   <h2 class="text-3xl font-bold">Home</h2>
   <div class="mt-5 flex">
-    {#if $mainId}
+    {#if g.rootDoc?.state?.mainID}
       <Button
         href={getPagePath(router, 'main', {
-          id: stripAutomergePrefix($mainId)
+          id: stripAutomergePrefix(g.rootDoc?.state?.mainID)
         })}
         variant="outline">Go to your main list</Button
       >

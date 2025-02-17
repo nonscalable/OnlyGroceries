@@ -1,6 +1,6 @@
 type SpecialListInfo = { name: string; id: string }
 
-export type MetaDoc = {
+export type RootDoc = {
   mainID: string | null
   specialInfos: Array<SpecialListInfo>
 }

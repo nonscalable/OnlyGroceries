@@ -3,48 +3,24 @@
   import Input from '$lib/components/ui/input/input.svelte'
   import TabsList from '$lib/components/ui/tabs/tabs-list.svelte'
   import TabsTrigger from '$lib/components/ui/tabs/tabs-trigger.svelte'
-  import type { GroceryData, ItemType } from '$src/types'
-  import type { AutomergeUrl } from '@automerge/automerge-repo/slim'
-  import { document } from '@automerge/automerge-repo-svelte-store'
+  import type { ItemType } from '$src/types'
   import { nanoid } from 'nanoid'
+  import { g } from '$src/stores/global.svelte'
 
   type Props = {
     activeTab: ItemType
-    docUrl: AutomergeUrl
   }
-  let { activeTab, docUrl }: Props = $props()
-  let doc = document<GroceryData>(docUrl)
+  let { activeTab }: Props = $props()
 
   let text = $state('')
   let message = $state('')
   let showMessage = $state(false)
-  let itemTexts = $derived(
-    $doc.regularIds.map(id => $doc.items[id].text.toLowerCase())
-  )
 
   function add() {
     let formatted = text.toLowerCase().trim()
     if (!formatted) {
       message = 'You have to type something'
       showMessage = true
-      return
-    }
-
-    if (itemTexts.includes(formatted)) {
-      if (activeTab === 'regular') {
-        message = 'Item is already in the list'
-        showMessage = true
-      } else {
-        for (const [id, item] of Object.entries($doc.items)) {
-          if (item.text.toLowerCase() === formatted) {
-            doc.change(d => {
-              d.items[id].inCart = !d.items[id].inCart
-              d.items[id].purchased = false
-            })
-          }
-        }
-        text = ''
-      }
       return
     }
 
@@ -56,7 +32,7 @@
     }
     let id = nanoid()
 
-    doc.change(d => {
+    g.mainDoc?.change(d => {
       d.items[id] = item
       activeTab === 'rare' ? d.rareIds.push(id) : d.regularIds.push(id)
     })

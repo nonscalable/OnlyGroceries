@@ -1,19 +1,19 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button'
-  import type { SpecialListData, SpecialItem } from '$src/types'
-  import type { AutomergeUrl } from '@automerge/automerge-repo'
-  import { document } from '@automerge/automerge-repo-svelte-store'
   import GripVertical from 'lucide-svelte/icons/grip-vertical'
   import ShoppingBasket from 'lucide-svelte/icons/shopping-basket'
   import Trash2 from 'lucide-svelte/icons/trash-2'
+  import type { SpecialItem } from '$src/types'
+
+  import { g } from '$stores/global.svelte'
 
   interface Props {
     item: SpecialItem
-    docUrl: AutomergeUrl
+    docID: string
     id: string
   }
-  let { item, docUrl, id }: Props = $props()
-  let doc = document<SpecialListData>(docUrl)
+  let { item, docID, id }: Props = $props()
+  let doc = $derived(g.specialDocs[docID])
 
   function togglePurchased() {
     doc.change(d => {

@@ -4,25 +4,22 @@
   import AddItemBlock from '$lib/components/add-item-block.svelte'
   import RegularItem from '$lib/components/regular-item.svelte'
   import CartItem from '$lib/components/cart-item.svelte'
-  import { document } from '@automerge/automerge-repo-svelte-store'
-  import { type AutomergeUrl } from '@automerge/automerge-repo/slim'
+
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { sortable } from '../sortable'
-  import type { GroceryData, ItemType } from '../types'
-  import { addAutomergePrefix } from '../utils'
+  import type { ItemType } from '../types'
+  import { g } from '$stores/global.svelte'
 
-  interface Props {
-    id: string
-  }
-  let { id }: Props = $props()
+  const cartIds = $derived.by(() => {
+    const state = g.mainDoc?.state
 
-  let docUrl = addAutomergePrefix(id) as AutomergeUrl
-  let doc = document<GroceryData>(docUrl)
+    const regularIds = state?.regularIds ?? []
+    const rareIds = state?.rareIds ?? []
 
-  let cartIds = $derived([
-    ...$doc.regularIds.filter(id => $doc.items[id].inCart),
-    ...$doc.rareIds
-  ])
+    return [...regularIds.filter(id => state?.items?.[id]?.inCart), ...rareIds]
+  })
+
+  let mainDoc = $derived(g.mainDoc?.state)
 
   let activeTab = $state<ItemType>('regular')
 
@@ -41,7 +38,7 @@
     const { oldIndex, newIndex } = event
     if (typeof oldIndex !== 'number' || typeof newIndex !== 'number') return
 
-    doc.change(d => {
+    g.mainDoc?.change(d => {
       const [movedItem] = d.regularIds.splice(oldIndex, 1)
       d.regularIds.splice(newIndex, 0, movedItem)
     })
@@ -50,19 +47,21 @@
 
 <div class="container pt-2">
   <Tabs.Root bind:value={activeTab}>
-    <AddItemBlock {activeTab} {docUrl} />
+    <AddItemBlock {activeTab} />
 
     <Tabs.Content value="regular">
       <ul use:sortable={options} class="grid gap-2">
-        {#each $doc.regularIds as id (id)}
-          <RegularItem item={$doc.items[id]} {docUrl} {id} />
-        {/each}
+        {#if mainDoc}
+          {#each mainDoc.regularIds as id (id)}
+            <RegularItem item={mainDoc.items[id]} {id} />
+          {/each}
+        {/if}
       </ul>
     </Tabs.Content>
     <Tabs.Content value="rare">
       <ul>
         {#each cartIds as id, i (id)}
-          <CartItem {docUrl} {id} {i} />
+          <CartItem {id} {i} />
         {/each}
       </ul>
     </Tabs.Content>
