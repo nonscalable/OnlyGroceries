@@ -1,16 +1,20 @@
 <script lang="ts">
-  import Button from '$src/lib/components/ui/button/button.svelte'
-  import Input from '$src/lib/components/ui/input/input.svelte'
-  import { Label } from '$src/lib/components/ui/label'
-  import { syncServerUrl } from '$src/stores/settings'
+  import Button from '$lib/components/ui/button/button.svelte'
+  import Input from '$lib/components/ui/input/input.svelte'
+  import { Label } from '$lib/components/ui/label'
+
   import { toast } from 'svelte-sonner'
   import { useRegisterSW } from 'virtual:pwa-register/svelte'
+
+  import { rootdocID, syncServerUrl } from '$stores/settings'
+  import { g } from '$stores/global.svelte'
 
   const { needRefresh, updateServiceWorker } = useRegisterSW({})
 
   let version = $state('1.0.0 (WIP)')
   let buildTime = $state(__BUILD_TIME__)
   let url = $state($syncServerUrl)
+  let rootID = $state($rootdocID)
 
   async function checkForUpdates() {
     if ($needRefresh) {
@@ -39,6 +43,35 @@
     $syncServerUrl = url
     toast.success('The new sync server URL has been saved', {
       description: `Use the same one on another peer`
+    })
+  }
+
+  async function share() {
+    if (navigator.share) {
+      await navigator.share({
+        text: $rootdocID
+      })
+    } else {
+      await navigator.clipboard.writeText($rootdocID)
+      toast.success('List ID has been copied to clipboard', {
+        description: 'Send it to your friend'
+      })
+    }
+  }
+
+  function changeRootDoc() {
+    for (let id in g.specialDocs) {
+      g.specialDocs[id].delete()
+    }
+    g.specialDocs = {}
+    g.mainDoc?.delete()
+    g.mainDoc = undefined
+    g.rootDoc?.delete()
+    g.rootDoc = undefined
+    $rootdocID = rootID
+
+    toast.success('You joined other group', {
+      description: ``
     })
   }
 </script>
@@ -78,6 +111,16 @@
       />
 
       <Button class="mt-3 w-full" onclick={save}>Save</Button>
+    </section>
+
+    <section class="rounded-lg border p-4">
+      <h2 class="mb-3 text-xl font-semibold">Collaboration</h2>
+
+      <Label for="rootdocid">ID (rootdocID)</Label>
+      <Input type="text" id="rootdocid" placeholder="..." bind:value={rootID} />
+      <Button class="mt-3 w-full" onclick={share}>Share</Button>
+
+      <Button class="mt-3 w-full" onclick={changeRootDoc}>Change</Button>
     </section>
   </section>
 </main>

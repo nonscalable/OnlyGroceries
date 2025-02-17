@@ -1,3 +1,10 @@
+type SpecialListInfo = { name: string; id: string }
+
+export type RootDoc = {
+  mainID: string | null
+  specialInfos: Array<SpecialListInfo>
+}
+
 // Types for Main List
 export type ItemType = 'regular' | 'rare'
 export type Item = {

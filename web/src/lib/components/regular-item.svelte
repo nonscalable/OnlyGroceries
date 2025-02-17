@@ -1,29 +1,28 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button'
-  import type { GroceryData, Item } from '$src/types'
-  import type { AutomergeUrl } from '@automerge/automerge-repo'
-  import { document } from '@automerge/automerge-repo-svelte-store'
   import GripVertical from 'lucide-svelte/icons/grip-vertical'
   import ShoppingBasket from 'lucide-svelte/icons/shopping-basket'
   import Trash2 from 'lucide-svelte/icons/trash-2'
+  import type { Item } from '$src/types'
+
+  import { g } from '$stores/global.svelte'
 
   interface Props {
-    item: Item
-    docUrl: AutomergeUrl
     id: string
   }
-  let { item, docUrl, id }: Props = $props()
-  let doc = document<GroceryData>(docUrl)
+  let { id }: Props = $props()
+  let item = $derived(g.mainDoc?.state?.items[id] as Item)
 
   function toggleInCart() {
-    doc.change(d => {
+    g.mainDoc?.change(d => {
       d.items[id].inCart = !d.items[id].inCart
       d.items[id].purchased = false
     })
   }
 
   function remove() {
-    doc.change(d => {
+    g.mainDoc?.change(d => {
+      console.log(d.items[id].text)
       d.regularIds.splice(
         d.regularIds.findIndex(v => v === id),
         1
@@ -33,32 +32,31 @@
   }
 </script>
 
-<li class="flex">
+<Button
+  data-select-btn
+  size="lg"
+  class="interactive grid w-full grid-cols-[auto_1fr_auto_auto] gap-0 px-0 {item.inCart
+    ? 'bg-slate-200'
+    : ''}"
+  variant="outline"
+  onclick={toggleInCart}
+>
+  <GripVertical class="mx-2 size-4 text-slate-500" />
+
+  <div class="flex items-center justify-between">
+    <span>{item.text}</span>
+    {#if item.inCart}
+      <ShoppingBasket class="size-4" />
+    {/if}
+  </div>
+
   <Button
-    size="lg"
-    variant="outline"
-    class="grid w-full grid-cols-[auto_1fr_auto_auto] gap-0 px-0 {item.inCart
-      ? 'bg-slate-200'
-      : ''}"
-    aria-pressed={item.inCart}
-    onclick={toggleInCart}
+    data-delete-btn
+    variant="ghost"
+    class="px-4 text-slate-500 "
+    onclick={e => {
+      e.stopPropagation()
+      remove()
+    }}><Trash2 class="size-4" /></Button
   >
-    <GripVertical class="mx-2 size-4 text-slate-500" />
-
-    <div class="flex items-center justify-between">
-      <span>{item.text}</span>
-      {#if item.inCart}
-        <ShoppingBasket class="size-4" />
-      {/if}
-    </div>
-
-    <Button
-      variant="ghost"
-      class="px-4 text-slate-500 "
-      onclick={e => {
-        e.stopPropagation()
-        remove()
-      }}><Trash2 class="size-4" /></Button
-    >
-  </Button>
-</li>
+</Button>

@@ -59,15 +59,15 @@ importers:
       '@automerge/automerge-repo-storage-indexeddb':
         specifier: ^1.2.1
         version: 1.2.1(@types/node@22.10.2)(typescript@5.7.2)
-      '@automerge/automerge-repo-svelte-store':
-        specifier: ^1.2.1
-        version: 1.2.1(@automerge/automerge@2.2.8)(@types/node@22.10.2)(svelte@5.15.0)(typescript@5.7.2)
       '@nanostores/persistent':
         specifier: ^0.10.2
         version: 0.10.2(nanostores@0.11.3)
       '@nanostores/router':
         specifier: ^0.16.1
         version: 0.16.1(nanostores@0.11.3)
+      '@thisux/sveltednd':
+        specifier: ^0.0.20
+        version: 0.0.20(svelte@5.15.0)
       idb:
         specifier: ^8.0.1
         version: 8.0.1
@@ -199,12 +199,6 @@ packages:
 
   '@automerge/automerge-repo-storage-nodefs@1.2.1':
     resolution: {integrity: sha512-MEbz4vul3frdl+zWDQE3ELBNjiC78QSOEb4reeEgCiGcoimLKxUmHvlQLxpiR209tw72Tf6RRFtvwoqV1I8TKw==}
-
-  '@automerge/automerge-repo-svelte-store@1.2.1':
-    resolution: {integrity: sha512-lkfSb238eKNKj0+O0d8AZ/CwMHlmNrwjqZg2bDJGHnEw8PI/axxuuTBTWqi5SWk4xA9R2hXb5HbkDpHln+bTWQ==}
-    peerDependencies:
-      '@automerge/automerge': ^2.2.5
-      svelte: ^3.0.0 || ^4.0.0
 
   '@automerge/automerge-repo@1.2.1':
     resolution: {integrity: sha512-uEBr4bM01aSWkEt2tDKQxfW0Pahz2zbTTn4sRJfeKJlAg2SLr4QepFJ+3Tp4CNEkkU485olfnKYf6gt7uilMZQ==}
@@ -1117,6 +1111,31 @@ packages:
 
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
+
+  '@thisux/sveltednd@0.0.12':
+    resolution: {integrity: sha512-9edVcakYkoCzU6pNIwmJ6Cf+9anECod26Ue/rL3Ssf5LyuLaBLXtBx4H4U8YwQCkwtMeSGFf0OsiMpPpFjvCcg==}
+    peerDependencies:
+      svelte: ^5.0.0
+
+  '@thisux/sveltednd@0.0.14':
+    resolution: {integrity: sha512-Vbq69SU3HUomPg6oCXtb89OG89hka0YIkdaErYibn3waK7tYE66IcQxD/Fzg8YNW3EVsXoA9kc7kW5EUBCSQGg==}
+    peerDependencies:
+      svelte: ^5.0.0
+
+  '@thisux/sveltednd@0.0.17':
+    resolution: {integrity: sha512-lRninjw439phhA8xAHqCpMAX0hnwFMdbXW4M0XJgAdnGxeum+QsLiIC4P3HnkNXAygsVKUqxRcbS84CxDZ9hPw==}
+    peerDependencies:
+      svelte: ^5.0.0
+
+  '@thisux/sveltednd@0.0.18':
+    resolution: {integrity: sha512-MO+iR9ZRHApvtwgWujmqwUbhv9mKs0jLOmeG4tn98GmU1/9wVOi02jrNqeggKg3c8dXz6pMmUHfOfmcq7WwYZg==}
+    peerDependencies:
+      svelte: ^5.0.0
+
+  '@thisux/sveltednd@0.0.20':
+    resolution: {integrity: sha512-VE0HopIlHIvNOfSZ1SsiIzl1AmTU0VSd2Nz2Q2nIdqIUsT/UP4hiLw2ed2jFqTKTbqC+kbCYL9vuBpkYnEw+Kw==}
+    peerDependencies:
+      svelte: ^5.0.0
 
   '@tsconfig/node10@1.0.11':
     resolution: {integrity: sha512-DcRjDCujK/kCk/cUe8Xz8ZSpm8mS3mNNpta+jGCA6USEDfktlNvm1+IuZ9eTcDbNk41BHwpHHeW+N1lKCz4zOw==}
@@ -3041,18 +3060,6 @@ snapshots:
       - supports-color
       - typescript
 
-  '@automerge/automerge-repo-svelte-store@1.2.1(@automerge/automerge@2.2.8)(@types/node@22.10.2)(svelte@5.15.0)(typescript@5.7.2)':
-    dependencies:
-      '@automerge/automerge': 2.2.8
-      '@automerge/automerge-repo': 1.2.1(@types/node@22.10.2)(typescript@5.7.2)
-      svelte: 5.15.0
-    transitivePeerDependencies:
-      - '@swc/core'
-      - '@swc/wasm'
-      - '@types/node'
-      - supports-color
-      - typescript
-
   '@automerge/automerge-repo@1.2.1(@types/node@22.10.2)(typescript@5.7.2)':
     dependencies:
       '@automerge/automerge': 2.2.8
@@ -4025,6 +4032,30 @@ snapshots:
   '@swc/helpers@0.5.15':
     dependencies:
       tslib: 2.8.1
+
+  '@thisux/sveltednd@0.0.12(svelte@5.15.0)':
+    dependencies:
+      svelte: 5.15.0
+
+  '@thisux/sveltednd@0.0.14(svelte@5.15.0)':
+    dependencies:
+      '@thisux/sveltednd': 0.0.12(svelte@5.15.0)
+      svelte: 5.15.0
+
+  '@thisux/sveltednd@0.0.17(svelte@5.15.0)':
+    dependencies:
+      '@thisux/sveltednd': 0.0.14(svelte@5.15.0)
+      svelte: 5.15.0
+
+  '@thisux/sveltednd@0.0.18(svelte@5.15.0)':
+    dependencies:
+      '@thisux/sveltednd': 0.0.17(svelte@5.15.0)
+      svelte: 5.15.0
+
+  '@thisux/sveltednd@0.0.20(svelte@5.15.0)':
+    dependencies:
+      '@thisux/sveltednd': 0.0.18(svelte@5.15.0)
+      svelte: 5.15.0
 
   '@tsconfig/node10@1.0.11': {}
 

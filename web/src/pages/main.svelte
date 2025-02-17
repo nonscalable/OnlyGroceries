@@ -4,65 +4,79 @@
   import AddItemBlock from '$lib/components/add-item-block.svelte'
   import RegularItem from '$lib/components/regular-item.svelte'
   import CartItem from '$lib/components/cart-item.svelte'
-  import { document } from '@automerge/automerge-repo-svelte-store'
-  import { type AutomergeUrl } from '@automerge/automerge-repo/slim'
-  import Sortable, { type SortableEvent } from 'sortablejs'
-  import { sortable } from '../sortable'
-  import type { GroceryData, ItemType } from '../types'
-  import { addAutomergePrefix } from '../utils'
 
-  interface Props {
-    id: string
+  import type { ItemType } from '../types'
+  import { g } from '$stores/global.svelte'
+  import { draggable, droppable, type DragDropState } from '@thisux/sveltednd'
+  import { flip } from 'svelte/animate'
+  import { fade } from 'svelte/transition'
+
+  function handleDrop(state: DragDropState<string>) {
+    const { draggedItem, targetContainer } = state
+    const dragIndex = g.mainDoc?.state?.regularIds.findIndex(
+      (id: string) => id === draggedItem
+    )
+    const dropIndex = parseInt(targetContainer ?? '0')
+
+    if (dragIndex !== -1 && !isNaN(dropIndex)) {
+      g.mainDoc?.change(d => {
+        const [movedItem] = d.regularIds.splice(dragIndex as number, 1)
+        d.regularIds.splice(dropIndex, 0, movedItem)
+      })
+    }
   }
-  let { id }: Props = $props()
 
-  let docUrl = addAutomergePrefix(id) as AutomergeUrl
-  let doc = document<GroceryData>(docUrl)
+  const cartIds = $derived.by(() => {
+    const state = g.mainDoc?.state
 
-  let cartIds = $derived([
-    ...$doc.regularIds.filter(id => $doc.items[id].inCart),
-    ...$doc.rareIds
-  ])
+    const regularIds = state?.regularIds ?? []
+    const rareIds = state?.rareIds ?? []
+
+    return [...regularIds.filter(id => state?.items?.[id]?.inCart), ...rareIds]
+  })
+
+  let mainDoc = $derived(g.mainDoc?.state)
 
   let activeTab = $state<ItemType>('regular')
-
-  const options: Sortable.SortableOptions = {
-    animation: 150,
-    swapThreshold: 0.5,
-    ghostClass: 'ghost',
-    onEnd: handleSort,
-    forceFallback: true,
-    fallbackClass: 'fallback',
-    fallbackTolerance: 1,
-    delay: 80,
-    delayOnTouchOnly: true
-  }
-  function handleSort(event: SortableEvent) {
-    const { oldIndex, newIndex } = event
-    if (typeof oldIndex !== 'number' || typeof newIndex !== 'number') return
-
-    doc.change(d => {
-      const [movedItem] = d.regularIds.splice(oldIndex, 1)
-      d.regularIds.splice(newIndex, 0, movedItem)
-    })
-  }
 </script>
 
 <div class="container pt-2">
   <Tabs.Root bind:value={activeTab}>
-    <AddItemBlock {activeTab} {docUrl} />
+    <AddItemBlock {activeTab} />
 
     <Tabs.Content value="regular">
-      <ul use:sortable={options} class="grid gap-2">
-        {#each $doc.regularIds as id (id)}
-          <RegularItem item={$doc.items[id]} {docUrl} {id} />
-        {/each}
+      <ul class="grid gap-2">
+        {#if mainDoc}
+          {#each mainDoc.regularIds as id, index (id)}
+            <li
+              {id}
+              use:draggable={{
+                container: index.toString(),
+                dragData: id,
+                interactive: [
+                  '[data-delete-btn]',
+                  '[data-select-btn]',
+                  '.interactive'
+                ]
+              }}
+              use:droppable={{
+                container: index.toString(),
+                callbacks: { onDrop: handleDrop }
+              }}
+              animate:flip={{ duration: 200 }}
+              in:fade={{ duration: 150 }}
+              out:fade={{ duration: 150 }}
+            >
+              <RegularItem {id} />
+            </li>
+          {/each}
+        {/if}
       </ul>
     </Tabs.Content>
     <Tabs.Content value="rare">
       <ul>
         {#each cartIds as id, i (id)}
-          <CartItem {docUrl} {id} {i} />
+          <CartItem {id} {i} />
         {/each}
       </ul>
     </Tabs.Content>
