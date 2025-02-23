@@ -5,26 +5,10 @@
   import RegularItem from '$lib/components/regular-item.svelte'
   import CartItem from '$lib/components/cart-item.svelte'
 
+  import Sortable, { type SortableEvent } from 'sortablejs'
+  import { sortable } from '../sortable'
   import type { ItemType } from '../types'
   import { g } from '$stores/global.svelte'
-  import { draggable, droppable, type DragDropState } from '@thisux/sveltednd'
-  import { flip } from 'svelte/animate'
-  import { fade } from 'svelte/transition'
-
-  function handleDrop(state: DragDropState<string>) {
-    const { draggedItem, targetContainer } = state
-    const dragIndex = g.mainDoc?.state?.regularIds.findIndex(
-      (id: string) => id === draggedItem
-    )
-    const dropIndex = parseInt(targetContainer ?? '0')
-
-    if (dragIndex !== -1 && !isNaN(dropIndex)) {
-      g.mainDoc?.change(d => {
-        const [movedItem] = d.regularIds.splice(dragIndex as number, 1)
-        d.regularIds.splice(dropIndex, 0, movedItem)
-      })
-    }
-  }
 
   const cartIds = $derived.by(() => {
     const state = g.mainDoc?.state
@@ -35,9 +19,30 @@
     return [...regularIds.filter(id => state?.items?.[id]?.inCart), ...rareIds]
   })
 
-  let mainDoc = $derived(g.mainDoc?.state)
+  let mainDoc = $derived(g.mainDoc)
 
   let activeTab = $state<ItemType>('regular')
+
+  const options: Sortable.SortableOptions = {
+    animation: 150,
+    swapThreshold: 0.5,
+    ghostClass: 'ghost',
+    onEnd: handleSort,
+    forceFallback: true,
+    fallbackClass: 'fallback',
+    fallbackTolerance: 1,
+    delay: 80,
+    delayOnTouchOnly: true
+  }
+  function handleSort(event: SortableEvent) {
+    const { oldIndex, newIndex } = event
+    if (typeof oldIndex !== 'number' || typeof newIndex !== 'number') return
+
+    g.mainDoc?.change(d => {
+      const [movedItem] = d.regularIds.splice(oldIndex, 1)
+      d.regularIds.splice(newIndex, 0, movedItem)
+    })
+  }
 </script>
 
 <div class="container pt-2">
@@ -45,33 +50,21 @@
     <AddItemBlock {activeTab} />
 
     <Tabs.Content value="regular">
-      <ul class="grid gap-2">
-        {#if mainDoc}
-          {#each mainDoc.regularIds as id, index (id)}
-            <li
-              {id}
-              use:draggable={{
-                container: index.toString(),
-                dragData: id,
-                interactive: [
-                  '[data-delete-btn]',
-                  '[data-select-btn]',
-                  '.interactive'
-                ]
-              }}
-              use:droppable={{
-                container: index.toString(),
-                callbacks: { onDrop: handleDrop }
-              }}
-              animate:flip={{ duration: 200 }}
-              in:fade={{ duration: 150 }}
-              out:fade={{ duration: 150 }}
-            >
-              <RegularItem {id} />
-            </li>
-          {/each}
-        {/if}
-      </ul>
+      <!-- #key is a workaround to prevent errors when users do dnd
+      https://github.com/sveltejs/svelte/issues/11826. it fixes "Illegal
+      invocation" bug, app crash when item drops out of the parent, when peers
+      do dnd at the same time -->
+      {#key mainDoc?.state?.regularIds}
+        <ul use:sortable={options} class="grid gap-2">
+          {#if mainDoc?.state && mainDoc?.state.regularIds}
+            {#each mainDoc.state.regularIds as id, i (id)}
+              <li>
+                <RegularItem item={mainDoc.state.items[id]} {id} />
+              </li>
+            {/each}
+          {/if}
+        </ul>
+      {/key}
     </Tabs.Content>
     <Tabs.Content value="rare">
       <ul>

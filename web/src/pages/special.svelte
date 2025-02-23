@@ -90,13 +90,17 @@
     <Button onclick={add} size="lg">Add</Button>
   </div>
 
-  <ul use:sortable={options} class="grid gap-2">
-    {#if doc?.state && doc.state.ids}
-      {#each doc.state.ids as id (id)}
-        <SpecialItem item={doc.state.items[id]} {docID} {id} />
-      {/each}
-    {/if}
-  </ul>
+  {#key doc?.state?.ids}
+    <ul use:sortable={options} class="grid gap-2">
+      {#if doc?.state && doc.state.ids}
+        {#each doc.state.ids as id (id)}
+          <li>
+            <SpecialItem item={doc.state.items[id]} {docID} {id} />
+          </li>
+        {/each}
+      {/if}
+    </ul>
+  {/key}
 </div>
 
 <style>

@@ -8,10 +8,10 @@
   import { g } from '$stores/global.svelte'
 
   interface Props {
+    item: Item
     id: string
   }
-  let { id }: Props = $props()
-  let item = $derived(g.mainDoc?.state?.items[id] as Item)
+  let { item, id }: Props = $props()
 
   function toggleInCart() {
     g.mainDoc?.change(d => {
@@ -22,7 +22,6 @@
 
   function remove() {
     g.mainDoc?.change(d => {
-      console.log(d.items[id].text)
       d.regularIds.splice(
         d.regularIds.findIndex(v => v === id),
         1
