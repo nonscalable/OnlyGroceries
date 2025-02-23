@@ -32,32 +32,30 @@
   }
 </script>
 
-<li class="flex">
+<Button
+  size="lg"
+  variant="outline"
+  class="grid w-full grid-cols-[auto_1fr_auto_auto] gap-0 px-0 {item.purchased
+    ? 'bg-slate-200'
+    : ''}"
+  aria-pressed={item.purchased}
+  onclick={togglePurchased}
+>
+  <GripVertical class="mx-2 size-4 text-slate-500" />
+
+  <div class="flex items-center justify-between">
+    <span>{item.text}</span>
+    {#if item.purchased}
+      <ShoppingBasket class="size-4" />
+    {/if}
+  </div>
+
   <Button
-    size="lg"
-    variant="outline"
-    class="grid w-full grid-cols-[auto_1fr_auto_auto] gap-0 px-0 {item.purchased
-      ? 'bg-slate-200'
-      : ''}"
-    aria-pressed={item.purchased}
-    onclick={togglePurchased}
+    variant="ghost"
+    class="px-4 text-slate-500 "
+    onclick={e => {
+      e.stopPropagation()
+      remove()
+    }}><Trash2 class="size-4" /></Button
   >
-    <GripVertical class="mx-2 size-4 text-slate-500" />
-
-    <div class="flex items-center justify-between">
-      <span>{item.text}</span>
-      {#if item.purchased}
-        <ShoppingBasket class="size-4" />
-      {/if}
-    </div>
-
-    <Button
-      variant="ghost"
-      class="px-4 text-slate-500 "
-      onclick={e => {
-        e.stopPropagation()
-        remove()
-      }}><Trash2 class="size-4" /></Button
-    >
-  </Button>
-</li>
+</Button>
