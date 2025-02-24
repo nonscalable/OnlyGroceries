@@ -6,6 +6,9 @@ import { addAutomergePrefix, stripAutomergePrefix } from '$src/utils'
 import type { GroceryData, RootDoc, SpecialListData } from '$src/types'
 import { Autodoc } from './autodoc.svelte'
 
+rootdocID.subscribe(() => {
+  console.log('i subscribe on rootdocid changes')
+})
 export const repo = new Repo({
   storage: new IndexedDBStorageAdapter(),
   network: [new BrowserWebSocketClientAdapter(syncServerUrl.get())]
@@ -22,7 +25,8 @@ $effect.root(() => {
   // Set rootdoc
   $effect(() => {
     let id = rootdocID.get()
-    if (id) {
+
+    if (id && !g.rootDoc) {
       g.rootDoc = new Autodoc({ docID: addAutomergePrefix(id) })
     } else {
       let handle = repo.create<RootDoc>({
