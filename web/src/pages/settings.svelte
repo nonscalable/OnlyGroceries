@@ -8,6 +8,7 @@
 
   import { rootdocID, syncServerUrl } from '$stores/settings'
   import { g } from '$stores/global.svelte'
+  import { tick } from 'svelte'
 
   const { needRefresh, updateServiceWorker } = useRegisterSW({})
 
@@ -59,20 +60,33 @@
     }
   }
 
-  function changeRootDoc() {
-    for (let id in g.specialDocs) {
-      g.specialDocs[id].delete()
-    }
-    g.specialDocs = {}
-    g.mainDoc?.delete()
-    g.mainDoc = undefined
-    g.rootDoc?.delete()
-    g.rootDoc = undefined
-    $rootdocID = rootID
+  async function changeRootDoc() {
+    let loadingToast = toast.loading('Wait!')
 
-    toast.success('You joined other group', {
-      description: ``
-    })
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      g.rootDoc?.delete()
+      g.mainDoc?.delete()
+      for (let id in g.specialDocs) {
+        g.specialDocs[id].delete()
+      }
+
+      g.rootDoc = undefined
+      g.mainDoc = undefined
+      g.specialDocs = {}
+
+      $rootdocID = rootID
+    } catch (err) {
+      toast.error(
+        `Error: ${(err as Error).message || 'Something went wrong'}`,
+        { id: loadingToast }
+      )
+    } finally {
+      await tick()
+
+      toast.success('Root document has been changed', { id: loadingToast })
+    }
   }
 </script>
 
