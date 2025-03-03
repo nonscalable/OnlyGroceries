@@ -15,6 +15,7 @@
   offlineReady.subscribe(value => {
     if (value) {
       toast('App is ready to work offline.', {
+        position: 'bottom-center',
         duration: Number.POSITIVE_INFINITY,
         cancel: { label: 'Close' }
       })
@@ -24,6 +25,7 @@
   needRefresh.subscribe(value => {
     if (value) {
       toast('New content available. Click on reload button to update.', {
+        position: 'bottom-center',
         duration: Number.POSITIVE_INFINITY,
         action: {
           label: 'Reload',
@@ -43,7 +45,7 @@
   }
 </script>
 
-<Toaster position="bottom-center" />
+<Toaster position="top-center" richColors />
 
 <style>
   :global([data-sonner-toaster][data-y-position='bottom']) {

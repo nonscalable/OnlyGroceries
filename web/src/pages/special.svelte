@@ -8,6 +8,7 @@
   import Sortable, { type SortableEvent } from 'sortablejs'
 
   import { g } from '$stores/global.svelte'
+  import { toast } from 'svelte-sonner'
 
   interface Props {
     id: string
@@ -18,14 +19,11 @@
   )
   let doc = $derived(g.specialDocs[docID])
   let text = $state('')
-  let message = $state('')
-  let showMessage = $state(false)
 
   function add() {
     let formatted = text.toLowerCase().trim()
     if (!formatted) {
-      message = 'You have to type something'
-      showMessage = true
+      toast.error('You have to type something')
       return
     }
 
@@ -77,17 +75,10 @@
       class="text-md focus-visible:ring-offset-1"
       bind:value={text}
       onkeydown={(e: KeyboardEvent) => handleKeydown(e)}
-      oninput={() => (showMessage = false)}
       required
     />
-    <p
-      class="h-5 text-sm text-red-700 transition-opacity"
-      class:opacity-100={showMessage}
-      class:opacity-0={!showMessage}
-    >
-      {message}
-    </p>
-    <Button onclick={add} size="lg">Add</Button>
+
+    <Button class="mt-3" onclick={add} size="lg">Add</Button>
   </div>
 
   {#key doc?.state?.ids}

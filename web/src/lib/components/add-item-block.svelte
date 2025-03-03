@@ -6,21 +6,18 @@
   import type { ItemType } from '$src/types'
   import { nanoid } from 'nanoid'
   import { g } from '$src/stores/global.svelte'
+  import { toast } from 'svelte-sonner'
 
   type Props = {
     activeTab: ItemType
   }
   let { activeTab }: Props = $props()
-
   let text = $state('')
-  let message = $state('')
-  let showMessage = $state(false)
 
   function add() {
     let formatted = text.toLowerCase().trim()
     if (!formatted) {
-      message = 'You have to type something'
-      showMessage = true
+      toast.error('You have to type something')
       return
     }
 
@@ -55,16 +52,9 @@
     class="text-md focus-visible:ring-offset-1"
     bind:value={text}
     onkeydown={(e: KeyboardEvent) => handleKeydown(e)}
-    oninput={() => (showMessage = false)}
     placeholder={`Add ${activeTab === 'regular' ? 'regular' : 'occasional'} item`}
     required
   />
-  <p
-    class="h-5 text-sm text-red-700 transition-opacity"
-    class:opacity-100={showMessage}
-    class:opacity-0={!showMessage}
-  >
-    {message}
-  </p>
-  <Button onclick={add} size="lg">Add</Button>
+
+  <Button class="mt-3" onclick={add} size="lg">Add</Button>
 </div>
