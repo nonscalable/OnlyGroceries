@@ -2,6 +2,7 @@
   import Button from '$lib/components/ui/button/button.svelte'
   import Input from '$lib/components/ui/input/input.svelte'
   import { Label } from '$lib/components/ui/label'
+  import { Share, Undo2, Check } from 'lucide-svelte'
 
   import { toast } from 'svelte-sonner'
   import { useRegisterSW } from 'virtual:pwa-register/svelte'
@@ -16,10 +17,13 @@
   let buildTime = $state(__BUILD_TIME__)
   let url = $state($syncServerUrl)
   let rootID = $state($rootdocID)
+  let isShareDisabled = $derived(!rootID)
+  let isUpdateDisabled = $derived(!rootID || rootID === $rootdocID)
 
   async function checkForUpdates() {
     if ($needRefresh) {
       toast('New update available!', {
+        position: 'bottom-center',
         duration: Number.POSITIVE_INFINITY,
         action: {
           label: 'Update Now',
@@ -33,6 +37,7 @@
       })
     } else {
       toast('App is up to date.', {
+        position: 'bottom-center',
         cancel: {
           label: 'OK'
         }
@@ -60,8 +65,8 @@
     }
   }
 
-  async function changeRootDoc() {
-    let loadingToast = toast.loading('Wait!')
+  async function updateRootDoc() {
+    let loadingToast = toast.loading('Wait...', { position: 'bottom-center' })
 
     try {
       await new Promise(resolve => setTimeout(resolve, 2000))
@@ -132,9 +137,22 @@
 
       <Label for="rootdocid">ID (rootdocID)</Label>
       <Input type="text" id="rootdocid" placeholder="..." bind:value={rootID} />
-      <Button class="mt-3 w-full" onclick={share}>Share</Button>
-
-      <Button class="mt-3 w-full" onclick={changeRootDoc}>Change</Button>
+      <Button
+        variant="secondary"
+        class="mt-3 w-full"
+        disabled={isShareDisabled}
+        onclick={share}><Share />Copy & Share</Button
+      >
+      <Button
+        variant="secondary"
+        class="mt-3 w-full"
+        onclick={() => (rootID = $rootdocID)}><Undo2 />Reset</Button
+      >
+      <Button
+        disabled={isUpdateDisabled}
+        class="mt-3 w-full"
+        onclick={updateRootDoc}><Check />Update</Button
+      >
     </section>
   </section>
 </main>

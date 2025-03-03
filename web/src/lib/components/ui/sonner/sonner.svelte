@@ -8,10 +8,9 @@
   let restProps: SonnerProps = $props()
 </script>
 
-<Sonner
-  theme={$mode}
-  class="toaster group"
-  toastOptions={{
+<Sonner theme={$mode} class="toaster group" {...restProps} />
+
+<!-- toastOptions={{
     classes: {
       toast:
         'group toast group-[.toaster]:!bg-background group-[.toaster]:!text-foreground group-[.toaster]:!border-border group-[.toaster]:!shadow-lg',
@@ -21,6 +20,4 @@
       cancelButton:
         'group-[.toast]:!bg-muted group-[.toast]:!text-muted-foreground'
     }
-  }}
-  {...restProps}
-/>
+  }} -->
