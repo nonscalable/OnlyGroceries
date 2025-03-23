@@ -117,7 +117,7 @@
       <Sidebar.GroupContent>
         <Sidebar.Menu>
           {#await g.rootDoc?.handle.whenReady() then _}
-            {#if g.rootDoc?.state?.specialInfos}
+            {#if g.rootDoc?.state.specialInfos}
               {@const specialLists = g.rootDoc.state.specialInfos}
               {#if specialLists.length > 0}
                 {#each specialLists as list, i}

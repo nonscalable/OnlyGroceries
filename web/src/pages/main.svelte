@@ -54,7 +54,7 @@
       https://github.com/sveltejs/svelte/issues/11826. it fixes "Illegal
       invocation" bug, app crash when item drops out of the parent, when peers
       do dnd at the same time -->
-      {#key mainDoc?.state?.regularIds}
+      {#key mainDoc?.state.regularIds}
         <ul use:sortable={options} class="grid gap-2">
           {#if mainDoc?.state && mainDoc?.state.regularIds}
             {#each mainDoc.state.regularIds as id, i (id)}

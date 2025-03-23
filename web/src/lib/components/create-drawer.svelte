@@ -11,7 +11,7 @@
   import { router } from '$stores/router'
   import { Autodoc } from '$stores/autodoc.svelte'
   import { createDrawer as drawer } from '$stores/create-drawer.svelte'
-  import { g } from '$stores/global.svelte'
+  import { g, repo } from '$stores/global.svelte'
 
   let name = $state('')
   let showMessage = $state(false)
@@ -23,7 +23,7 @@
     }
   })
 
-  async function createList() {
+  function createList() {
     if (!name.trim()) {
       showMessage = true
       return
@@ -46,14 +46,12 @@
         purchased: false
       }
     }
-    let doc = new Autodoc<SpecialListData>({
-      initial: {
-        items,
-        ids: Object.keys(items)
-      }
+    let handle = repo.create<SpecialListData>({
+      items,
+      ids: Object.keys(items)
     })
-    let id = stripAutomergePrefix(doc.handle.url)
-    g.specialDocs[id] = doc
+    let id = stripAutomergePrefix(handle.url)
+    g.specialDocs[id] = new Autodoc<SpecialListData>({ handle })
     g.rootDoc?.change(d => {
       d.specialInfos.push({ name, id })
     })
