@@ -24,40 +24,46 @@ export let g = $state({
 $effect.root(() => {
   // Set rootdoc
   $effect(() => {
-    let id = rootdocID.get()
+    let id = rootdocID.get();
 
-    if (id && !g.rootDoc) {
-      g.rootDoc = new Autodoc({ docID: addAutomergePrefix(id) })
-    } else {
-      let handle = repo.create<RootDoc>({
+    if (!id) {
+      const handle = repo.create<RootDoc>({
         mainID: null,
         specialInfos: []
       })
-      g.rootDoc = new Autodoc({ docID: handle.url })
+      g.rootDoc = new Autodoc({ handle })
       rootdocID.set(stripAutomergePrefix(handle.url))
+      return
+    }
+
+    if (id && !g.rootDoc) {
+      repo.find<RootDoc>(addAutomergePrefix(id)).then(handle => {
+        g.rootDoc = new Autodoc({ handle })
+      })
+      return
     }
   })
 
   // Set maindoc and specialdocs if rootdoc has their ids
   $effect.pre(() => {
-    if (g.rootDoc && g.rootDoc.state?.mainID && !g.mainDoc) {
-      g.mainDoc = new Autodoc({
-        docID: addAutomergePrefix(g.rootDoc.state.mainID)
+    if (g.rootDoc && g.rootDoc.state.mainID && !g.mainDoc) {
+      repo.find<GroceryData>(addAutomergePrefix(g.rootDoc.state.mainID)).then(handle => {
+        g.mainDoc = new Autodoc({ handle })
       })
     }
     //TODO: check if specialIDs has the same ids as specialDocs has
     if (
       g.rootDoc &&
-      g.rootDoc.state?.specialInfos &&
-      g.rootDoc.state?.specialInfos.length > 0 &&
+      g.rootDoc.state.specialInfos &&
+      g.rootDoc.state.specialInfos.length > 0 &&
       Object.keys(g.specialDocs) &&
       Object.keys(g.specialDocs).length === 0
     ) {
       for (let data of g.rootDoc.state.specialInfos) {
-        g.specialDocs[data.id] = new Autodoc({
-          docID: addAutomergePrefix(data.id)
+        repo.find<SpecialListData>( addAutomergePrefix(data.id)).then(handle => {
+          g.specialDocs[data.id] = new Autodoc({ handle })
         })
-      }
+       }
     }
   })
 })
