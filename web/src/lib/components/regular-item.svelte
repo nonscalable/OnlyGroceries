@@ -34,7 +34,7 @@
 <Button
   data-select-btn
   size="lg"
-  class="interactive grid w-full grid-cols-[auto_1fr_auto_auto] gap-0 px-0 {item.inCart
+  class="interactive grid h-auto w-full grid-cols-[auto_1fr_auto_auto] gap-0 px-0 {item.inCart
     ? 'bg-slate-200'
     : ''}"
   variant="outline"
@@ -43,10 +43,8 @@
   <GripVertical class="mx-2 size-4 text-slate-500" />
 
   <div class="flex items-center justify-between">
-    <span>{item.text}</span>
-    {#if item.inCart}
-      <ShoppingBasket class="size-4" />
-    {/if}
+    <span class="whitespace-normal py-2 text-left">{item.text}</span>
+    <ShoppingBasket class="size-4 {item.inCart ? '' : 'invisible'}" />
   </div>
 
   <Button
