@@ -9,7 +9,7 @@ import { repo } from './global.svelte'
 
 export class Autodoc<T> {
   #handle: DocHandle<T>
-  state: Doc<T> | undefined = $state(undefined)
+  state: Doc<T> = $state() as Doc<T>
 
   #subscribe: () => void
   #updateSubscribers: () => void
@@ -25,18 +25,16 @@ export class Autodoc<T> {
     this.#updateSubscribers()
   }
 
-  constructor({ docID, initial }: { docID?: AutomergeUrl; initial?: T }) {
+  constructor({ handle }: { handle: DocHandle<T> }) {
     this.#updateSubscribers = () => {}
     this.#subscribe = createSubscriber(update => {
       this.#updateSubscribers = update
     })
-    if (docID) {
-      this.#handle = repo.find(docID)
-      this.#handle.doc().then(doc => (this.state = doc))
-    } else {
-      this.#handle = repo.create<T>(initial)
-      this.#handle.doc().then(doc => (this.state = doc))
-    }
+
+    // IMPORTANT: the constructor expects a handle in the 'ready' state.
+    // This way, it's up to caller to make sure the handle is ready
+    this.#handle = handle
+    this.state = handle.doc()
 
     this.#handle.on('change', p => {
       this.state = p.doc
@@ -44,10 +42,7 @@ export class Autodoc<T> {
   }
 
   change(callback: ChangeFn<T>) {
-    this.#handle.whenReady().then(() => {
-      this.#handle.change(callback)
-      this.state = this.#handle.docSync()
-    })
+    this.#handle.change(callback)
   }
 
   delete() {

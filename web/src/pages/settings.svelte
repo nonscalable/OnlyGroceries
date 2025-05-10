@@ -8,8 +8,9 @@
   import { useRegisterSW } from 'virtual:pwa-register/svelte'
 
   import { rootdocID, syncServerUrl } from '$stores/settings'
-  import { g } from '$stores/global.svelte'
+  import { g, repo } from '$stores/global.svelte'
   import { tick } from 'svelte'
+  import { addAutomergePrefix } from '$src/utils'
 
   const { needRefresh, updateServiceWorker } = useRegisterSW({})
 
@@ -69,7 +70,15 @@
     let loadingToast = toast.loading('Wait...', { position: 'bottom-center' })
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Uncomment the line below to test the toast
+      // await new Promise(resolve => setTimeout(resolve, 1000))
+
+      let handle = await repo.find(addAutomergePrefix(rootID), {
+        // it is needed to make repo throw when the rootID not found.
+        // This way, if we can not load the new document, we'll fall into
+        // the catch statement and won't delete the current data
+        allowableStates: ['ready']
+      })
 
       g.rootDoc?.delete()
       g.mainDoc?.delete()
@@ -82,6 +91,8 @@
       g.specialDocs = {}
 
       $rootdocID = rootID
+
+      toast.success('Root document has been changed', { id: loadingToast })
     } catch (err) {
       toast.error(
         `Error: ${(err as Error).message || 'Something went wrong'}`,
@@ -89,8 +100,6 @@
       )
     } finally {
       await tick()
-
-      toast.success('Root document has been changed', { id: loadingToast })
     }
   }
 </script>

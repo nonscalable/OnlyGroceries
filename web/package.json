@@ -49,8 +49,8 @@
   },
   "dependencies": {
     "@automerge/automerge": "^2.2.8",
-    "@automerge/automerge-repo": "^1.2.1",
-    "@automerge/automerge-repo-network-websocket": "^1.2.1",
+    "@automerge/automerge-repo": "2.0.0-alpha.23",
+    "@automerge/automerge-repo-network-websocket": "2.0.0-alpha.23",
     "@automerge/automerge-repo-storage-indexeddb": "^1.2.1",
     "@nanostores/persistent": "^0.10.2",
     "@nanostores/router": "^0.16.1",

@@ -116,8 +116,7 @@
       </Sidebar.GroupAction>
       <Sidebar.GroupContent>
         <Sidebar.Menu>
-          {#await g.rootDoc?.handle.whenReady() then _}
-            {#if g.rootDoc?.state?.specialInfos}
+            {#if g.rootDoc?.state.specialInfos}
               {@const specialLists = g.rootDoc.state.specialInfos}
               {#if specialLists.length > 0}
                 {#each specialLists as list, i}
@@ -156,7 +155,6 @@
                 No special lists yet
               </Sidebar.MenuItem>
             {/if}
-          {/await}
         </Sidebar.Menu>
       </Sidebar.GroupContent>
     </Sidebar.Group>

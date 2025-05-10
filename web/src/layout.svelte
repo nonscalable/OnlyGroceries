@@ -16,7 +16,7 @@
 
   import { openPage } from '@nanostores/router'
 
-  let mainID = $derived(g.rootDoc?.state?.mainID)
+  let mainID = $derived(g.rootDoc?.state.mainID)
 
   //TODO: fix this type thing - "g.rootDoc?.state?.mainID"
   $effect(() => {

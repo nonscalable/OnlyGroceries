@@ -15,7 +15,7 @@
   }
   let { id: docID }: Props = $props()
   let title = $derived(
-    g.rootDoc?.state?.specialInfos.find(info => info.id === docID)?.name
+    g.rootDoc?.state.specialInfos.find(info => info.id === docID)?.name
   )
   let doc = $derived(g.specialDocs[docID])
   let text = $state('')
@@ -81,7 +81,7 @@
     <Button class="mt-3" onclick={add} size="lg">Add</Button>
   </div>
 
-  {#key doc?.state?.ids}
+  {#key doc?.state.ids}
     <ul use:sortable={options} class="grid gap-2">
       {#if doc?.state && doc.state.ids}
         {#each doc.state.ids as id (id)}
