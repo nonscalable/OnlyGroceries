@@ -51,4 +51,7 @@
   :global([data-sonner-toaster][data-y-position='bottom']) {
     bottom: 48px !important;
   }
+  :global([data-sonner-toaster][data-y-position='top']) {
+    top: env(safe-area-inset-top) !important;
+  }
 </style>

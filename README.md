@@ -39,3 +39,7 @@ This makes the following workflow:
 3. Once you're in the shop, switch to `Shopping List` tab to see only the items you need. No distractions!
 
 ## Self Hosting (WIP)
+
+## Building Android
+
+The app can be compiled as Android APK. For details, refer to [ANDROID.md](/ANDROID.md)

@@ -7,5 +7,9 @@
     "dev": "pnpm run -F web -F server dev",
     "build": "pnpm run -r build",
     "preview": "pnpm run -r preview"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.9.6",
+    "web": "^0.0.2"
   }
 }

@@ -38,7 +38,7 @@
 </script>
 
 <Sidebar.Root class="border-r-0" variant="inset">
-  <Sidebar.Header>
+  <Sidebar.Header class="pt-safe">
     <Sidebar.Menu>
       <Sidebar.MenuItem>
         <Sidebar.MenuButton size="lg">

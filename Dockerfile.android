@@ -1,0 +1,21 @@
+FROM nixos/nix:2.33.0 AS builder
+
+COPY flake.nix flake.lock android/
+
+WORKDIR /android
+
+RUN nix develop --extra-experimental-features "nix-command flakes"
+
+COPY . /android
+
+WORKDIR /android
+
+RUN --mount=type=secret,id=jks \
+    --mount=type=secret,id=properties \
+    cat /run/secrets/properties > src-tauri/gen/android/keystore.properties && \
+    cat /run/secrets/jks > src-tauri/gen/android/upload-keystore.jks && \
+    nix develop --extra-experimental-features "nix-command flakes" --command pnpm tauri android build
+
+FROM scratch
+
+COPY --from=builder /android/src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk /dist/app.apk

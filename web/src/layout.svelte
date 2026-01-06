@@ -26,7 +26,7 @@
   })
 </script>
 
-<Sidebar.Provider>
+<Sidebar.Provider class="pt-safe">
   <AppSidebar />
 
   <Sidebar.Inset class="touch-pan-y pb-24">

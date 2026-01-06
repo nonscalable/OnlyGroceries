@@ -1,6 +1,7 @@
 import { fontFamily } from 'tailwindcss/defaultTheme'
 import type { Config } from 'tailwindcss'
 import tailwindcssAnimate from 'tailwindcss-animate'
+import { PluginAPI } from 'tailwindcss/types/config'
 
 const config: Config = {
   future: {
@@ -90,10 +91,24 @@ const config: Config = {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'caret-blink': 'caret-blink 1.25s ease-out infinite'
-      }
+      },
     }
   },
-  plugins: [tailwindcssAnimate]
+  plugins: [
+    tailwindcssAnimate,
+    ({ addUtilities }: PluginAPI) => {
+          addUtilities({
+            '.pt-safe': { 'padding-top': 'env(safe-area-inset-top)' },
+            '.pb-safe': { 'padding-bottom': 'env(safe-area-inset-bottom)' },
+            '.pl-safe': { 'padding-left': 'env(safe-area-inset-left)' },
+            '.pr-safe': { 'padding-right': 'env(safe-area-inset-right)' },
+            '.mt-safe': { 'padding-top': 'env(safe-area-inset-top)' },
+            '.mb-safe': { 'padding-bottom': 'env(safe-area-inset-bottom)' },
+            '.ml-safe': { 'padding-left': 'env(safe-area-inset-left)' },
+            '.mr-safe': { 'padding-right': 'env(safe-area-inset-right)' },
+          })
+        }
+  ]
 }
 
 export default config

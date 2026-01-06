@@ -34,7 +34,7 @@
 <Button
   data-select-btn
   size="lg"
-  class="interactive grid h-auto w-full grid-cols-[auto_1fr_auto_auto] gap-0 px-0 {item.inCart
+  class="interactive grid min-h-12 w-full grid-cols-[auto_1fr_auto_auto] gap-0 px-0 {item.inCart
     ? 'bg-slate-200'
     : ''}"
   variant="outline"
