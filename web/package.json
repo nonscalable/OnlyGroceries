@@ -49,9 +49,10 @@
   },
   "dependencies": {
     "@automerge/automerge": "^2.2.8",
-    "@automerge/automerge-repo": "^1.2.1",
-    "@automerge/automerge-repo-network-websocket": "^1.2.1",
-    "@automerge/automerge-repo-storage-indexeddb": "^1.2.1",
+    "@automerge/automerge-repo": "^2.5.1",
+    "@automerge/automerge-repo-network-websocket": "^2.5.1",
+    "@automerge/automerge-repo-storage-indexeddb": "^2.5.1",
+    "@automerge/automerge-repo-svelte-store": "^2.5.1",
     "@nanostores/persistent": "^0.10.2",
     "@nanostores/router": "^0.16.1",
     "@thisux/sveltednd": "^0.0.20",

@@ -7,42 +7,50 @@
   import { sortable } from '../sortable'
   import Sortable, { type SortableEvent } from 'sortablejs'
 
-  import { g } from '$stores/global.svelte'
   import { toast } from 'svelte-sonner'
+  import { isSpecial, type Root, type Special } from '$src/lib/core/types'
+  import { type AutomergeDocumentStore } from '@automerge/automerge-repo-svelte-store'
+  import {
+    toggleInCart,
+    createItem,
+    deleteItem,
+    handleDnd
+  } from '$src/lib/core'
 
   interface Props {
-    id: string
+    listId: string
+    root: AutomergeDocumentStore<Root> | null
   }
-  let { id: docID }: Props = $props()
-  let title = $derived(
-    g.rootDoc?.state?.specialInfos.find(info => info.id === docID)?.name
-  )
-  let doc = $derived(g.specialDocs[docID])
-  let text = $state('')
+  const { root, listId }: Props = $props()
 
-  function add() {
+  let title = $derived($root?.specials.lists[listId].name)
+  let text = $state('')
+  let specials = $derived(
+    $root?.globalOrder.filter(id => isSpecial($root.items[id], listId)) || []
+  )
+
+  function addSpecial() {
     let formatted = text.toLowerCase().trim()
     if (!formatted) {
       toast.error('You have to type something')
       return
     }
 
-    let item = {
-      text: text.trim(),
-      purchased: false
-    }
-    let id = nanoid()
-    doc.change(d => {
-      d.items[id] = item
-      d.ids.push(id)
+    root?.change(doc => {
+      createItem(doc, {
+        kind: 'special',
+        text: text.trim(),
+        purchased: false,
+        inCart: false,
+        specialId: listId
+      })
     })
-
     text = ''
   }
 
   function handleKeydown(event: KeyboardEvent) {
     if (event.key === 'Enter') {
-      add()
+      addSpecial()
     }
   }
 
@@ -61,15 +69,16 @@
     const { oldIndex, newIndex } = event
     if (typeof oldIndex !== 'number' || typeof newIndex !== 'number') return
 
-    doc.change(d => {
-      const [movedItem] = d.ids.splice(oldIndex, 1)
-      d.ids.splice(newIndex, 0, movedItem)
+    root?.change(doc => {
+      handleDnd(doc, specials, oldIndex, newIndex)
     })
   }
 </script>
 
 <div class="container pt-2">
-  <h1 class="text-3xl font-bold">{title}</h1>
+  <h1 class="text-3xl font-bold">
+    {title}
+  </h1>
   <div class="mb-4 mt-4 flex flex-col gap-1">
     <Input
       class="text-md focus-visible:ring-offset-1"
@@ -78,18 +87,20 @@
       required
     />
 
-    <Button class="mt-3" onclick={add} size="lg">Add</Button>
+    <Button class="mt-3" onclick={addSpecial} size="lg">Add</Button>
   </div>
 
-  {#key doc?.state?.ids}
+  {#key specials}
     <ul use:sortable={options} class="grid gap-2">
-      {#if doc?.state && doc.state.ids}
-        {#each doc.state.ids as id (id)}
-          <li>
-            <SpecialItem item={doc.state.items[id]} {docID} {id} />
-          </li>
-        {/each}
-      {/if}
+      {#each specials as id (id)}
+        <li>
+          <SpecialItem
+            item={$root?.items[id] as Special}
+            remove={() => root?.change(doc => deleteItem(doc, id))}
+            toggleInCart={() => root?.change(doc => toggleInCart(doc, id))}
+          />
+        </li>
+      {/each}
     </ul>
   {/key}
 </div>

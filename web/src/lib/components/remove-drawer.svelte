@@ -3,33 +3,25 @@
   import Button from '$lib/components/ui/button/button.svelte'
   import { toast } from 'svelte-sonner'
   import { openPage } from '@nanostores/router'
-  import type { SpecialListData } from '$src/types'
-
   import { removeDrawer as drawer } from '$stores/remove-drawer.svelte'
   import { router } from '$stores/router'
-  import type { Autodoc } from '$stores/autodoc.svelte'
-  import { g } from '$stores/global.svelte'
+
+  interface Props {
+    onRemove: (id: string) => void
+  }
+  const { onRemove }: Props = $props()
 
   function remove() {
-    if (drawer.listType === 'main') {
-      g.mainDoc?.delete()
-      g.mainDoc = undefined
-      g.rootDoc?.change(d => (d.mainID = null))
-    } else {
-      g.specialDocs[drawer.listId!].delete()
-      g.specialDocs[drawer.listId!] = {} as Autodoc<SpecialListData>
-      g.rootDoc?.change(d => {
-        let index = d.specialInfos.findIndex(item => item.id === drawer.listId)
-        if (index !== -1) {
-          d.specialInfos.splice(index, 1)
-        }
-      })
+    if (!drawer.specialList) {
+      return
     }
 
-    openPage(router, 'home')
+    onRemove(drawer.specialList.id)
+
+    openPage(router, 'main')
 
     drawer.close()
-    toast(`${drawer.listName} has been deleted`, {
+    toast(`${drawer.specialList.name} has been deleted`, {
       cancel: { label: 'Close' }
     })
   }
@@ -39,7 +31,9 @@
   <Drawer.Content>
     <div class="mx-auto mb-4 w-full max-w-sm">
       <Drawer.Header>
-        <Drawer.Title class="mb-4">{`Delete ${drawer.listName}`}</Drawer.Title>
+        <Drawer.Title class="mb-4"
+          >{`Delete ${drawer.specialList?.name}`}</Drawer.Title
+        >
         <Drawer.Description>Are you sure?</Drawer.Description>
       </Drawer.Header>
 

@@ -13,8 +13,8 @@
   "keywords": [],
   "author": "",
   "dependencies": {
-    "@automerge/automerge-repo": "^1.2.1",
-    "@automerge/automerge-repo-network-websocket": "^1.2.1",
+    "@automerge/automerge-repo": "^2.5.1",
+    "@automerge/automerge-repo-network-websocket": "^2.5.1",
     "@automerge/automerge-repo-storage-nodefs": "^1.2.1",
     "dotenv": "^16.4.7",
     "eventemitter3": "^5.0.1",

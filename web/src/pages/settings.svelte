@@ -7,18 +7,23 @@
   import { toast } from 'svelte-sonner'
   import { useRegisterSW } from 'virtual:pwa-register/svelte'
 
-  import { rootdocID, syncServerUrl } from '$stores/settings'
-  import { g } from '$stores/global.svelte'
+  import { persistedRootUrl, syncServerUrl } from '$src/lib/core/repo'
   import { tick } from 'svelte'
+  import type { AutomergeUrl } from '@automerge/automerge-repo'
 
   const { needRefresh, updateServiceWorker } = useRegisterSW({})
+
+  interface Props {
+    setRootId: (newId: AutomergeUrl) => Promise<null | string>
+  }
+  const { setRootId }: Props = $props()
 
   let version = $state('1.0.0 (WIP)')
   let buildTime = $state(__BUILD_TIME__)
   let url = $state($syncServerUrl)
-  let rootID = $state($rootdocID)
-  let isShareDisabled = $derived(!rootID)
-  let isUpdateDisabled = $derived(!rootID || rootID === $rootdocID)
+  let newRootId = $state($persistedRootUrl)
+  let isShareDisabled = $derived(!newRootId)
+  let isUpdateDisabled = $derived(!newRootId || newRootId === $persistedRootUrl)
 
   async function checkForUpdates() {
     if ($needRefresh) {
@@ -55,10 +60,10 @@
   async function share() {
     if (navigator.share) {
       await navigator.share({
-        text: $rootdocID
+        text: $persistedRootUrl
       })
     } else {
-      await navigator.clipboard.writeText($rootdocID)
+      await navigator.clipboard.writeText($persistedRootUrl)
       toast.success('List ID has been copied to clipboard', {
         description: 'Send it to your friend'
       })
@@ -68,30 +73,17 @@
   async function updateRootDoc() {
     let loadingToast = toast.loading('Wait...', { position: 'bottom-center' })
 
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
+    // Uncomment the line below to test the toast
+    // await new Promise(resolve => setTimeout(resolve, 2000))
 
-      g.rootDoc?.delete()
-      g.mainDoc?.delete()
-      for (let id in g.specialDocs) {
-        g.specialDocs[id].delete()
-      }
-
-      g.rootDoc = undefined
-      g.mainDoc = undefined
-      g.specialDocs = {}
-
-      $rootdocID = rootID
-    } catch (err) {
-      toast.error(
-        `Error: ${(err as Error).message || 'Something went wrong'}`,
-        { id: loadingToast }
-      )
-    } finally {
-      await tick()
-
+    const error = await setRootId(newRootId)
+    if (error != null) {
+      toast.error(error, { id: loadingToast })
+    } else {
       toast.success('Root document has been changed', { id: loadingToast })
     }
+
+    await tick()
   }
 </script>
 
@@ -136,7 +128,12 @@
       <h2 class="mb-3 text-xl font-semibold">Collaboration</h2>
 
       <Label for="rootdocid">ID (rootdocID)</Label>
-      <Input type="text" id="rootdocid" placeholder="..." bind:value={rootID} />
+      <Input
+        type="text"
+        id="rootdocid"
+        placeholder="..."
+        bind:value={newRootId}
+      />
       <Button
         variant="secondary"
         class="mt-3 w-full"
@@ -146,7 +143,7 @@
       <Button
         variant="secondary"
         class="mt-3 w-full"
-        onclick={() => (rootID = $rootdocID)}><Undo2 />Reset</Button
+        onclick={() => (newRootId = $persistedRootUrl)}><Undo2 />Reset</Button
       >
       <Button
         disabled={isUpdateDisabled}

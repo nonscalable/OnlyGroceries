@@ -7,21 +7,36 @@
 
   import Sortable, { type SortableEvent } from 'sortablejs'
   import { sortable } from '../sortable'
-  import type { ItemType } from '../types'
-  import { g } from '$stores/global.svelte'
 
-  const cartIds = $derived.by(() => {
-    const state = g.mainDoc?.state
+  import { type AutomergeDocumentStore } from '@automerge/automerge-repo-svelte-store'
+  import {
+    type Root,
+    type Staple,
+    isStaple,
+    type ItemKind
+  } from '$src/lib/core/types'
+  import {
+    deleteFromCart,
+    toggleInCart,
+    togglePurchased,
+    createItem,
+    deleteItem,
+    handleDnd
+  } from '$src/lib/core'
 
-    const regularIds = state?.regularIds ?? []
-    const rareIds = state?.rareIds ?? []
+  interface Props {
+    root: AutomergeDocumentStore<Root> | null
+  }
+  const { root }: Props = $props()
 
-    return [...regularIds.filter(id => state?.items?.[id]?.inCart), ...rareIds]
-  })
+  let activeTab = $state<ItemKind>('staple')
 
-  let mainDoc = $derived(g.mainDoc)
-
-  let activeTab = $state<ItemType>('regular')
+  let staples = $derived(
+    $root?.globalOrder.filter(id => isStaple($root.items[id])) || []
+  )
+  let cartIds = $derived(
+    $root?.globalOrder.filter(id => $root.items[id].inCart) || []
+  )
 
   const options: Sortable.SortableOptions = {
     animation: 150,
@@ -38,43 +53,89 @@
     const { oldIndex, newIndex } = event
     if (typeof oldIndex !== 'number' || typeof newIndex !== 'number') return
 
-    g.mainDoc?.change(d => {
-      const [movedItem] = d.regularIds.splice(oldIndex, 1)
-      d.regularIds.splice(newIndex, 0, movedItem)
+    root?.change(doc => {
+      if (activeTab == 'staple') {
+        handleDnd(doc, staples, oldIndex, newIndex)
+      } else {
+        handleDnd(doc, cartIds, oldIndex, newIndex)
+      }
+    })
+  }
+
+  function deleteStaple(id: string) {
+    root?.change(doc => {
+      if (isStaple(doc.items[id])) {
+        deleteItem(doc, id)
+      }
+    })
+  }
+
+  function addItem(text: string) {
+    root?.change(doc => {
+      if (activeTab == 'staple') {
+        createItem(doc, {
+          text: text,
+          kind: 'staple',
+          inCart: false,
+          purchased: false
+        })
+      } else {
+        createItem(doc, {
+          text: text,
+          kind: 'rare',
+          inCart: true,
+          purchased: false
+        })
+      }
     })
   }
 </script>
 
-<div class="container pt-2">
-  <Tabs.Root bind:value={activeTab}>
-    <AddItemBlock {activeTab} />
+{#if $root}
+  <div class="container pt-2">
+    <Tabs.Root bind:value={activeTab}>
+      <AddItemBlock addToCart={addItem} {activeTab} />
 
-    <Tabs.Content value="regular">
-      <!-- #key is a workaround to prevent errors when users do dnd
+      <Tabs.Content value="staple">
+        <!-- #key is a workaround to prevent errors when users do dnd
       https://github.com/sveltejs/svelte/issues/11826. it fixes "Illegal
       invocation" bug, app crash when item drops out of the parent, when peers
       do dnd at the same time -->
-      {#key mainDoc?.state?.regularIds}
-        <ul use:sortable={options} class="grid gap-2">
-          {#if mainDoc?.state && mainDoc?.state.regularIds}
-            {#each mainDoc.state.regularIds as id, i (id)}
+        {#key staples}
+          <ul use:sortable={options} class="grid gap-2">
+            {#each staples as id, i (id)}
               <li>
-                <RegularItem item={mainDoc.state.items[id]} {id} />
+                <RegularItem
+                  item={$root.items[id] as Staple}
+                  toggleInCart={() =>
+                    root?.change(doc => toggleInCart(doc, id))}
+                  deleteItem={() => deleteStaple(id)}
+                />
               </li>
             {/each}
-          {/if}
-        </ul>
-      {/key}
-    </Tabs.Content>
-    <Tabs.Content value="rare">
-      <ul>
-        {#each cartIds as id, i (id)}
-          <CartItem {id} {i} />
-        {/each}
-      </ul>
-    </Tabs.Content>
-  </Tabs.Root>
-</div>
+          </ul>
+        {/key}
+      </Tabs.Content>
+
+      <Tabs.Content value="rare">
+        {#key cartIds}
+          <ul use:sortable={options} class="grid gap-2">
+            {#each cartIds as id, i (id)}
+              <CartItem
+                {i}
+                item={$root?.items[id]}
+                togglePurchased={() =>
+                  root?.change(doc => togglePurchased(doc, id))}
+                deleteCartItem={() =>
+                  root?.change(doc => deleteFromCart(doc, id))}
+              />
+            {/each}
+          </ul>
+        {/key}
+      </Tabs.Content>
+    </Tabs.Root>
+  </div>
+{/if}
 
 <style>
   :global(.ghost) {

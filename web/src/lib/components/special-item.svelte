@@ -3,43 +3,24 @@
   import GripVertical from 'lucide-svelte/icons/grip-vertical'
   import ShoppingBasket from 'lucide-svelte/icons/shopping-basket'
   import Trash2 from 'lucide-svelte/icons/trash-2'
-  import type { SpecialItem } from '$src/types'
-
-  import { g } from '$stores/global.svelte'
+  import type { Special } from '$src/lib/core/types'
 
   interface Props {
-    item: SpecialItem
-    docID: string
-    id: string
+    item: Special
+    remove: () => void
+    toggleInCart: () => void
   }
-  let { item, docID, id }: Props = $props()
-  let doc = $derived(g.specialDocs[docID])
-
-  function togglePurchased() {
-    doc.change(d => {
-      d.items[id].purchased = !d.items[id].purchased
-    })
-  }
-
-  function remove() {
-    doc.change(d => {
-      d.ids.splice(
-        d.ids.findIndex(v => v === id),
-        1
-      )
-      delete d.items[id]
-    })
-  }
+  let { item, remove, toggleInCart }: Props = $props()
 </script>
 
 <Button
   size="lg"
   variant="outline"
-  class="grid h-auto w-full grid-cols-[auto_1fr_auto_auto] gap-0 px-0 {item.purchased
+  class="grid h-auto w-full grid-cols-[auto_1fr_auto_auto] gap-0 px-0 {item.inCart
     ? 'bg-slate-200'
     : ''}"
-  aria-pressed={item.purchased}
-  onclick={togglePurchased}
+  aria-pressed={item.inCart}
+  onclick={toggleInCart}
 >
   <GripVertical class="mx-2 size-4 text-slate-500" />
 
@@ -47,7 +28,7 @@
     <span class="flex-1 whitespace-normal break-words break-all py-2 text-left"
       >{item.text}</span
     >
-    <ShoppingBasket class="size-4 {item.purchased ? '' : 'invisible'}" />
+    <ShoppingBasket class="size-4 {item.inCart ? '' : 'invisible'}" />
   </div>
 
   <Button

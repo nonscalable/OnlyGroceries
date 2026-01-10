@@ -3,15 +3,14 @@
   import Input from '$lib/components/ui/input/input.svelte'
   import TabsList from '$lib/components/ui/tabs/tabs-list.svelte'
   import TabsTrigger from '$lib/components/ui/tabs/tabs-trigger.svelte'
-  import type { ItemType } from '$src/types'
-  import { nanoid } from 'nanoid'
-  import { g } from '$src/stores/global.svelte'
+  import type { ItemKind } from '$src/lib/core/types'
   import { toast } from 'svelte-sonner'
 
   type Props = {
-    activeTab: ItemType
+    activeTab: ItemKind
+    addToCart: (text: string) => void
   }
-  let { activeTab }: Props = $props()
+  let { addToCart, activeTab }: Props = $props()
   let text = $state('')
 
   function add() {
@@ -21,18 +20,7 @@
       return
     }
 
-    let item = {
-      text: text.trim(),
-      type: activeTab,
-      purchased: false,
-      inCart: activeTab === 'rare' ? true : false
-    }
-    let id = nanoid()
-
-    g.mainDoc?.change(d => {
-      d.items[id] = item
-      activeTab === 'rare' ? d.rareIds.push(id) : d.regularIds.push(id)
-    })
+    addToCart(text.trim())
     text = ''
   }
 
@@ -44,7 +32,7 @@
 </script>
 
 <TabsList class="grid w-full grid-cols-2">
-  <TabsTrigger class="h-8" value="regular">Staples</TabsTrigger>
+  <TabsTrigger class="h-8" value="staple">Staples</TabsTrigger>
   <TabsTrigger class="h-8" value="rare">Shopping List</TabsTrigger>
 </TabsList>
 <div class="mb-4 mt-4 flex flex-col gap-1">
@@ -52,7 +40,7 @@
     class="text-md focus-visible:ring-offset-1"
     bind:value={text}
     onkeydown={(e: KeyboardEvent) => handleKeydown(e)}
-    placeholder={`Add ${activeTab === 'regular' ? 'regular' : 'occasional'} item`}
+    placeholder={`Add ${activeTab === 'staple' ? 'regular' : 'occasional'} item`}
     required
   />
 

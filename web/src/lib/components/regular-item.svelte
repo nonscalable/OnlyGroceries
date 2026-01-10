@@ -3,32 +3,14 @@
   import GripVertical from 'lucide-svelte/icons/grip-vertical'
   import ShoppingBasket from 'lucide-svelte/icons/shopping-basket'
   import Trash2 from 'lucide-svelte/icons/trash-2'
-  import type { Item } from '$src/types'
-
-  import { g } from '$stores/global.svelte'
+  import type {  Staple } from '$src/lib/core/types'
 
   interface Props {
-    item: Item
-    id: string
+    item: Staple
+    toggleInCart: () => void
+    deleteItem: () => void
   }
-  let { item, id }: Props = $props()
-
-  function toggleInCart() {
-    g.mainDoc?.change(d => {
-      d.items[id].inCart = !d.items[id].inCart
-      d.items[id].purchased = false
-    })
-  }
-
-  function remove() {
-    g.mainDoc?.change(d => {
-      d.regularIds.splice(
-        d.regularIds.findIndex(v => v === id),
-        1
-      )
-      delete d.items[id]
-    })
-  }
+  let { deleteItem, toggleInCart, item }: Props = $props()
 </script>
 
 <Button
@@ -55,7 +37,7 @@
     class="px-4 text-slate-500 "
     onclick={e => {
       e.stopPropagation()
-      remove()
+      deleteItem()
     }}><Trash2 class="size-4" /></Button
   >
 </Button>

@@ -3,15 +3,15 @@
   import Input from '$lib/components/ui/input/input.svelte'
   import Button from '$lib/components/ui/button/button.svelte'
 
-  import type { SpecialItems, SpecialListData } from '$src/types'
-  import { stripAutomergePrefix } from '$src/utils'
-  import { nanoid } from 'nanoid'
   import { openPage } from '@nanostores/router'
 
   import { router } from '$stores/router'
-  import { Autodoc } from '$stores/autodoc.svelte'
   import { createDrawer as drawer } from '$stores/create-drawer.svelte'
-  import { g } from '$stores/global.svelte'
+
+  interface Props {
+    onCreate: (name: string) => string
+  }
+  const { onCreate }: Props = $props()
 
   let name = $state('')
   let showMessage = $state(false)
@@ -24,40 +24,7 @@
   })
 
   async function createList() {
-    if (!name.trim()) {
-      showMessage = true
-      return
-    }
-    let items: SpecialItems = {
-      [nanoid()]: {
-        text: 'Bratwurst 🌭✨',
-        purchased: false
-      },
-      [nanoid()]: {
-        text: 'Glühwein 🍷🎄',
-        purchased: false
-      },
-      [nanoid()]: {
-        text: 'Weihnachtsstollen 🍞🎅',
-        purchased: false
-      },
-      [nanoid()]: {
-        text: 'Lebkuchen 🍪⭐',
-        purchased: false
-      }
-    }
-    let doc = new Autodoc<SpecialListData>({
-      initial: {
-        items,
-        ids: Object.keys(items)
-      }
-    })
-    let id = stripAutomergePrefix(doc.handle.url)
-    g.specialDocs[id] = doc
-    g.rootDoc?.change(d => {
-      d.specialInfos.push({ name, id })
-    })
-
+    const id = onCreate(name)
     openPage(router, 'special', { id })
     drawer.close()
   }
