@@ -8,8 +8,8 @@ import { defaultState } from '.'
 
 export const syncServerUrl = persistentAtom<string>(
   'onlygroceries:syncServerUrl',
-  'ws://localhost:8080?access-token=og'
-  // 'wss://sync.automerge.org'
+  // 'ws://localhost:8080?access-token=og'
+  'wss://sync.automerge.org'
 )
 
 export const persistedRootUrl = persistentAtom<AutomergeUrl>(

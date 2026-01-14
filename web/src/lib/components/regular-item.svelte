@@ -3,7 +3,7 @@
   import GripVertical from 'lucide-svelte/icons/grip-vertical'
   import ShoppingBasket from 'lucide-svelte/icons/shopping-basket'
   import Trash2 from 'lucide-svelte/icons/trash-2'
-  import type {  Staple } from '$src/lib/core/types'
+  import type { Staple } from '$src/lib/core/types'
 
   interface Props {
     item: Staple
@@ -11,14 +11,19 @@
     deleteItem: () => void
   }
   let { deleteItem, toggleInCart, item }: Props = $props()
+
+  let touched = $state(false)
 </script>
 
 <Button
+  ontouchstart={() => (touched = true)}
+  ontouchend={() => (touched = false)}
+  ontouchcancel={() => (touched = false)}
   data-select-btn
   size="lg"
-  class="interactive grid min-h-12 w-full grid-cols-[auto_1fr_auto_auto] gap-0 px-0 {item.inCart
-    ? 'bg-slate-200'
-    : ''}"
+  class="duration-250 grid min-h-12 w-full grid-cols-[auto_1fr_auto_auto] gap-0 px-0 transition-transform ease-out {touched
+    ? 'scale-[1.03]'
+    : ''} {item.inCart ? 'bg-slate-200' : ''}"
   variant="outline"
   onclick={toggleInCart}
 >
