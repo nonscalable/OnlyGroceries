@@ -46,9 +46,13 @@
       <Sidebar.Menu>
         <!-- Logo -->
         <Sidebar.MenuItem>
-          <Sidebar.MenuButton size="lg">
+          <Sidebar.MenuButton
+            size="lg"
+            isActive={$router?.route === 'peers'}
+            onclick={toggleSidebarIfMobile}
+          >
             {#snippet child({ props })}
-              <a href="##" {...props}>
+              <a href={getPagePath(router, 'peers')} {...props}>
                 <div
                   class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg"
                 >

@@ -81,9 +81,15 @@ importers:
       '@nanostores/router':
         specifier: ^0.16.1
         version: 0.16.1(nanostores@0.11.3)
+      '@tauri-apps/api':
+        specifier: ^2.9.1
+        version: 2.9.1
       '@thisux/sveltednd':
         specifier: ^0.0.20
         version: 0.0.20(svelte@5.20.2)
+      core:
+        specifier: link:@tauri-apps/api/core
+        version: link:@tauri-apps/api/core
       idb:
         specifier: ^8.0.1
         version: 8.0.1
@@ -1196,6 +1202,9 @@ packages:
 
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
+
+  '@tauri-apps/api@2.9.1':
+    resolution: {integrity: sha512-IGlhP6EivjXHepbBic618GOmiWe4URJiIeZFlB7x3czM0yDHHYviH1Xvoiv4FefdkQtn6v7TuwWCRfOGdnVUGw==}
 
   '@tauri-apps/cli-darwin-arm64@2.9.6':
     resolution: {integrity: sha512-gf5no6N9FCk1qMrti4lfwP77JHP5haASZgVbBgpZG7BUepB3fhiLCXGUK8LvuOjP36HivXewjg72LTnPDScnQQ==}
@@ -4283,6 +4292,8 @@ snapshots:
   '@swc/helpers@0.5.15':
     dependencies:
       tslib: 2.8.1
+
+  '@tauri-apps/api@2.9.1': {}
 
   '@tauri-apps/cli-darwin-arm64@2.9.6':
     optional: true

@@ -42,10 +42,6 @@
             ndk-29-0-14206865
           ]);
       in {
-        packages.android = pkgs.callPackage ./nix/android.nix {
-          inherit pkgs android-nixpkgs;
-        };
-
         devShells.default = pkgs.mkShell rec {
           packages = with pkgs; [
             androidSdk
@@ -53,6 +49,12 @@
 
             pnpm_10
             nodejs_22
+
+            pango
+            gdk-pixbuf
+            at-spi2-atk
+            libsoup_3
+            webkitgtk_4_1
 
             pkg-config
             gobject-introspection

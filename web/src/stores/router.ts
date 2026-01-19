@@ -3,7 +3,8 @@ import { createRouter } from '@nanostores/router'
 const routes = {
   main: '/main',
   special: '/special/:id',
-  settings: '/settings'
+  settings: '/settings',
+  peers: '/peers'
 } as const
 
 export const router = createRouter(routes)

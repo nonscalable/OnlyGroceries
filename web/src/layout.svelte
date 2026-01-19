@@ -9,6 +9,7 @@
   import Main from './pages/main.svelte'
   import Settings from './pages/settings.svelte'
   import Special from './pages/special.svelte'
+  import Peers from './pages/peers.svelte'
 
   import { router } from '$stores/router'
 
@@ -21,6 +22,12 @@
   import type { AutomergeUrl } from '@automerge/automerge-repo'
   import { nanoid } from 'nanoid'
   import { createSpecialList, deleteSpecialList } from '$src/lib/core'
+  import { accept, connect, getEndpointId, send, subscribeMdns } from './tauri'
+  import { addPeer, deletePeer, setMyNodeId } from '$stores/peers.svelte'
+  import {
+    IrohClientAdapter,
+    IrohServerAdapter
+  } from './lib/core/iroh-network-adapter'
 
   let rootUrl = $state(getRoot())
   let root = $state<AutomergeDocumentStore<Root> | null>(null)
@@ -34,6 +41,41 @@
         console.error('Load Root Document:', err)
       })
   })
+
+  async function p2pStuff() {
+    let nodeId = await getEndpointId()
+
+    setMyNodeId(nodeId)
+
+    const nodes = new Set()
+
+    // TODO: move to iroh-network-adapter?
+    subscribeMdns(event => {
+      if ('Discovered' in event) {
+        const remoteId = event.Discovered.node_id
+
+        if (nodes.has(remoteId)) {
+          return
+        }
+
+        nodes.add(remoteId)
+        addPeer(event.Discovered)
+
+        if (remoteId > nodeId) {
+          repo.networkSubsystem.addNetworkAdapter(
+            new IrohClientAdapter(remoteId)
+          )
+          console.log('connected to', remoteId)
+        } else {
+          repo.networkSubsystem.addNetworkAdapter(
+            new IrohServerAdapter(remoteId)
+          )
+          console.log('accepted from', remoteId)
+        }
+      }
+    })
+  }
+  p2pStuff()
 
   $effect.root(() => {
     if (root) {
@@ -92,6 +134,8 @@
         <Special {root} listId={$router.params.id} />
       {:else if $router.route === 'settings'}
         <Settings {setRootId} />
+      {:else if $router.route === 'peers'}
+        <Peers />
       {:else}
         <Main {root} />
       {/if}

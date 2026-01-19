@@ -5,6 +5,8 @@ import type { AutomergeUrl } from '@automerge/automerge-repo'
 import { persistentAtom } from '@nanostores/persistent'
 import type { Root } from './types'
 import { defaultState } from '.'
+import { IrohClientAdapter } from './iroh-network-adapter/IrohClientAdapter'
+import { subscribeMdns } from '$src/tauri'
 
 export const syncServerUrl = persistentAtom<string>(
   'onlygroceries:syncServerUrl',
@@ -17,8 +19,9 @@ export const persistedRootUrl = persistentAtom<AutomergeUrl>(
 )
 
 export const repo = new Repo({
-  storage: new IndexedDBStorageAdapter(),
-  network: [new WebSocketClientAdapter(syncServerUrl.get())]
+  storage: new IndexedDBStorageAdapter()
+  // network: [new IrohClientAdapter()]
+  // network: [new WebSocketClientAdapter(syncServerUrl.get())]
 })
 
 export function getRoot(): AutomergeUrl {
