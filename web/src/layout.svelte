@@ -22,8 +22,8 @@
   import type { AutomergeUrl } from '@automerge/automerge-repo'
   import { nanoid } from 'nanoid'
   import { createSpecialList, deleteSpecialList } from '$src/lib/core'
-  import { accept, connect, getEndpointId, send, subscribeMdns } from './tauri'
-  import { addPeer, deletePeer, setMyNodeId } from '$stores/peers.svelte'
+  import { getEndpointId, subscribeMdns } from './tauri'
+  import { addPeer, setMyNodeId } from '$stores/peers.svelte'
   import {
     IrohClientAdapter,
     IrohServerAdapter
