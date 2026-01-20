@@ -2,9 +2,6 @@ mod commands;
 mod node;
 
 use tauri::Manager;
-// use commands::AppState;
-use tokio::sync::Mutex;
-
 use crate::node::Node;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -31,7 +28,7 @@ pub fn run() {
 
             tauri::async_runtime::block_on(async move {
                 let node = Node::new().await.expect("init node");
-                handle.manage(Mutex::new(node));
+                handle.manage(node);
             });
 
             Ok(())

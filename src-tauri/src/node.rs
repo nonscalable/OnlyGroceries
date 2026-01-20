@@ -8,34 +8,50 @@ use iroh::{
     Endpoint, EndpointId,
 };
 use tokio::{
-    sync::{mpsc, oneshot, Mutex},
+    select,
+    sync::{mpsc, Mutex},
     task::JoinHandle,
 };
 
-use crate::commands::{RepoMessage, SYNC_ALPN};
+pub const SYNC_ALPN: &[u8] = b"iroh/automerge-network-adapter";
+
+pub type RepoMessage = Vec<u8>;
 
 #[derive(derive_more::Debug)]
 pub struct Node {
     pub endpoint: Endpoint,
     pub mdns: Arc<Mutex<MdnsDiscovery>>,
     #[debug(skip)]
-    conns: HashMap<EndpointId, Mutex<PeerConnection>>,
+    conns: Mutex<HashMap<EndpointId, PeerConnection>>,
 }
 
 pub struct PeerConnection {
-    // recv: RecvStream,
-    // send: SendStream,
-    // init_sync: oneshot::Sender<RepoMessage>,
-    // init_sync: Mutex<Option<oneshot::Sender<RepoMessage>>>,
-    init_sync: Option<oneshot::Sender<RepoMessage>>,
     js_to_rust: mpsc::Sender<RepoMessage>,
     rust_to_js: Arc<Mutex<mpsc::Receiver<RepoMessage>>>,
 
-    router: Option<Router>,
-    connection: Option<Connection>,
-    join_handle: Option<JoinHandle<()>>,
+    // Keep these guys from being dropped
+    // They might be used later for graceful shutdown.
+    _router: Option<Router>,
+    _join_handle: Option<JoinHandle<()>>,
 }
 
+// An iroh + tauri wrapper to be used for JS NetworkAdapter implementation.
+//
+// Inspired by
+//  https://github.com/n0-computer/iroh-examples/blob/b70f21e200f7f761860b69efd9af511b56919ff8/iroh-automerge/src/protocol.rs
+//
+// Key differences between this implementation and iroh example is that
+// this implementation does not have direct access to automerge and has to
+// send/receive data to/from JS runtime.
+//
+// That difference implies two things:
+// 1. Two asynchronous "programs" has to be coordinated: iroh and JS automerge-repo, which
+//    makes things more complicated
+// 2. automerge-repo does not send empty message (*) which makes it impossible to use
+//    this (**) nice check from iroh example
+//
+// (*)  https://github.com/automerge/automerge-repo/blob/54ac3db6da1ebab274485429f63765a2da6e5b4b/packages/automerge-repo/src/synchronizer/DocSynchronizer.ts#L205
+// (**) https://github.com/n0-computer/iroh-examples/blob/b70f21e200f7f761860b69efd9af511b56919ff8/iroh-automerge/src/protocol.rs#L95-L98
 impl Node {
     pub async fn new() -> anyhow::Result<Self> {
         let endpoint = Endpoint::empty_builder(iroh::RelayMode::Disabled)
@@ -50,14 +66,12 @@ impl Node {
         Ok(Node {
             endpoint,
             mdns: Arc::new(Mutex::new(mdns)),
-            conns: HashMap::new(),
+            conns: Mutex::new(HashMap::new()),
         })
     }
 
-    pub async fn connect(&mut self, remote: EndpointId) -> anyhow::Result<()> {
+    pub async fn connect(&self, remote: EndpointId) -> anyhow::Result<()> {
         let conn = self.endpoint.connect(remote, SYNC_ALPN).await?;
-
-        let (init_sync, sync_initialized) = oneshot::channel::<RepoMessage>();
 
         // connect:
         //   - (Remote Recv) chan.send_js (here) -> rust_to_js -> subscribe_recv
@@ -68,47 +82,62 @@ impl Node {
         let handle = tokio::spawn(async move {
             let (mut send, mut recv) = conn.open_bi().await.unwrap();
 
-            println!("BEFORE INIT SYNC");
-            let init_msg = sync_initialized.await.unwrap();
-            Self::send_message(&mut send, Some(init_msg.clone()))
+            Self::handle_handshake(&mut recv_rust, &send_js, &mut send, &mut recv)
                 .await
-                .expect("send init message");
-            println!("AFTER INIT SYNC {:?}", init_msg);
+                .unwrap();
 
             loop {
-                let remote_msg = Self::read_message(&mut recv).await.expect("read reply");
-
-                if let Some(msg) = remote_msg {
-                    // JS reads the message, handles in NetworkAdapter
-                    // and sends back
-                    // ==== SILENCE, JS IS TALKIN ====
-                    send_js.send(msg).await.expect("send msg to JS");
-                    let sync_msg = recv_rust.recv().await.expect("get msg from JS");
-                    // ==== JS FINISHED ====
-
-                    Self::send_message(&mut send, Some(sync_msg))
-                        .await
-                        .expect("send reply to remote");
+                select! {
+                    biased;
+                    sync_msg = recv_rust.recv() => {
+                        send_message(&mut send, sync_msg.unwrap()).await.expect("send");
+                    }
+                    remote_msg = read_message(&mut recv) => {
+                        send_js.send(remote_msg.unwrap()).await.expect("send to JS");
+                    }
                 }
             }
         });
 
         let peer_conn = PeerConnection {
-            init_sync: Some(init_sync),
             js_to_rust: send_rust,
             rust_to_js: Arc::new(Mutex::new(recv_js)),
-            router: None,
-            connection: None,
-            join_handle: Some(handle),
+            _router: None,
+            _join_handle: Some(handle),
         };
-
         // TODO: check if connected
-        self.conns.insert(remote, Mutex::new(peer_conn));
+        self.conns.lock().await.insert(remote, peer_conn);
 
         Ok(())
     }
 
-    pub async fn receive(&mut self, remote: EndpointId) -> anyhow::Result<()> {
+    // Handle initial protocol handshake described here:
+    //  https://github.com/automerge/automerge-repo/blob/54ac3db6da1ebab274485429f63765a2da6e5b4b/packages/automerge-repo-network-websocket/README.md
+    //
+    // This function ensures that initial join/peer messages are
+    // handled in the correct order. Subsequent `sync` messages might
+    // arrive from either side (client or server), but `join` and `peer`
+    // has to be handled sequentially.
+    pub async fn handle_handshake(
+        repo_msg_recv: &mut mpsc::Receiver<RepoMessage>,
+        repo_msg_send: &mpsc::Sender<RepoMessage>,
+        iroh_send: &mut SendStream,
+        iroh_recv: &mut RecvStream,
+    ) -> anyhow::Result<()> {
+        let join_msg = repo_msg_recv.recv().await.unwrap();
+        send_message(iroh_send, join_msg).await?;
+
+        let peer_msg = read_message(iroh_recv).await?;
+        // SILENCE, JS IS TALKING
+        repo_msg_send.send(peer_msg).await.unwrap();
+        let sync_state = repo_msg_recv.recv().await.unwrap();
+        // JS RETURNED
+        send_message(iroh_send, sync_state).await.unwrap();
+
+        Ok(())
+    }
+
+    pub async fn receive(&self, remote: EndpointId) -> anyhow::Result<()> {
         let (send_js, recv_js) = mpsc::channel::<RepoMessage>(10);
         let (send_rust, recv_rust) = mpsc::channel::<RepoMessage>(10);
 
@@ -121,83 +150,37 @@ impl Node {
             .spawn();
 
         let peer_conn = PeerConnection {
-            init_sync: None,
             js_to_rust: send_rust,
             rust_to_js: Arc::new(Mutex::new(recv_js)),
-
-            router: Some(router),
-            connection: None,
-            join_handle: None,
+            _router: Some(router),
+            _join_handle: None,
         };
 
         // TODO: check if connected
-        self.conns.insert(remote, Mutex::new(peer_conn));
+        self.conns.lock().await.insert(remote, peer_conn);
 
         Ok(())
     }
 
     pub async fn send_js(&self, remote: EndpointId, msg: RepoMessage) -> anyhow::Result<()> {
-        let conn = match self.conns.get(&remote) {
+        match self.conns.lock().await.get(&remote) {
             None => bail!("unknown peer"),
-            Some(conn) => conn,
+            Some(conn) => {
+                conn.js_to_rust.send(msg).await?;
+            }
         };
-
-        let mut conn = conn.lock().await;
-
-        if let Some(kickoff) = conn.init_sync.take() {
-            kickoff.send(msg).expect("kickoff sync protocol");
-            return Ok(());
-        };
-
-        conn.js_to_rust.send(msg).await?;
 
         Ok(())
     }
 
-    pub async fn get_conn(
+    pub async fn get_recv_subscription(
         &self,
         remote: EndpointId,
     ) -> anyhow::Result<Arc<Mutex<mpsc::Receiver<RepoMessage>>>> {
-        let conn = match self.conns.get(&remote) {
+        match self.conns.lock().await.get(&remote) {
             None => bail!("unknown peer"),
-            Some(conn) => conn,
-        };
-
-        let conn = conn.lock().await;
-
-        Ok(conn.rust_to_js.clone())
-    }
-
-    async fn send_message(send: &mut SendStream, msg: Option<RepoMessage>) -> Result<(), String> {
-        if let Some(msg) = msg {
-            // Write content length
-            send.write_all(&(msg.len() as u64).to_le_bytes())
-                .await
-                .unwrap();
-
-            // Write the message
-            send.write_all(&msg).await.unwrap();
-        } else {
-            send.write_all(&0u64.to_le_bytes()).await.unwrap();
+            Some(conn) => Ok(conn.rust_to_js.clone()),
         }
-
-        Ok(())
-    }
-
-    async fn read_message(recv: &mut RecvStream) -> anyhow::Result<Option<RepoMessage>> {
-        let mut incoming_len = [0u8; 8];
-        recv.read_exact(&mut incoming_len).await?;
-        let len = u64::from_le_bytes(incoming_len);
-
-        if len == 0 {
-            // zero length indicates no meaningful message this round
-            return Ok(None);
-        }
-
-        let mut buffer = vec![0u8; len as usize];
-        recv.read_exact(&mut buffer).await?;
-
-        Ok(Some(buffer))
     }
 }
 
@@ -210,31 +193,46 @@ struct ConnHandler {
 impl ProtocolHandler for ConnHandler {
     async fn accept(&self, connection: Connection) -> Result<(), iroh::protocol::AcceptError> {
         let (mut send, mut recv) = connection.accept_bi().await.unwrap();
-        println!("ACCEPTED BI");
 
         loop {
-            println!("BEFORE READ");
-            let remote_msg = Node::read_message(&mut recv).await.expect("read reply");
-            println!("AFTER READ {:?}", remote_msg);
-
-            if let Some(msg) = remote_msg {
-                // JS reads the message, handles in NetworkAdapter
-                // and sends back
-                // ==== SILENCE, JS IS TALKIN ====
-                self.send_js.send(msg).await.expect("send msg to JS");
-                let sync_msg = self
-                    .recv_rust
-                    .lock()
-                    .await
-                    .recv()
-                    .await
-                    .expect("get msg from JS");
-                // ==== JS FINISHED ====
-
-                Node::send_message(&mut send, Some(sync_msg))
-                    .await
-                    .expect("send reply to remote");
-            }
+            select! {
+                biased;
+                remote_msg = read_message(&mut recv) => {
+                    self.send_js.send(remote_msg.unwrap()).await.expect("send msg to JS");
+                }
+                sync_msg = async { self.recv_rust.lock().await.recv().await } => {
+                    send_message(&mut send, sync_msg.unwrap())
+                        .await
+                        .expect("send reply to remote");
+                }
+            };
         }
     }
+}
+
+async fn send_message(send: &mut SendStream, msg: RepoMessage) -> anyhow::Result<()> {
+    // Write content length
+    send.write_all(&(msg.len() as u64).to_le_bytes())
+        .await
+        .unwrap();
+
+    // Write content
+    send.write_all(&msg).await.unwrap();
+
+    Ok(())
+}
+
+async fn read_message(recv: &mut RecvStream) -> anyhow::Result<RepoMessage> {
+    let mut incoming_len = [0u8; 8];
+    recv.read_exact(&mut incoming_len).await?;
+    let len = u64::from_le_bytes(incoming_len);
+
+    if len == 0 {
+        return Ok(vec![]);
+    }
+
+    let mut buffer = vec![0u8; len as usize];
+    recv.read_exact(&mut buffer).await?;
+
+    Ok(buffer)
 }

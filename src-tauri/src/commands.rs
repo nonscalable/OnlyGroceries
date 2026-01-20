@@ -4,9 +4,8 @@ use futures::StreamExt;
 use iroh::{discovery::mdns::DiscoveryEvent, EndpointId};
 use serde::Serialize;
 use tauri::{command, ipc::Channel, State};
-use tokio::sync::Mutex;
 
-use crate::node::Node;
+use crate::node::{Node, RepoMessage};
 
 #[derive(Debug, Clone, Serialize)]
 pub struct DiscoveredPeer {
@@ -20,19 +19,17 @@ pub enum MdnsEvent {
     Expired(String),
 }
 
-pub const SYNC_ALPN: &[u8] = b"iroh/automerge-network-adapter";
-
 #[command]
-pub(crate) async fn get_endpoint_id(state: State<'_, Mutex<Node>>) -> Result<String, String> {
-    Ok(state.lock().await.endpoint.id().to_string())
+pub(crate) async fn get_endpoint_id(state: State<'_, Node>) -> Result<String, String> {
+    Ok(state.endpoint.id().to_string())
 }
 
 #[command]
 pub(crate) async fn subscribe_mdns(
-    state: State<'_, Mutex<Node>>,
+    state: State<'_, Node>,
     channel: Channel<MdnsEvent>,
 ) -> Result<(), String> {
-    let mdns = { state.lock().await.mdns.clone() };
+    let mdns = state.mdns.clone();
 
     let mut events = mdns.lock().await.subscribe().await;
     while let Some(event) = events.next().await {
@@ -55,27 +52,22 @@ pub(crate) async fn subscribe_mdns(
 }
 
 #[command]
-pub(crate) async fn connect(
-    state: State<'_, Mutex<Node>>,
-    remote_str: String,
-) -> Result<(), String> {
+pub(crate) async fn connect(state: State<'_, Node>, remote_str: String) -> Result<(), String> {
     let remote = EndpointId::from_str(&remote_str).unwrap();
-
-    state.lock().await.connect(remote).await.unwrap();
-
+    state.connect(remote).await.unwrap();
     Ok(())
 }
 
 #[command]
 pub(crate) async fn send(
-    state: State<'_, Mutex<Node>>,
+    state: State<'_, Node>,
     remote_str: String,
     msg: Vec<u8>,
 ) -> Result<(), String> {
     let remote = EndpointId::from_str(&remote_str).unwrap();
 
-    let node = state.lock().await;
-    node.send_js(remote, msg)
+    state
+        .send_js(remote, msg)
         .await
         .map_err(|err| err.to_string())?;
 
@@ -84,16 +76,13 @@ pub(crate) async fn send(
 
 #[command]
 pub(crate) async fn subscribe_recv(
-    state: State<'_, Mutex<Node>>,
+    state: State<'_, Node>,
     remote_str: String,
     js_channel: Channel<RepoMessage>,
 ) -> Result<(), String> {
     let remote = EndpointId::from_str(&remote_str).unwrap();
 
-    let conn = {
-        let node = state.lock().await;
-        node.get_conn(remote).await.unwrap()
-    };
+    let conn = state.get_recv_subscription(remote).await.unwrap();
 
     while let Some(px) = conn.lock().await.recv().await {
         js_channel.send(px).expect("send message to JS via IPC");
@@ -103,13 +92,8 @@ pub(crate) async fn subscribe_recv(
 }
 
 #[command]
-pub(crate) async fn receive(
-    state: State<'_, Mutex<Node>>,
-    remote_str: String,
-) -> Result<(), String> {
+pub(crate) async fn receive(state: State<'_, Node>, remote_str: String) -> Result<(), String> {
     let remote = EndpointId::from_str(&remote_str).unwrap();
-    state.lock().await.receive(remote).await.unwrap();
+    state.receive(remote).await.unwrap();
     Ok(())
 }
-
-pub type RepoMessage = Vec<u8>;

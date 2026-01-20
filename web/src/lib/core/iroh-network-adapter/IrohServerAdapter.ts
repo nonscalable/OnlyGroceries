@@ -1,6 +1,5 @@
 import {
   accept as irohAccept,
-  connect as irohConnect,
   send as irohSend,
   subscribeRecv
 } from '$src/tauri'
@@ -9,7 +8,6 @@ import { isJoinMessage, type FromServerMessage } from './messages'
 import {
   cbor,
   NetworkAdapter,
-  type Message,
   type PeerId,
   type PeerMetadata
 } from '@automerge/automerge-repo'
@@ -18,6 +16,10 @@ import { toUint8Array } from './util'
 export class IrohServerAdapter extends NetworkAdapter {
   #endpoint: string
   #ready: boolean
+  #readyResolver?: () => void
+  #readyPromise: Promise<void> = new Promise<void>(resolve => {
+    this.#readyResolver = resolve
+  })
 
   constructor(endpointId: string) {
     super()
@@ -32,13 +34,15 @@ export class IrohServerAdapter extends NetworkAdapter {
 
     irohAccept(this.#endpoint).then(() => {
       this.#ready = true
-    })
+      this.#readyResolver?.()
 
-    setTimeout(() => {
+      // TODO: automerge-websocket-adapter waits
+      // for some time and calls 'forceReady' in the main function
+      // to not block keep the document 'unavailable'
       subscribeRecv(this.#endpoint, rawMsg => {
         this.receiveMessage(rawMsg)
       })
-    }, 0)
+    })
   }
 
   receiveMessage(msgBytes: Uint8Array<ArrayBufferLike>) {
@@ -85,9 +89,6 @@ export class IrohServerAdapter extends NetworkAdapter {
 
   whenReady(): Promise<void> {
     console.log('[iroh server] whenReady init')
-    return new Promise(resolve => {
-      console.log('[iroh server] whenReady resolve')
-      resolve()
-    })
+    return this.#readyPromise
   }
 }

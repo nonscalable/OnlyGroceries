@@ -11,7 +11,6 @@ import type {
 import {
   cbor,
   NetworkAdapter,
-  type Message,
   type PeerId,
   type PeerMetadata
 } from '@automerge/automerge-repo'
@@ -21,6 +20,10 @@ import { isPeerMessage } from '@automerge/automerge-repo-network-websocket/dist/
 export class IrohClientAdapter extends NetworkAdapter {
   #endpoint: string
   #ready: boolean
+  #readyResolver?: () => void
+  #readyPromise: Promise<void> = new Promise<void>(resolve => {
+    this.#readyResolver = resolve
+  })
 
   constructor(endpointId: string) {
     super()
@@ -35,15 +38,16 @@ export class IrohClientAdapter extends NetworkAdapter {
 
     irohConnect(this.#endpoint).then(() => {
       this.#ready = true
-    })
+      this.#readyResolver?.()
 
-    setTimeout(() => {
+      // TODO: automerge-websocket-adapter waits
+      // for some time and calls 'forceReady' in the main function
+      // to not block keep the document 'unavailable'
+      this.send(joinMessage(peerId, peerMetadata!))
       subscribeRecv(this.#endpoint, rawMsg => {
         this.receiveMessage(rawMsg)
       })
-    }, 0)
-
-    this.send(joinMessage(this.peerId, this.peerMetadata!))
+    })
   }
 
   receiveMessage(msgBytes: Uint8Array<ArrayBufferLike>) {
@@ -83,10 +87,7 @@ export class IrohClientAdapter extends NetworkAdapter {
 
   whenReady(): Promise<void> {
     console.log('[iroh client] whenReady init')
-    return new Promise(resolve => {
-      console.log('[iroh client] whenReady resolve')
-      resolve()
-    })
+    return this.#readyPromise
   }
 }
 
