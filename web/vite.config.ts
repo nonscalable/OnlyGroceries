@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import wasm from 'vite-plugin-wasm'
 import path from 'path'
@@ -18,67 +18,78 @@ const time = JSON.stringify(
   })()
 )
 
-export default defineConfig({
-  define: {
-    __BUILD_TIME__: time
-  },
-  server: {
-    host: true,
-    allowedHosts: true
-  },
-  plugins: [
-    wasm(),
-    svelte(),
-    VitePWA({
-      strategies: 'injectManifest',
-      srcDir: 'src',
-      filename: 'sw.ts',
-      registerType: 'prompt',
-      injectRegister: false,
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
 
-      manifest: {
-        name: 'Grocery List',
-        short_name: 'Grocery',
-        background_color: '#ffffff',
-        start_url: '/',
-        theme_color: '#ffffff',
-        icons: [
-          {
-            src: '/icon-512.png',
-            type: 'image/png',
-            purpose: 'maskable',
-            sizes: '512x512'
-          },
-          { src: '/icon-512.png', type: 'image/png', sizes: '512x512' },
-          { src: '/icon-192.png', type: 'image/png', sizes: '192x192' }
-        ]
+  return {
+    define: {
+      __BUILD_TIME__: time
+    },
+
+    server: {
+      host: true,
+      allowedHosts: process.env.VITE_ALLOWED_HOSTS
+        ? process.env.VITE_ALLOWED_HOSTS.split(',').map(h => h.trim())
+        : true
       },
 
-      injectManifest: {
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,wasm}'],
-        maximumFileSizeToCacheInBytes: 30 * 1024 * 1024
-      },
+    plugins: [
+      wasm(),
+      svelte(),
+      VitePWA({
+        strategies: 'injectManifest',
+        srcDir: 'src',
+        filename: 'sw.ts',
+        registerType: 'prompt',
+        injectRegister: false,
 
-      devOptions: {
-        enabled: false,
-        navigateFallback: 'index.html',
-        type: 'module'
+        manifest: {
+          name: 'Grocery List',
+          short_name: 'Grocery',
+          background_color: '#ffffff',
+          start_url: '/',
+          theme_color: '#ffffff',
+          icons: [
+            {
+              src: '/icon-512.png',
+              type: 'image/png',
+              purpose: 'maskable',
+              sizes: '512x512'
+            },
+            { src: '/icon-512.png', type: 'image/png', sizes: '512x512' },
+            { src: '/icon-192.png', type: 'image/png', sizes: '192x192' }
+          ]
+        },
+
+        injectManifest: {
+          globPatterns: ['**/*.{js,css,html,svg,png,ico,wasm}'],
+          maximumFileSizeToCacheInBytes: 30 * 1024 * 1024
+        },
+
+        devOptions: {
+          enabled: false,
+          navigateFallback: 'index.html',
+          type: 'module'
+        }
+      })
+    ],
+
+    build: {
+      sourcemap: true,
+      target: 'esnext'
+    },
+
+    resolve: {
+      alias: {
+        $src: path.resolve('./src'),
+        $lib: path.resolve('./src/lib'),
+        $stores: path.resolve('./src/stores')
       }
-    })
-  ],
-  build: {
-    sourcemap: true,
-    target: 'esnext'
-  },
-  resolve: {
-    alias: {
-      $src: path.resolve('./src'),
-      $lib: path.resolve('./src/lib'),
-      $stores: path.resolve('./src/stores')
+    },
+
+    worker: {
+      format: 'es',
+      plugins: () => [wasm()]
     }
-  },
-  worker: {
-    format: 'es',
-    plugins: () => [wasm()]
   }
 })
