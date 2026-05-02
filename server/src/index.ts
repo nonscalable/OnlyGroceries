@@ -3,6 +3,7 @@ import { NodeWSServerAdapter } from '@automerge/automerge-repo-network-websocket
 import { NodeFSStorageAdapter } from '@automerge/automerge-repo-storage-nodefs'
 import express from 'express'
 import { WebSocketServer } from 'ws'
+import crypto from 'crypto'
 
 import 'dotenv/config'
 
@@ -10,6 +11,7 @@ type Config = {
   port: number
   baseDir: string
   allowedTokens: string[]
+  debugWs: boolean
 }
 
 let config = parseEnvConfig()
@@ -26,6 +28,25 @@ let repo = new Repo({
   network: [new NodeWSServerAdapter(wss as any)]
 })
 
+if (config.debugWs) {
+  console.log('[debug] ws config', {
+    port: config.port,
+    baseDir: config.baseDir,
+    tokenCount: config.allowedTokens.length,
+    tokenFingerprints: config.allowedTokens.map(token => {
+      const normalizedToken = token || ''
+      const hash = crypto
+        .createHash('sha256')
+        .update(normalizedToken)
+        .digest('hex')
+      return {
+        length: normalizedToken.length,
+        sha256_8: hash.slice(0, 8)
+      }
+    })
+  })
+}
+
 app.get('/', (_, resp) => {
   resp.send('OK')
 })
@@ -39,16 +60,30 @@ server.on('upgrade', async (req, socket, head) => {
   }
 
   let accessToken = params.get('access-token')
-  console.log('[debug] ws upgrade', {
-    url,
-    accessToken,
-    remoteAddress: req.socket.remoteAddress || 'unknown'
-  })
-  console.log('[debug] token check', {
-    allowedTokens: config.allowedTokens,
-    accessTokenLength: accessToken?.length,
-    isAllowed: accessToken ? config.allowedTokens.includes(accessToken) : false
-  })
+
+  if (config.debugWs) {
+    const normalizedToken = accessToken || ''
+    const tokenHash = crypto
+      .createHash('sha256')
+      .update(normalizedToken)
+      .digest('hex')
+      .slice(0, 8)
+
+    console.log('[debug] ws upgrade', {
+      method: req.method,
+      url,
+      host: req.headers.host || '',
+      remoteAddress: req.socket.remoteAddress || 'unknown',
+      xForwardedFor: req.headers['x-forwarded-for'] || '',
+      xForwardedProto: req.headers['x-forwarded-proto'] || '',
+      cfConnectingIp: req.headers['cf-connecting-ip'] || '',
+      hasAccessToken: Boolean(accessToken),
+      accessTokenLength: normalizedToken.length,
+      accessTokenSha256_8: tokenHash,
+      tokenMatch: config.allowedTokens.includes(normalizedToken)
+    })
+  }
+
   if (!accessToken) {
     socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n')
     socket.destroy()
@@ -103,9 +138,13 @@ function parseEnvConfig(): Config {
   // base dir
   let baseDir = process.env.BASE_DIR || 'automerge-repo-data'
 
+  // debug ws logs
+  let debugWs = process.env.DEBUG_WS === '1'
+
   return {
     port: port,
     baseDir: baseDir,
-    allowedTokens: tokens
+    allowedTokens: tokens,
+    debugWs: debugWs
   }
 }
