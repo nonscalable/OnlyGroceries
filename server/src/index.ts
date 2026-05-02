@@ -22,7 +22,8 @@ let wss = new WebSocketServer({
 })
 let repo = new Repo({
   storage: new NodeFSStorageAdapter(config.baseDir),
-  network: [new NodeWSServerAdapter(wss)]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  network: [new NodeWSServerAdapter(wss as any)]
 })
 
 app.get('/', (_, resp) => {
@@ -38,6 +39,11 @@ server.on('upgrade', async (req, socket, head) => {
   }
 
   let accessToken = params.get('access-token')
+  console.log('[debug] ws upgrade', {
+    url,
+    accessToken,
+    remoteAddress: req.socket.remoteAddress || 'unknown'
+  })
   if (!accessToken) {
     socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n')
     socket.destroy()
