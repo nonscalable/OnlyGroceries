@@ -22,6 +22,10 @@ export default defineConfig({
   define: {
     __BUILD_TIME__: time
   },
+  server: {
+    host: true,
+    allowedHosts: true
+  },
   plugins: [
     wasm(),
     svelte(),
