@@ -44,6 +44,11 @@ server.on('upgrade', async (req, socket, head) => {
     accessToken,
     remoteAddress: req.socket.remoteAddress || 'unknown'
   })
+  console.log('[debug] token check', {
+    allowedTokens: config.allowedTokens,
+    accessTokenLength: accessToken?.length,
+    isAllowed: accessToken ? config.allowedTokens.includes(accessToken) : false
+  })
   if (!accessToken) {
     socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n')
     socket.destroy()
