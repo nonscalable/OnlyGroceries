@@ -48,7 +48,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ghcr.io/shall0pass/actual-backup
+          images: ghcr.io/shall0pass/OnlyGroceries
           tags: |
             type=raw,value=${{ steps.semver.outputs.tag }}
             type=raw,value=${{ steps.semver.outputs.short }}
