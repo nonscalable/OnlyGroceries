@@ -1,7 +1,7 @@
 {
   "name": "@onlygroceries/server",
   "private": true,
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "An automerge-repo-sync-server with dead simple authorization",
   "main": "index.js",
   "scripts": {
