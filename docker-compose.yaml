@@ -1,0 +1,18 @@
+services:
+  app:
+    container_name: onlygroceries
+    image: ghcr.io/shall0pass/onlygroceries:latest
+    ports:
+      - "5173:5173" #web app
+      - "5174:8080" #sync server
+    restart: unless-stopped
+    volumes:
+      - /path/to/docker/onlygroceries:/app/server/data
+    environment:
+      - ALLOWED_TOKEN=secret-token
+      - VITE_ALLOWED_HOSTS=onlygroceries.example.com
+      - DEBUG_WS=0 #used for debugging websocket connections, set to 1 to enable
+      - PORT=8080
+
+
+    
