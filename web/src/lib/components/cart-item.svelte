@@ -16,8 +16,7 @@
 <li class="mb-2 flex justify-between">
   <label
     for={`rare-${i}`}
-    class="item.purchased flex w-full items-center
-   gap-2 leading-8"
+    class="item.purchased flex min-w-0 w-full items-center gap-2"
     class:line-through={item.purchased}
   >
     <Checkbox
@@ -25,7 +24,7 @@
       checked={item.purchased}
       onCheckedChange={togglePurchased}
     />
-    {item.text}
+    <span class="truncate">{item.text}</span>
   </label>
   <Button
     variant="ghost"

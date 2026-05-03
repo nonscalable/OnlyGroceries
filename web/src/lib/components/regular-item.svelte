@@ -91,8 +91,8 @@
     >
       <GripVertical class="mx-2 size-4 self-center text-slate-500" />
 
-      <div class="flex w-full min-w-0 items-center justify-between">
-        <span class="flex-1 whitespace-normal break-words break-all py-2 text-left"
+      <div class="flex w-full min-w-0 items-center justify-between gap-2">
+        <span class="flex-1 truncate py-2 text-left"
           >{item.text}</span
         >
         <ShoppingBasket class="size-4 {item.inCart ? '' : 'invisible'}" />
