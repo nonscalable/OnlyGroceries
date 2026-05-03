@@ -60,14 +60,8 @@ export default defineConfig(({ mode }) => {
             {
               src: '/icon_onlygroceries.png',
               type: 'image/png',
-              purpose: 'maskable',
-              sizes: '1024x1024'
-            },
-            {
-              src: '/icon_onlygroceries.png',
-              type: 'image/png',
-              purpose: 'any',
-              sizes: '1024x1024'
+              purpose: 'any maskable',
+              sizes: 'any'
             }
           ]
         },
