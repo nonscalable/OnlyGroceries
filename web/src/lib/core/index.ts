@@ -16,7 +16,11 @@ export function createItem(doc: Root, item: Item) {
 }
 
 export function deleteItem(doc: Root, itemId: string) {
-  const globalIdx = doc.globalOrder.indexOf(itemId)
+  let globalIdx = -1
+  for (let i = 0; i < doc.globalOrder.length; i++) {
+    if (String(doc.globalOrder[i]) === itemId) { globalIdx = i; break }
+  }
+  if (globalIdx === -1) return
   doc.globalOrder.splice(globalIdx, 1)
   delete doc.items[itemId]
 }
@@ -29,8 +33,12 @@ export function handleDnd(
 ) {
   const oldId = itemsView[oldIndex]
   const newId = itemsView[newIndex]
-  const globalOld = doc.globalOrder.indexOf(oldId)
-  const globalNew = doc.globalOrder.indexOf(newId)
+  let globalOld = -1, globalNew = -1
+  for (let i = 0; i < doc.globalOrder.length; i++) {
+    const s = String(doc.globalOrder[i])
+    if (s === oldId) globalOld = i
+    if (s === newId) globalNew = i
+  }
   const [movedItem] = doc.globalOrder.splice(globalOld, 1)
   doc.globalOrder.splice(globalNew, 0, movedItem)
 }

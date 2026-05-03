@@ -38,6 +38,31 @@
     $root?.globalOrder.filter(id => $root.items[id].inCart) || []
   )
 
+  let regularCartIds = $derived(
+    cartIds.filter(id => $root?.items[id].kind !== 'special')
+  )
+
+  type SpecialGroup = { listId: string; name: string; ids: string[] }
+  let specialCartGroups = $derived.by<SpecialGroup[]>(() => {
+    if (!$root) return []
+    const seen = new Map<string, string[]>()
+    for (const id of cartIds) {
+      const item = $root.items[id]
+      if (item.kind === 'special') {
+        const bucket = seen.get(item.specialId)
+        if (bucket) bucket.push(id)
+        else seen.set(item.specialId, [id])
+      }
+    }
+    return $root.specials.order
+      .filter(listId => (seen.get(listId)?.length ?? 0) > 0)
+      .map(listId => ({
+        listId,
+        name: $root!.specials.lists[listId]?.name ?? listId,
+        ids: seen.get(listId)!
+      }))
+  })
+
   const options: Sortable.SortableOptions = {
     animation: 150,
     swapThreshold: 0.5,
@@ -57,7 +82,7 @@
       if (activeTab == 'staple') {
         handleDnd(doc, staples, oldIndex, newIndex)
       } else {
-        handleDnd(doc, cartIds, oldIndex, newIndex)
+        handleDnd(doc, regularCartIds, oldIndex, newIndex)
       }
     })
   }
@@ -118,20 +143,59 @@
       </Tabs.Content>
 
       <Tabs.Content value="rare">
-        {#key cartIds}
-          <ul use:sortable={options} class="grid gap-2">
-            {#each cartIds as id, i (id)}
-              <CartItem
-                {i}
-                item={$root?.items[id]}
-                togglePurchased={() =>
-                  root?.change(doc => togglePurchased(doc, id))}
-                deleteCartItem={() =>
-                  root?.change(doc => deleteFromCart(doc, id))}
-              />
-            {/each}
-          </ul>
-        {/key}
+        {#if regularCartIds.length > 0}
+          <details open>
+            <summary
+              class="flex cursor-pointer select-none items-center gap-2 rounded-md px-1 py-1 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+            >
+              <span class="chevron">▶</span>
+              Shopping List
+              <span class="ml-auto text-xs font-normal text-slate-400"
+                >{regularCartIds.length}</span
+              >
+            </summary>
+            {#key regularCartIds}
+              <ul use:sortable={options} class="mt-1 grid gap-2 pl-2">
+                {#each regularCartIds as id, i (id)}
+                  <CartItem
+                    {i}
+                    item={$root?.items[id]}
+                    togglePurchased={() =>
+                      root?.change(doc => togglePurchased(doc, id))}
+                    deleteCartItem={() =>
+                      root?.change(doc => deleteFromCart(doc, id))}
+                  />
+                {/each}
+              </ul>
+            {/key}
+          </details>
+        {/if}
+
+        {#each specialCartGroups as group (group.listId)}
+          <details class="mt-3" open>
+            <summary
+              class="flex cursor-pointer select-none items-center gap-2 rounded-md px-1 py-1 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+            >
+              <span class="chevron">▶</span>
+              {group.name}
+              <span class="ml-auto text-xs font-normal text-slate-400"
+                >{group.ids.length}</span
+              >
+            </summary>
+            <ul class="mt-1 grid gap-2 pl-2">
+              {#each group.ids as id, i (id)}
+                <CartItem
+                  {i}
+                  item={$root?.items[id]}
+                  togglePurchased={() =>
+                    root?.change(doc => togglePurchased(doc, id))}
+                  deleteCartItem={() =>
+                    root?.change(doc => deleteFromCart(doc, id))}
+                />
+              {/each}
+            </ul>
+          </details>
+        {/each}
       </Tabs.Content>
     </Tabs.Root>
   </div>
@@ -157,5 +221,15 @@
     border-radius: 8px;
     transform: rotate(4deg);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  details .chevron {
+    display: inline-block;
+    font-size: 0.6rem;
+    transition: transform 0.2s;
+  }
+
+  details[open] .chevron {
+    transform: rotate(90deg);
   }
 </style>

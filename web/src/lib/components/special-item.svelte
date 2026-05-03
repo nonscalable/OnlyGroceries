@@ -11,32 +11,53 @@
     toggleInCart: () => void
   }
   let { item, remove, toggleInCart }: Props = $props()
+
+  let confirming = $state(false)
+  let resetTimer: ReturnType<typeof setTimeout> | null = null
+
+  function handleDelete() {
+    if (confirming) {
+      confirming = false
+      if (resetTimer) clearTimeout(resetTimer)
+      remove()
+    } else {
+      confirming = true
+      if (resetTimer) clearTimeout(resetTimer)
+      resetTimer = setTimeout(() => { confirming = false }, 3000)
+    }
+  }
+
+  $effect(() => () => { if (resetTimer) clearTimeout(resetTimer) })
 </script>
 
-<Button
-  size="lg"
-  variant="outline"
-  class="grid h-auto w-full grid-cols-[auto_1fr_auto_auto] gap-0 px-0 {item.inCart
+<div
+  class="flex min-h-12 w-full items-stretch overflow-hidden rounded-md border border-input {item.inCart
     ? 'bg-slate-200'
-    : ''}"
-  aria-pressed={item.inCart}
-  onclick={toggleInCart}
+    : 'bg-background'}"
 >
-  <GripVertical class="mx-2 size-4 text-slate-500" />
-
-  <div class="flex w-full min-w-0 items-center justify-between">
-    <span class="flex-1 whitespace-normal break-words break-all py-2 text-left"
-      >{item.text}</span
-    >
-    <ShoppingBasket class="size-4 {item.inCart ? '' : 'invisible'}" />
-  </div>
-
-  <Button
-    variant="ghost"
-    class="px-4 text-slate-500"
-    onclick={e => {
-      e.stopPropagation()
-      remove()
-    }}><Trash2 class="size-4" /></Button
+  <button
+    class="grid flex-1 grid-cols-[auto_1fr_auto] gap-0 px-0 text-sm font-medium"
+    aria-pressed={item.inCart}
+    onclick={toggleInCart}
   >
-</Button>
+    <GripVertical class="mx-2 size-4 self-center text-slate-500" />
+
+    <div class="flex w-full min-w-0 items-center justify-between">
+      <span class="flex-1 whitespace-normal break-words break-all py-2 text-left"
+        >{item.text}</span
+      >
+      <ShoppingBasket class="size-4 {item.inCart ? '' : 'invisible'}" />
+    </div>
+  </button>
+
+  <button
+    class="relative overflow-hidden px-4 text-slate-500"
+    onclick={handleDelete}
+  >
+    <span
+      class="absolute inset-0 bg-red-500 transition-transform duration-200 ease-out"
+      style:transform={confirming ? 'translateX(0)' : 'translateX(100%)'}
+    />
+    <Trash2 class="relative z-10 size-4" />
+  </button>
+</div>
