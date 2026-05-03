@@ -52,6 +52,7 @@ export default defineConfig(({ mode }) => {
         manifest: {
           name: 'Grocery List',
           short_name: 'Grocery',
+          display: 'standalone',
           background_color: '#ffffff',
           start_url: '/',
           theme_color: '#ffffff',

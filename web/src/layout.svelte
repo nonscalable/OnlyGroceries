@@ -96,13 +96,13 @@
         <Main {root} />
       {/if}
 
-      <PwaBadge />
-
-      <RemoveDrawer {onRemove} />
-      <CreateDrawer {onCreate} />
-      <div
-        class="z-1 fixed bottom-0 left-0 h-20 w-full bg-gradient-to-t from-white"
-      ></div>
+<RemoveDrawer {onRemove} />
+        <CreateDrawer {onCreate} />
+        <div
+          class="z-1 fixed bottom-0 left-0 h-20 w-full bg-gradient-to-t from-white"
+        ></div>
     {/if}
+
+    <PwaBadge />
   </Sidebar.Inset>
 </Sidebar.Provider>
