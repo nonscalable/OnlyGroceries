@@ -21,7 +21,8 @@
     togglePurchased,
     createItem,
     deleteItem,
-    handleDnd
+    handleDnd,
+    updateItemText
   } from '$src/lib/core'
 
   interface Props {
@@ -135,6 +136,7 @@
                   toggleInCart={() =>
                     root?.change(doc => toggleInCart(doc, id))}
                   deleteItem={() => deleteStaple(id)}
+                  updateText={(text) => root?.change(doc => updateItemText(doc, id, text))}
                 />
               </li>
             {/each}

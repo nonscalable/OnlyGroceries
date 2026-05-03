@@ -61,11 +61,19 @@ export function toggleInCart(doc: Root, id: string) {
   doc.items[id].inCart = !doc.items[id].inCart
 }
 
+export function updateItemText(doc: Root, id: string, text: string) {
+  doc.items[id].text = text
+}
+
 // Special Lists
 
 export function createSpecialList(doc: Root, id: string, name: string) {
   doc.specials.lists[id] = { name }
   doc.specials.order.push(id)
+}
+
+export function renameSpecialList(doc: Root, id: string, name: string) {
+  doc.specials.lists[id].name = name
 }
 
 export function deleteSpecialList(doc: Root, id: string) {

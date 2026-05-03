@@ -14,8 +14,11 @@
     toggleInCart,
     createItem,
     deleteItem,
-    handleDnd
+    handleDnd,
+    updateItemText
   } from '$src/lib/core'
+  import Pencil from 'lucide-svelte/icons/pencil'
+  import { renameSpecialList } from '$src/lib/core'
 
   interface Props {
     listId: string
@@ -25,6 +28,28 @@
 
   let title = $derived($root?.specials.lists[listId].name)
   let text = $state('')
+  let editingTitle = $state(false)
+  let editTitleText = $state('')
+  let titleInputEl = $state<HTMLInputElement | null>(null)
+
+  function startEditTitle() {
+    editTitleText = title ?? ''
+    editingTitle = true
+    setTimeout(() => titleInputEl?.focus(), 0)
+  }
+
+  function commitTitle() {
+    const trimmed = editTitleText.trim()
+    if (trimmed && trimmed !== title) {
+      root?.change(doc => renameSpecialList(doc, listId, trimmed))
+    }
+    editingTitle = false
+  }
+
+  function handleTitleKeydown(e: KeyboardEvent) {
+    if (e.key === 'Enter') { e.preventDefault(); commitTitle() }
+    if (e.key === 'Escape') { editingTitle = false }
+  }
   let specials = $derived(
     $root?.globalOrder.filter(id => isSpecial($root.items[id], listId)) || []
   )
@@ -76,9 +101,26 @@
 </script>
 
 <div class="container pt-2">
-  <h1 class="text-3xl font-bold">
-    {title}
-  </h1>
+  <div class="flex w-full items-center gap-2">
+    {#if editingTitle}
+      <input
+        bind:this={titleInputEl}
+        bind:value={editTitleText}
+        onblur={commitTitle}
+        onkeydown={handleTitleKeydown}
+        class="flex-1 border-b-2 border-blue-400 bg-transparent text-3xl font-bold outline-none"
+      />
+    {:else}
+      <h1 class="flex-1 text-3xl font-bold">{title}</h1>
+      <button
+        onclick={startEditTitle}
+        class="text-slate-400 hover:text-slate-600"
+        aria-label="Rename list"
+      >
+        <Pencil class="size-5" />
+      </button>
+    {/if}
+  </div>
   <div class="mb-4 mt-4 flex flex-col gap-1">
     <Input
       class="text-md focus-visible:ring-offset-1"
@@ -98,6 +140,7 @@
             item={$root?.items[id] as Special}
             remove={() => root?.change(doc => deleteItem(doc, id))}
             toggleInCart={() => root?.change(doc => toggleInCart(doc, id))}
+            updateText={(text) => root?.change(doc => updateItemText(doc, id, text))}
           />
         </li>
       {/each}
