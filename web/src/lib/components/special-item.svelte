@@ -3,6 +3,7 @@
   import GripVertical from 'lucide-svelte/icons/grip-vertical'
   import ShoppingBasket from 'lucide-svelte/icons/shopping-basket'
   import Trash2 from 'lucide-svelte/icons/trash-2'
+  import Pencil from 'lucide-svelte/icons/pencil'
   import type { Special } from '$src/lib/core/types'
 
   interface Props {
@@ -33,18 +34,11 @@
   let editing = $state(false)
   let editText = $state('')
   let inputEl = $state<HTMLInputElement | null>(null)
-  let longPressTimer: ReturnType<typeof setTimeout> | null = null
 
-  function startLongPress() {
-    longPressTimer = setTimeout(() => {
-      editText = item.text
-      editing = true
-      setTimeout(() => inputEl?.focus(), 0)
-    }, 500)
-  }
-
-  function cancelLongPress() {
-    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null }
+  function startEdit() {
+    editText = item.text
+    editing = true
+    setTimeout(() => inputEl?.focus(), 0)
   }
 
   function commitEdit() {
@@ -78,12 +72,6 @@
       class="grid flex-1 grid-cols-[auto_1fr_auto] gap-0 px-0 text-sm font-medium"
       aria-pressed={item.inCart}
       onclick={toggleInCart}
-      ontouchstart={startLongPress}
-      ontouchend={cancelLongPress}
-      ontouchcancel={cancelLongPress}
-      onmousedown={startLongPress}
-      onmouseup={cancelLongPress}
-      onmouseleave={cancelLongPress}
     >
       <GripVertical class="mx-2 size-4 self-center text-slate-500" />
 
@@ -93,6 +81,14 @@
         >
         <ShoppingBasket class="size-4 {item.inCart ? '' : 'invisible'}" />
       </div>
+    </button>
+
+    <button
+      class="px-4 text-slate-500 hover:bg-slate-100"
+      onclick={startEdit}
+      aria-label="Edit item"
+    >
+      <Pencil class="size-4" />
     </button>
 
     <button
