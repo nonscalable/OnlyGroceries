@@ -38,7 +38,15 @@ This makes the following workflow:
 2. Before going to the shop, you click on the item you're going to buy.
 3. Once you're in the shop, switch to `Shopping List` tab to see only the items you need. No distractions!
 
-## Self Hosting (WIP)
+## Self Hosting
+
+It's recommended to install this using the docker-compose.yaml
+
+Notice:  This version, though forked, has some additional changes in the source that were AI generated.
+    1. Collapsible and Expandable lists in the Shopping List tab
+    2. Editable items by long pressing the item
+    3. Editable list names
+    4. Tap and confirm workflow for deleting an item from a list
 
 ## Building Android
 
