@@ -25,6 +25,7 @@
   const { rootDoc }: Props = $props()
 
   let sidebar = useSidebar()
+  let appVersion = $state(__APP_VERSION__)
   let specialListsMenuEl = $state<HTMLUListElement | null>(null)
 
   function toggleSidebarIfMobile() {
@@ -91,7 +92,7 @@
                 </div>
                 <div class="grid flex-1 text-left text-sm leading-tight">
                   <span class="truncate font-semibold">OnlyGroceries</span>
-                  <span class="truncate text-xs">1.0.0</span>
+                  <span class="truncate text-xs">{appVersion}</span>
                 </div>
               </a>
             {/snippet}
