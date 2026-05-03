@@ -8,6 +8,11 @@
   import { useRegisterSW } from 'virtual:pwa-register/svelte'
 
   import { persistedRootUrl, syncServerUrl } from '$src/lib/core/repo'
+  import {
+    highlightColor,
+    themePreference,
+    type ThemePreference
+  } from '$src/stores/theme'
   import { tick } from 'svelte'
   import type { AutomergeUrl } from '@automerge/automerge-repo'
 
@@ -20,10 +25,18 @@
 
   let version = $state(__APP_VERSION__)
   let buildTime = $state(__BUILD_TIME__)
+  let theme = $state<ThemePreference>($themePreference)
+  let highlight = $state($highlightColor)
   let url = $state($syncServerUrl)
   let newRootId = $state($persistedRootUrl)
   let isShareDisabled = $derived(!newRootId)
   let isUpdateDisabled = $derived(!newRootId || newRootId === $persistedRootUrl)
+
+  function saveAppearance() {
+    $themePreference = theme
+    $highlightColor = highlight
+    toast.success('Appearance preferences have been saved')
+  }
 
   async function checkForUpdates() {
     if ($needRefresh) {
@@ -96,12 +109,12 @@
 
       <dl class="space-y-2">
         <div class="flex justify-between">
-          <dt class="text-gray-600">Version:</dt>
-          <dd class="text-gray-900">{version}</dd>
+          <dt class="text-muted-foreground">Version:</dt>
+          <dd class="text-foreground">{version}</dd>
         </div>
         <div class="flex justify-between">
-          <dt class="text-gray-700">Build Date:</dt>
-          <dd class="text-gray-900">{buildTime}</dd>
+          <dt class="text-muted-foreground">Build Date:</dt>
+          <dd class="text-foreground">{buildTime}</dd>
         </div>
       </dl>
 
@@ -122,6 +135,40 @@
       />
 
       <Button class="mt-3 w-full" onclick={save}>Save</Button>
+    </section>
+
+    <section class="rounded-lg border p-4">
+      <h2 class="mb-3 text-xl font-semibold">Appearance</h2>
+
+      <div class="grid grid-cols-3 gap-2">
+        <Button
+          variant={theme === 'light' ? 'default' : 'outline'}
+          onclick={() => (theme = 'light')}>Light</Button
+        >
+        <Button
+          variant={theme === 'dark' ? 'default' : 'outline'}
+          onclick={() => (theme = 'dark')}>Dark</Button
+        >
+        <Button
+          variant={theme === 'system' ? 'default' : 'outline'}
+          onclick={() => (theme = 'system')}>System</Button
+        >
+      </div>
+
+      <div class="mt-4 flex items-center justify-between gap-3 rounded-md border p-3">
+        <div>
+          <p class="text-sm font-medium">Highlight color</p>
+          <p class="text-xs text-muted-foreground">Used for primary accents and focus ring</p>
+        </div>
+        <Input
+          type="color"
+          bind:value={highlight}
+          class="h-10 w-16 cursor-pointer rounded-md p-1"
+          aria-label="Highlight color"
+        />
+      </div>
+
+      <Button class="mt-3 w-full" onclick={saveAppearance}>Save Appearance</Button>
     </section>
 
     <section class="rounded-lg border p-4">

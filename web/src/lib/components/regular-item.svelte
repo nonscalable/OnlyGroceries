@@ -61,7 +61,7 @@
   data-select-btn
   class="duration-250 flex min-h-12 w-full items-stretch overflow-hidden rounded-md border {editing ? 'border-blue-400' : 'border-input'} transition-transform ease-out {touched
     ? 'scale-[1.03]'
-    : ''} {item.inCart ? 'bg-slate-200' : 'bg-background'}"
+    : ''} {item.inCart ? 'bg-slate-200 dark:bg-slate-700' : 'bg-background'}"
 >
   {#if editing}
     <GripVertical class="mx-2 size-4 self-center text-slate-500" />

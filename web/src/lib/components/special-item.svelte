@@ -55,7 +55,7 @@
 
 <div
   class="flex min-h-12 w-full items-stretch overflow-hidden rounded-md border {editing ? 'border-blue-400' : 'border-input'} {item.inCart
-    ? 'bg-slate-200'
+    ? 'bg-slate-200 dark:bg-slate-700'
     : 'bg-background'}"
 >
   {#if editing}
