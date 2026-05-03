@@ -76,6 +76,36 @@ export function renameSpecialList(doc: Root, id: string, name: string) {
   doc.specials.lists[id].name = name
 }
 
+export function reorderSpecialLists(
+  doc: Root,
+  oldIndex: number,
+  newIndex: number
+) {
+  if (
+    oldIndex === newIndex ||
+    oldIndex < 0 ||
+    newIndex < 0 ||
+    oldIndex >= doc.specials.order.length ||
+    newIndex >= doc.specials.order.length
+  ) {
+    return
+  }
+
+  const [moved] = doc.specials.order.splice(oldIndex, 1)
+  doc.specials.order.splice(newIndex, 0, moved)
+}
+
+export function setSpecialListOrder(doc: Root, orderedIds: string[]) {
+  if (orderedIds.length !== doc.specials.order.length) return
+
+  const knownIds = new Set(doc.specials.order.map(id => String(id)))
+  for (const id of orderedIds) {
+    if (!knownIds.has(id)) return
+  }
+
+  doc.specials.order.splice(0, doc.specials.order.length, ...orderedIds)
+}
+
 export function deleteSpecialList(doc: Root, id: string) {
   const items = Object.entries(doc.items)
     .filter(([_, item]) => isSpecial(item, id))

@@ -8,10 +8,12 @@
   import Settings from 'lucide-svelte/icons/settings'
   import Trash2 from 'lucide-svelte/icons/trash-2'
   import Plus from 'lucide-svelte/icons/plus'
+  import Sortable, { type SortableEvent } from 'sortablejs'
 
   import { router } from '$stores/router'
   import { removeDrawer } from '$stores/remove-drawer.svelte'
   import { createDrawer } from '$stores/create-drawer.svelte'
+  import { setSpecialListOrder } from '$src/lib/core'
 
   import { getPagePath } from '@nanostores/router'
   import { type AutomergeDocumentStore } from '@automerge/automerge-repo-svelte-store'
@@ -23,6 +25,7 @@
   const { rootDoc }: Props = $props()
 
   let sidebar = useSidebar()
+  let specialListsMenuEl = $state<HTMLUListElement | null>(null)
 
   function toggleSidebarIfMobile() {
     if (sidebar.isMobile) {
@@ -38,6 +41,38 @@
     toggleSidebarIfMobile()
     removeDrawer.open()
   }
+
+  const specialListSortOptions: Sortable.SortableOptions = {
+    animation: 150,
+    swapThreshold: 0.5,
+    draggable: '[data-special-list-id]',
+    delay: 80,
+    delayOnTouchOnly: true,
+    onEnd: handleSpecialListSort
+  }
+
+  function handleSpecialListSort(event: SortableEvent) {
+    const { oldIndex, newIndex } = event
+    if (typeof oldIndex !== 'number' || typeof newIndex !== 'number') return
+    if (!specialListsMenuEl) return
+
+    const orderedIds = Array.from(
+      specialListsMenuEl.querySelectorAll('[data-special-list-id]')
+    )
+      .map(node => (node as HTMLElement).dataset.specialListId)
+      .filter((id): id is string => Boolean(id))
+
+    rootDoc?.change(doc => {
+      setSpecialListOrder(doc, orderedIds)
+    })
+  }
+
+  $effect(() => {
+    if (!specialListsMenuEl) return
+
+    const sortable = Sortable.create(specialListsMenuEl, specialListSortOptions)
+    return () => sortable.destroy()
+  })
 </script>
 
 {#if $rootDoc}
@@ -89,13 +124,13 @@
           <Plus />
         </Sidebar.GroupAction>
         <Sidebar.GroupContent>
-          <Sidebar.Menu>
+          <Sidebar.Menu bind:ref={specialListsMenuEl}>
             {#if $rootDoc}
               {@const specialLists = $rootDoc.specials.order}
               {#if specialLists.length > 0}
-                {#each specialLists as listId, it}
+                {#each specialLists as listId (listId)}
                   {@const listName = $rootDoc.specials.lists[listId].name}
-                  <Sidebar.MenuItem>
+                  <Sidebar.MenuItem data-special-list-id={listId}>
                     <Sidebar.MenuButton
                       size="lg"
                       onclick={toggleSidebarIfMobile}
