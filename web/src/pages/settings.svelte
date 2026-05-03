@@ -10,7 +10,6 @@
   import { persistedRootUrl, syncServerUrl } from '$src/lib/core/repo'
   import { tick } from 'svelte'
   import type { AutomergeUrl } from '@automerge/automerge-repo'
-  import { version as pkgVersion } from '../../package.json'
 
   const { needRefresh, updateServiceWorker } = useRegisterSW({})
 
@@ -19,7 +18,7 @@
   }
   const { setRootId }: Props = $props()
 
-  let version = $state(pkgVersion)
+  let version = $state(__APP_VERSION__)
   let buildTime = $state(__BUILD_TIME__)
   let url = $state($syncServerUrl)
   let newRootId = $state($persistedRootUrl)
@@ -98,7 +97,7 @@
       <dl class="space-y-2">
         <div class="flex justify-between">
           <dt class="text-gray-600">Version:</dt>
-          <dd class="text-gray-900">{pkgVersion}</dd>
+          <dd class="text-gray-900">{version}</dd>
         </div>
         <div class="flex justify-between">
           <dt class="text-gray-700">Build Date:</dt>

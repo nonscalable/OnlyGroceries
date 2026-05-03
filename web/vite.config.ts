@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import wasm from 'vite-plugin-wasm'
 import path from 'path'
+import { readFileSync } from 'fs'
 import { VitePWA } from 'vite-plugin-pwa'
 
 const time = JSON.stringify(
@@ -18,12 +19,17 @@ const time = JSON.stringify(
   })()
 )
 
+const appVersion = JSON.stringify(
+  JSON.parse(readFileSync(path.resolve('../package.json'), 'utf-8')).version
+)
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
 
   return {
     define: {
-      __BUILD_TIME__: time
+      __BUILD_TIME__: time,
+      __APP_VERSION__: appVersion
     },
 
     server: {
