@@ -28,6 +28,11 @@ export const repo = new Repo({
   network: [new WebSocketClientAdapter(syncServerUrl.get())]
 })
 
+export function createRootDoc(): AutomergeUrl {
+  const handle = repo.create<Root>(defaultState())
+  return handle.url
+}
+
 function parseRootDocLinks(raw: string): RootDocLink[] {
   try {
     const parsed = JSON.parse(raw)
@@ -100,6 +105,19 @@ export function removeRootDocLink(name: string, url: AutomergeUrl): RootDocLink[
   return next
 }
 
+export function replaceRootDocLinks(links: RootDocLink[]): RootDocLink[] {
+  const next = links.filter(
+    (link): link is RootDocLink =>
+      Boolean(link) &&
+      typeof link.name === 'string' &&
+      typeof link.url === 'string' &&
+      link.url.startsWith('automerge:')
+  )
+
+  setRootDocLinks(next)
+  return next
+}
+
 export function ensureDefaultRootDocLink(url: AutomergeUrl): RootDocLink[] {
   const links = getRootDocLinks()
 
@@ -122,8 +140,7 @@ export function getRoot(): AutomergeUrl {
   let rootUrl = persistedRootUrl.get()
 
   if (!rootUrl) {
-    const handle = repo.create<Root>(defaultState())
-    rootUrl = handle.url
+    rootUrl = createRootDoc()
     persistedRootUrl.set(rootUrl)
   }
 

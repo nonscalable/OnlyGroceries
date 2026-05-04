@@ -2,17 +2,19 @@
   import Button from '$lib/components/ui/button/button.svelte'
   import Input from '$lib/components/ui/input/input.svelte'
   import { Label } from '$lib/components/ui/label'
-  import { Share, Undo2, Check, Trash2 } from 'lucide-svelte'
+  import { Share, Undo2, Check, Trash2, Download, Upload } from 'lucide-svelte'
 
   import { toast } from 'svelte-sonner'
   import { useRegisterSW } from 'virtual:pwa-register/svelte'
 
   import {
+    createRootDoc,
     persistedRootUrl,
     syncServerUrl,
     addRootDocLink,
     getRootDocLinks,
     removeRootDocLink,
+    replaceRootDocLinks,
     upsertRootDocLink,
     ensureDefaultRootDocLink,
     type RootDocLink
@@ -105,6 +107,13 @@
         description: 'Send it to your friend'
       })
     }
+  }
+
+  function createNewList() {
+    newRootId = createRootDoc()
+    toast.success('Created a new list ID', {
+      description: 'Save or activate it to start using the new Automerge list'
+    })
   }
 
   async function updateRootDoc() {
@@ -232,6 +241,143 @@
     }, 3000)
   }
 
+  async function exportLists() {
+    const payload = {
+      syncServerUrl: $syncServerUrl,
+      savedLists: getRootDocLinks()
+    }
+
+    const fileName = 'onlygrocieries-backup.json'
+    const contents = JSON.stringify(payload, null, 2)
+
+    try {
+      if ('showSaveFilePicker' in window) {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: fileName,
+          types: [
+            {
+              description: 'JSON Files',
+              accept: {
+                'application/json': ['.json']
+              }
+            }
+          ]
+        })
+
+        const writable = await handle.createWritable()
+        await writable.write(contents)
+        await writable.close()
+      } else {
+        const blob = new Blob([contents], { type: 'application/json' })
+        const blobUrl = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = blobUrl
+        link.download = fileName
+        link.click()
+        URL.revokeObjectURL(blobUrl)
+      }
+
+      toast.success('Lists exported successfully')
+    } catch (error: unknown) {
+      if ((error as DOMException)?.name === 'AbortError') {
+        return
+      }
+
+      toast.error(`Export failed: ${(error as Error)?.message || 'Unknown error'}`)
+    }
+  }
+
+  async function importLists() {
+    try {
+      const contents = await selectImportFileContents()
+      if (!contents) {
+        return
+      }
+
+      const parsed = JSON.parse(contents) as {
+        syncServerUrl?: unknown
+        savedLists?: unknown
+      }
+
+      if (typeof parsed.syncServerUrl !== 'string') {
+        throw new Error('Backup is missing a valid syncServerUrl')
+      }
+
+      if (!Array.isArray(parsed.savedLists)) {
+        throw new Error('Backup is missing a valid savedLists array')
+      }
+
+      const importedLinks = parsed.savedLists.filter(
+        (link): link is RootDocLink =>
+          Boolean(link) &&
+          typeof link === 'object' &&
+          typeof link.name === 'string' &&
+          typeof link.url === 'string' &&
+          link.url.startsWith('automerge:')
+      )
+
+      url = parsed.syncServerUrl
+      $syncServerUrl = parsed.syncServerUrl
+      savedRootLinks = replaceRootDocLinks(importedLinks)
+      savedRootLinks = ensureDefaultRootDocLink($persistedRootUrl)
+
+      const activeLink = savedRootLinks.find(link => link.url === $persistedRootUrl)
+      if (activeLink) {
+        rootName = activeLink.name
+        newRootId = activeLink.url
+      }
+
+      toast.success('Lists imported successfully')
+    } catch (error: unknown) {
+      if ((error as DOMException)?.name === 'AbortError') {
+        return
+      }
+
+      toast.error(`Import failed: ${(error as Error)?.message || 'Unknown error'}`)
+    }
+  }
+
+  async function selectImportFileContents(): Promise<string | null> {
+    if ('showOpenFilePicker' in window) {
+      const [handle] = await window.showOpenFilePicker({
+        multiple: false,
+        types: [
+          {
+            description: 'JSON Files',
+            accept: {
+              'application/json': ['.json']
+            }
+          }
+        ]
+      })
+
+      const file = await handle.getFile()
+      return file.text()
+    }
+
+    return new Promise((resolve, reject) => {
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.accept = '.json,application/json'
+
+      input.onchange = async () => {
+        try {
+          const file = input.files?.[0]
+          if (!file) {
+            resolve(null)
+            return
+          }
+
+          resolve(await file.text())
+        } catch (error) {
+          reject(error)
+        }
+      }
+
+      input.click()
+    })
+  }
+
   $effect(() => {
     return () => {
       if (deleteResetTimer) clearTimeout(deleteResetTimer)
@@ -336,13 +482,18 @@
       <Button
         variant="secondary"
         class="mt-3 w-full"
-        disabled={isShareDisabled}
-        onclick={share}><Share />Copy & Share</Button
+        onclick={() => (newRootId = $persistedRootUrl)}><Undo2 />Reset</Button
       >
       <Button
         variant="secondary"
         class="mt-3 w-full"
-        onclick={() => (newRootId = $persistedRootUrl)}><Undo2 />Reset</Button
+        onclick={createNewList}>Create New List</Button
+      >
+      <Button
+        variant="secondary"
+        class="mt-3 w-full"
+        disabled={isShareDisabled}
+        onclick={share}><Share />Copy & Share</Button
       >
       <Button
         disabled={isUpdateDisabled}
@@ -400,5 +551,14 @@
         {/if}
       </div>
     </section>
+
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <Button class="w-full" variant="secondary" onclick={importLists}
+        ><Upload />Import Lists</Button
+      >
+      <Button class="w-full" variant="secondary" onclick={exportLists}
+        ><Download />Export Lists</Button
+      >
+    </div>
   </section>
 </main>
