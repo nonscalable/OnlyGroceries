@@ -50,19 +50,21 @@ export default defineConfig(({ mode }) => {
         injectRegister: false,
 
         manifest: {
-          name: 'OnlyGroceries',
-          short_name: 'OnlyGroceries',
+          name: 'Grocery List',
+          short_name: 'Grocery',
           display: 'standalone',
           background_color: '#ffffff',
           start_url: '/',
           theme_color: '#ffffff',
           icons: [
             {
-              src: '/icon_onlygroceries.png',
+              src: '/icon-512.png',
               type: 'image/png',
-              purpose: 'any maskable',
-              sizes: 'any'
-            }
+              purpose: 'maskable',
+              sizes: '512x512'
+            },
+            { src: '/icon-512.png', type: 'image/png', sizes: '512x512' },
+            { src: '/icon-192.png', type: 'image/png', sizes: '192x192' }
           ]
         },
 

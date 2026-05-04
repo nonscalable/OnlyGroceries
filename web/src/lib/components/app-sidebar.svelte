@@ -2,6 +2,7 @@
   import * as Sidebar from './ui/sidebar/index.js'
   import { useSidebar } from './ui/sidebar/index.js'
 
+  import Command from 'lucide-svelte/icons/command'
   import House from 'lucide-svelte/icons/house'
   import ListTodo from 'lucide-svelte/icons/list-todo'
   import Settings from 'lucide-svelte/icons/settings'
@@ -87,11 +88,7 @@
                 <div
                   class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg"
                 >
-                  <img
-                    src="/icon_onlygroceries.png"
-                    alt="OnlyGroceries"
-                    class="size-full rounded-lg object-cover"
-                  />
+                  <Command class="size-4" />
                 </div>
                 <div class="grid flex-1 text-left text-sm leading-tight">
                   <span class="truncate font-semibold">OnlyGroceries</span>

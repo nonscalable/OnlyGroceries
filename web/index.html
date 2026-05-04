@@ -2,49 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="/icon_onlygroceries.png" type="image/png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Grocery List</title>
-
-    <style>
-      #app-splash {
-        position: fixed;
-        inset: 0;
-        display: grid;
-        place-items: center;
-        background: radial-gradient(circle at 30% 20%, #f8fafc 0%, #eef2ff 45%, #e2e8f0 100%);
-        z-index: 9999;
-        opacity: 1;
-        transition: opacity 180ms ease;
-      }
-
-      #app-splash.hide {
-        opacity: 0;
-        pointer-events: none;
-      }
-
-      #app-splash-content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 12px;
-      }
-
-      #app-splash img {
-        width: 50vmin;
-        height: 50vmin;
-      }
-    </style>
   </head>
-  <body>
-    <div id="app-splash" aria-hidden="true">
-      <div id="app-splash-content">
-        <img src="/icon_onlygroceries.png" alt="OnlyGroceries" />
-      </div>
-    </div>
-
-    <div id="app"></div>
+  <body id="app">
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
