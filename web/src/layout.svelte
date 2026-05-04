@@ -11,6 +11,7 @@
   import Special from './pages/special.svelte'
 
   import { router } from '$stores/router'
+  import { openPage } from '@nanostores/router'
 
   import { getRoot, repo, persistedRootUrl } from '$src/lib/core/repo'
   import {
@@ -70,6 +71,7 @@
 
       rootUrl = newRootUrl
       persistedRootUrl.set(newRootUrl)
+      openPage(router, 'main')
 
       return null
     } catch (err: unknown) {

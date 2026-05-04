@@ -2,12 +2,21 @@
   import Button from '$lib/components/ui/button/button.svelte'
   import Input from '$lib/components/ui/input/input.svelte'
   import { Label } from '$lib/components/ui/label'
-  import { Share, Undo2, Check } from 'lucide-svelte'
+  import { Share, Undo2, Check, Trash2 } from 'lucide-svelte'
 
   import { toast } from 'svelte-sonner'
   import { useRegisterSW } from 'virtual:pwa-register/svelte'
 
-  import { persistedRootUrl, syncServerUrl } from '$src/lib/core/repo'
+  import {
+    persistedRootUrl,
+    syncServerUrl,
+    addRootDocLink,
+    getRootDocLinks,
+    removeRootDocLink,
+    upsertRootDocLink,
+    ensureDefaultRootDocLink,
+    type RootDocLink
+  } from '$src/lib/core/repo'
   import {
     highlightColor,
     themePreference,
@@ -15,6 +24,7 @@
   } from '$src/stores/theme'
   import { tick } from 'svelte'
   import type { AutomergeUrl } from '@automerge/automerge-repo'
+  import { addAutomergePrefix } from '$src/utils'
 
   const { needRefresh, updateServiceWorker } = useRegisterSW({})
 
@@ -28,9 +38,23 @@
   let theme = $state<ThemePreference>($themePreference)
   let highlight = $state($highlightColor)
   let url = $state($syncServerUrl)
+  let rootName = $state('default')
   let newRootId = $state($persistedRootUrl)
+  let savedRootLinks = $state<RootDocLink[]>([])
+  let confirmingDeleteKey = $state<string | null>(null)
+  let deleteResetTimer: ReturnType<typeof setTimeout> | null = null
   let isShareDisabled = $derived(!newRootId)
   let isUpdateDisabled = $derived(!newRootId || newRootId === $persistedRootUrl)
+
+  $effect(() => {
+    const links = ensureDefaultRootDocLink($persistedRootUrl)
+    savedRootLinks = links
+
+    const activeLink = links.find(link => link.url === $persistedRootUrl)
+    if (activeLink) {
+      rootName = activeLink.name
+    }
+  })
 
   function saveAppearance() {
     $themePreference = theme
@@ -89,15 +113,130 @@
     // Uncomment the line below to test the toast
     // await new Promise(resolve => setTimeout(resolve, 2000))
 
-    const error = await setRootId(newRootId)
+    const normalizedRootId = normalizeAutomergeUrl(newRootId)
+    if (!normalizedRootId) {
+      toast.error('Please enter a valid Automerge list ID or URL', {
+        id: loadingToast
+      })
+      return
+    }
+
+    const error = await setRootId(normalizedRootId)
     if (error != null) {
       toast.error(error, { id: loadingToast })
     } else {
+      upsertRootDocLink(rootName, normalizedRootId)
+      savedRootLinks = ensureDefaultRootDocLink(normalizedRootId)
+      newRootId = normalizedRootId
       toast.success('Root document has been changed', { id: loadingToast })
     }
 
     await tick()
   }
+
+  function normalizeAutomergeUrl(value: string): AutomergeUrl | null {
+    const trimmed = value.trim()
+    if (!trimmed) return null
+    if (trimmed.startsWith('automerge:')) return trimmed as AutomergeUrl
+    return addAutomergePrefix(trimmed)
+  }
+
+  async function saveRootLink() {
+    const normalizedRootId = normalizeAutomergeUrl(newRootId)
+    if (!normalizedRootId) {
+      toast.error('Please enter a valid Automerge list ID or URL')
+      return
+    }
+
+    const trimmedName = rootName.trim() || 'Unnamed list'
+    addRootDocLink(trimmedName, normalizedRootId)
+    savedRootLinks = getRootDocLinks()
+    newRootId = normalizedRootId
+    toast.success('Saved list link', {
+      description: `"${trimmedName}" is available in collaboration links`
+    })
+
+    await tick()
+    window.location.reload()
+  }
+
+  async function activateRootLink(link: RootDocLink) {
+    const loadingToast = toast.loading('Switching list...', {
+      position: 'bottom-center'
+    })
+
+    const error = await setRootId(link.url)
+    if (error != null) {
+      toast.error(error, { id: loadingToast })
+      return
+    }
+
+    rootName = link.name
+    newRootId = link.url
+    savedRootLinks = ensureDefaultRootDocLink(link.url)
+    toast.success(`Now using "${link.name}"`, { id: loadingToast })
+
+    await tick()
+    window.location.reload()
+  }
+
+  function getSavedListKey(link: RootDocLink, index: number): string {
+    return `${link.url}:${link.name}:${index}`
+  }
+
+  function isDefaultLink(link: RootDocLink): boolean {
+    return link.name.trim().toLowerCase() === 'default'
+  }
+
+  async function handleDeleteSavedLink(link: RootDocLink, index: number) {
+    if (isDefaultLink(link)) {
+      return
+    }
+
+    const key = getSavedListKey(link, index)
+    if (confirmingDeleteKey === key) {
+      confirmingDeleteKey = null
+      if (deleteResetTimer) clearTimeout(deleteResetTimer)
+
+      const deletingActiveLink = link.url === $persistedRootUrl
+      if (deletingActiveLink) {
+        const defaultLink = getRootDocLinks().find(savedLink => isDefaultLink(savedLink))
+        if (!defaultLink) {
+          toast.error('Default list link is missing and cannot be activated')
+          return
+        }
+
+        const switchError = await setRootId(defaultLink.url)
+        if (switchError != null) {
+          toast.error(switchError)
+          return
+        }
+
+        rootName = defaultLink.name
+        newRootId = defaultLink.url
+      }
+
+      savedRootLinks = removeRootDocLink(link.name, link.url)
+      savedRootLinks = getRootDocLinks()
+      toast.success(`Removed "${link.name}" from saved lists`)
+
+      await tick()
+      window.location.reload()
+      return
+    }
+
+    confirmingDeleteKey = key
+    if (deleteResetTimer) clearTimeout(deleteResetTimer)
+    deleteResetTimer = setTimeout(() => {
+      confirmingDeleteKey = null
+    }, 3000)
+  }
+
+  $effect(() => {
+    return () => {
+      if (deleteResetTimer) clearTimeout(deleteResetTimer)
+    }
+  })
 </script>
 
 <main class="container pt-2">
@@ -174,13 +313,26 @@
     <section class="rounded-lg border p-4">
       <h2 class="mb-3 text-xl font-semibold">Collaboration</h2>
 
-      <Label for="rootdocid">ID (rootdocID)</Label>
+      <Label for="rootname">List Name</Label>
+      <Input
+        type="text"
+        id="rootname"
+        placeholder="default"
+        bind:value={rootName}
+      />
+
+      <Label for="rootdocid" class="mt-3 block">ID (rootdocID)</Label>
       <Input
         type="text"
         id="rootdocid"
         placeholder="..."
         bind:value={newRootId}
       />
+      <Button
+        variant="secondary"
+        class="mt-3 w-full"
+        onclick={saveRootLink}>Save Link</Button
+      >
       <Button
         variant="secondary"
         class="mt-3 w-full"
@@ -195,8 +347,58 @@
       <Button
         disabled={isUpdateDisabled}
         class="mt-3 w-full"
-        onclick={updateRootDoc}><Check />Update</Button
+        onclick={updateRootDoc}><Check />Activate Entered List</Button
       >
+
+      <div class="mt-4 space-y-2">
+        <p class="text-sm font-medium">Saved Lists</p>
+        {#if savedRootLinks.length === 0}
+          <p class="text-muted-foreground text-sm">No saved links yet</p>
+        {:else}
+          {#each savedRootLinks as link, index (getSavedListKey(link, index))}
+            <div
+              class={`flex items-center justify-between gap-2 rounded-md border p-2 ${link.url === $persistedRootUrl
+                ? 'border-primary bg-primary/10'
+                : ''}`}
+            >
+              <div class="min-w-0">
+                <p class="truncate text-sm font-semibold">{link.name}</p>
+                <p class="text-muted-foreground truncate text-xs">{link.url}</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <Button
+                  variant={link.url === $persistedRootUrl ? 'default' : 'outline'}
+                  onclick={() => activateRootLink(link)}
+                  >{link.url === $persistedRootUrl ? 'Active' : 'Use'}</Button
+                >
+                {#if !isDefaultLink(link)}
+                  <button
+                    class={`relative overflow-hidden rounded-md border px-3 py-2 transition-colors duration-200 ${confirmingDeleteKey ===
+                    getSavedListKey(link, index)
+                      ? 'border-red-500 text-white'
+                      : 'text-slate-500'}`}
+                    aria-label={`Delete saved list ${link.name}`}
+                    onclick={() => handleDeleteSavedLink(link, index)}
+                  >
+                    <span
+                      class="absolute inset-0 bg-red-500 transition-transform duration-200 ease-out"
+                      style:transform={confirmingDeleteKey === getSavedListKey(link, index)
+                        ? 'translateX(0)'
+                        : 'translateX(100%)'}
+                    />
+                    <Trash2
+                      class={`relative z-10 size-4 transition-colors duration-200 ${confirmingDeleteKey ===
+                      getSavedListKey(link, index)
+                        ? 'text-white'
+                        : 'text-slate-500'}`}
+                    />
+                  </button>
+                {/if}
+              </div>
+            </div>
+          {/each}
+        {/if}
+      </div>
     </section>
   </section>
 </main>

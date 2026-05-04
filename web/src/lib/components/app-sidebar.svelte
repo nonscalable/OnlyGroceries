@@ -15,7 +15,7 @@
   import { createDrawer } from '$stores/create-drawer.svelte'
   import { setSpecialListOrder } from '$src/lib/core'
 
-  import { getPagePath } from '@nanostores/router'
+  import { getPagePath, openPage } from '@nanostores/router'
   import { type AutomergeDocumentStore } from '@automerge/automerge-repo-svelte-store'
   import type { Root } from '$src/lib/core/types.js'
 
@@ -41,6 +41,12 @@
     removeDrawer.specialList = { id, name }
     toggleSidebarIfMobile()
     removeDrawer.open()
+  }
+
+  function goMain(event: MouseEvent) {
+    event.preventDefault()
+    openPage(router, 'main')
+    toggleSidebarIfMobile()
   }
 
   const specialListSortOptions: Sortable.SortableOptions = {
@@ -101,13 +107,9 @@
 
         <!-- Home -->
         <Sidebar.MenuItem>
-          <Sidebar.MenuButton
-            size="lg"
-            isActive={$router?.route === 'main'}
-            onclick={toggleSidebarIfMobile}
-          >
+          <Sidebar.MenuButton size="lg" isActive={$router?.route === 'main'}>
             {#snippet child({ props })}
-              <a href={getPagePath(router, 'main')} {...props}>
+              <a href={getPagePath(router, 'main')} onclick={goMain} {...props}>
                 <House />
                 <span class="truncate leading-tight">Main</span>
               </a>
