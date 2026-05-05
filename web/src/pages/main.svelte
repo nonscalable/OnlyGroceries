@@ -161,6 +161,7 @@
                 {#each regularCartIds as id, i (id)}
                   <CartItem
                     {i}
+                    itemId={id}
                     item={$root?.items[id]}
                     togglePurchased={() =>
                       root?.change(doc => togglePurchased(doc, id))}
@@ -188,6 +189,7 @@
               {#each group.ids as id, i (id)}
                 <CartItem
                   {i}
+                  itemId={id}
                   item={$root?.items[id]}
                   togglePurchased={() =>
                     root?.change(doc => togglePurchased(doc, id))}

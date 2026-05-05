@@ -50,6 +50,7 @@ export function deleteFromCart(doc: Root, itemId: string) {
     deleteItem(doc, itemId)
   } else {
     doc.items[itemId].inCart = false
+    doc.items[itemId].purchased = false
   }
 }
 

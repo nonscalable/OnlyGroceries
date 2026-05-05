@@ -6,22 +6,25 @@
 
   interface Props {
     i: number
+    itemId: string
     item: Item
     togglePurchased: () => void
     deleteCartItem: () => void
   }
-  let { i, item, togglePurchased, deleteCartItem }: Props = $props()
+  let { i, itemId, item, togglePurchased, deleteCartItem }: Props = $props()
+
+  let checkboxId = $derived(`cart-item-${itemId}`)
 </script>
 
 <li class="mb-2 flex justify-between">
   <label
-    for={`rare-${i}`}
+    for={checkboxId}
     class="item.purchased flex w-full items-center
    gap-2 leading-8"
     class:line-through={item.purchased}
   >
     <Checkbox
-      id={`rare-${i}`}
+      id={checkboxId}
       checked={item.purchased}
       onCheckedChange={togglePurchased}
     />
