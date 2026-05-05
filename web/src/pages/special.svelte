@@ -2,6 +2,7 @@
   import Input from '$lib/components/ui/input/input.svelte'
   import Button from '$lib/components/ui/button/button.svelte'
   import SpecialItem from '$lib/components/special-item.svelte'
+  import * as Drawer from '$lib/components/ui/drawer'
 
   import { nanoid } from 'nanoid'
   import { sortable } from '../sortable'
@@ -53,6 +54,52 @@
   let specials = $derived(
     $root?.globalOrder.filter(id => isSpecial($root.items[id], listId)) || []
   )
+
+  let movingItemId = $state<string | null>(null)
+  let moveDrawerOpen = $state(false)
+
+  let otherLists = $derived(
+    [
+      { id: 'staples', name: 'Staples' },
+      ...($root?.specials.order ?? []).filter(id => String(id) !== listId).map(id => ({
+        id: String(id),
+        name: $root!.specials.lists[String(id)].name
+      }))
+    ]
+  )
+
+  function openMoveDrawer(itemId: string) {
+    movingItemId = itemId
+    moveDrawerOpen = true
+  }
+
+  function moveItemToList(targetListId: string) {
+    if (!movingItemId) return
+    const id = movingItemId
+    root?.change(doc => {
+      const item = doc.items[id]
+      if (!item || !isSpecial(item, listId)) return
+      if (targetListId === 'staples') {
+        createItem(doc, {
+          kind: 'staple',
+          text: item.text,
+          purchased: false,
+          inCart: false
+        })
+      } else {
+        createItem(doc, {
+          kind: 'special',
+          text: item.text,
+          purchased: false,
+          inCart: false,
+          specialId: targetListId
+        })
+      }
+      deleteItem(doc, id)
+    })
+    movingItemId = null
+    moveDrawerOpen = false
+  }
 
   function addSpecial() {
     let formatted = text.toLowerCase().trim()
@@ -141,12 +188,30 @@
             remove={() => root?.change(doc => deleteItem(doc, id))}
             toggleInCart={() => root?.change(doc => toggleInCart(doc, id))}
             updateText={(text) => root?.change(doc => updateItemText(doc, id, text))}
+            onMoveRequest={() => openMoveDrawer(id)}
           />
         </li>
       {/each}
     </ul>
   {/key}
 </div>
+
+<Drawer.Root bind:open={moveDrawerOpen}>
+  <Drawer.Content>
+    <div class="mx-auto mb-4 w-full max-w-sm">
+      <Drawer.Header>
+        <Drawer.Title>Move to list</Drawer.Title>
+        <Drawer.Description>Choose a list to move this item to</Drawer.Description>
+      </Drawer.Header>
+      <div class="flex flex-col gap-2 p-4">
+        {#each otherLists as list}
+          <Button variant="outline" onclick={() => moveItemToList(list.id)}>{list.name}</Button>
+        {/each}
+        <Button variant="ghost" onclick={() => { moveDrawerOpen = false }}>Cancel</Button>
+      </div>
+    </div>
+  </Drawer.Content>
+</Drawer.Root>
 
 <style>
   :global(.ghost) {

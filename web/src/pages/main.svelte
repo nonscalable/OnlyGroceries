@@ -1,6 +1,8 @@
 <script lang="ts">
   import '../app.css'
   import * as Tabs from '$lib/components/ui/tabs'
+  import * as Drawer from '$lib/components/ui/drawer'
+  import { Button } from '$lib/components/ui/button'
   import AddItemBlock from '$lib/components/add-item-block.svelte'
   import RegularItem from '$lib/components/regular-item.svelte'
   import CartItem from '$lib/components/cart-item.svelte'
@@ -35,6 +37,41 @@
   let staples = $derived(
     $root?.globalOrder.filter(id => isStaple($root.items[id])) || []
   )
+
+  let moveDrawerOpen = $state(false)
+  let movingItemId = $state<string | null>(null)
+
+  let moveTargets = $derived(
+    ($root?.specials.order ?? []).map(id => ({
+      id: String(id),
+      name: $root!.specials.lists[String(id)].name
+    }))
+  )
+
+  function openMoveDrawer(itemId: string) {
+    movingItemId = itemId
+    moveDrawerOpen = true
+  }
+
+  function moveStapleTo(targetListId: string) {
+    if (!movingItemId) return
+    const id = movingItemId
+    root?.change(doc => {
+      const item = doc.items[id]
+      if (!item || !isStaple(item)) return
+      createItem(doc, {
+        kind: 'special',
+        text: item.text,
+        purchased: false,
+        inCart: false,
+        specialId: targetListId
+      })
+      deleteItem(doc, id)
+    })
+    movingItemId = null
+    moveDrawerOpen = false
+  }
+
   let cartIds = $derived(
     $root?.globalOrder.filter(id => $root.items[id].inCart) || []
   )
@@ -137,6 +174,7 @@
                     root?.change(doc => toggleInCart(doc, id))}
                   deleteItem={() => deleteStaple(id)}
                   updateText={(text) => root?.change(doc => updateItemText(doc, id, text))}
+                  onMoveRequest={() => openMoveDrawer(id)}
                 />
               </li>
             {/each}
@@ -204,6 +242,23 @@
     </Tabs.Root>
   </div>
 {/if}
+
+<Drawer.Root bind:open={moveDrawerOpen}>
+  <Drawer.Content>
+    <div class="mx-auto mb-4 w-full max-w-sm">
+      <Drawer.Header>
+        <Drawer.Title>Move to list</Drawer.Title>
+        <Drawer.Description>Choose a list to move this item to</Drawer.Description>
+      </Drawer.Header>
+      <div class="flex flex-col gap-2 p-4">
+        {#each moveTargets as list}
+          <Button variant="outline" onclick={() => moveStapleTo(list.id)}>{list.name}</Button>
+        {/each}
+        <Button variant="ghost" onclick={() => { moveDrawerOpen = false }}>Cancel</Button>
+      </div>
+    </div>
+  </Drawer.Content>
+</Drawer.Root>
 
 <style>
   :global(.ghost) {

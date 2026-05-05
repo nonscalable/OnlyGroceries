@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button'
+  import * as DropdownMenu from '$lib/components/ui/dropdown-menu'
   import GripVertical from 'lucide-svelte/icons/grip-vertical'
   import ShoppingBasket from 'lucide-svelte/icons/shopping-basket'
   import Trash2 from 'lucide-svelte/icons/trash-2'
@@ -11,8 +12,9 @@
     remove: () => void
     toggleInCart: () => void
     updateText: (text: string) => void
+    onMoveRequest: () => void
   }
-  let { item, remove, toggleInCart, updateText }: Props = $props()
+  let { item, remove, toggleInCart, updateText, onMoveRequest }: Props = $props()
 
   let confirming = $state(false)
   let resetTimer: ReturnType<typeof setTimeout> | null = null
@@ -83,13 +85,15 @@
       </div>
     </button>
 
-    <button
-      class="px-4 text-slate-500 hover:bg-slate-100"
-      onclick={startEdit}
-      aria-label="Edit item"
-    >
-      <Pencil class="size-4" />
-    </button>
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger class="px-4 text-slate-500 hover:bg-slate-100">
+        <Pencil class="size-4" />
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Content>
+        <DropdownMenu.Item onclick={startEdit}>Edit</DropdownMenu.Item>
+        <DropdownMenu.Item onclick={onMoveRequest}>Move</DropdownMenu.Item>
+      </DropdownMenu.Content>
+    </DropdownMenu.Root>
 
     <button
       class="relative overflow-hidden px-4 text-slate-500"
