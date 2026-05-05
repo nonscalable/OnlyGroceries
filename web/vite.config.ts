@@ -5,6 +5,8 @@ import path from 'path'
 import { readFileSync } from 'fs'
 import { VitePWA } from 'vite-plugin-pwa'
 
+import { cloudflare } from "@cloudflare/vite-plugin";
+
 const time = JSON.stringify(
   (() => {
     const now = new Date()
@@ -39,47 +41,43 @@ export default defineConfig(({ mode }) => {
         : true
       },
 
-    plugins: [
-      wasm(),
-      svelte(),
-      VitePWA({
-        strategies: 'injectManifest',
-        srcDir: 'src',
-        filename: 'sw.ts',
-        registerType: 'prompt',
-        injectRegister: false,
+    plugins: [wasm(), svelte(), VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
+      registerType: 'prompt',
+      injectRegister: false,
 
-        manifest: {
-          name: 'Grocery List',
-          short_name: 'Grocery',
-          display: 'standalone',
-          background_color: '#ffffff',
-          start_url: '/',
-          theme_color: '#ffffff',
-          icons: [
-            {
-              src: '/icon-512.png',
-              type: 'image/png',
-              purpose: 'maskable',
-              sizes: '512x512'
-            },
-            { src: '/icon-512.png', type: 'image/png', sizes: '512x512' },
-            { src: '/icon-192.png', type: 'image/png', sizes: '192x192' }
-          ]
-        },
+      manifest: {
+        name: 'Grocery List',
+        short_name: 'Grocery',
+        display: 'standalone',
+        background_color: '#ffffff',
+        start_url: '/',
+        theme_color: '#ffffff',
+        icons: [
+          {
+            src: '/icon-512.png',
+            type: 'image/png',
+            purpose: 'maskable',
+            sizes: '512x512'
+          },
+          { src: '/icon-512.png', type: 'image/png', sizes: '512x512' },
+          { src: '/icon-192.png', type: 'image/png', sizes: '192x192' }
+        ]
+      },
 
-        injectManifest: {
-          globPatterns: ['**/*.{js,css,html,svg,png,ico,wasm}'],
-          maximumFileSizeToCacheInBytes: 30 * 1024 * 1024
-        },
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,wasm}'],
+        maximumFileSizeToCacheInBytes: 30 * 1024 * 1024
+      },
 
-        devOptions: {
-          enabled: false,
-          navigateFallback: 'index.html',
-          type: 'module'
-        }
-      })
-    ],
+      devOptions: {
+        enabled: false,
+        navigateFallback: 'index.html',
+        type: 'module'
+      }
+    }), cloudflare()],
 
     build: {
       sourcemap: true,
@@ -98,5 +96,5 @@ export default defineConfig(({ mode }) => {
       format: 'es',
       plugins: () => [wasm()]
     }
-  }
+  };
 })

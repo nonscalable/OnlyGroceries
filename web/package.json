@@ -11,10 +11,12 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
-    "preview": "vite preview --host",
-    "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json"
+    "preview": "npm run build && wrangler dev",
+    "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json",
+    "deploy": "npm run build && wrangler deploy"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.35.0",
     "@sveltejs/vite-plugin-svelte": "5.0.3",
     "@tsconfig/svelte": "^5.0.4",
     "@types/node": "^22.10.2",
@@ -45,7 +47,8 @@
     "workbox-precaching": "^7.3.0",
     "workbox-routing": "^7.3.0",
     "workbox-strategies": "^7.3.0",
-    "workbox-window": "^7.3.0"
+    "workbox-window": "^7.3.0",
+    "wrangler": "^4.87.0"
   },
   "dependencies": {
     "@automerge/automerge": "^2.2.8",
