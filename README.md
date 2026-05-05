@@ -11,7 +11,7 @@ Minimalistic grocery list app with focus on frequently used everyday products.
 
 
 > The app is in its pr
-e-pre-alpha stage. You can try it at [`https://onlygroceries.pages.dev`](https://onlygroceries.pages.dev). Please, remember
+e-pre-alpha stage. You can try it at [`https://onlygroceries-br5.pages.dev/`](https://onlygroceries-br5.pages.dev/). Please, remember
 that the demo version uses public automerge sync server and the data can be erased at any time.
 
 The application in this fork has a superset of features not found upstream and the link above will not accurately depict what is now possible.
