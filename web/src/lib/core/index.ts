@@ -107,16 +107,18 @@ export function setSpecialListOrder(doc: Root, orderedIds: string[]) {
 }
 
 export function deleteSpecialList(doc: Root, id: string) {
+  const targetId = String(id)
   const items = Object.entries(doc.items)
-    .filter(([_, item]) => isSpecial(item, id))
-    .map(([id]) => id)
+    .filter(([_, item]) => isSpecial(item, targetId))
+    .map(([itemId]) => itemId)
 
-  const idx = doc.specials.order.indexOf(id)
+  const idx = doc.specials.order.findIndex(listId => String(listId) === targetId)
   if (idx >= 0) {
+    const normalizedListId = String(doc.specials.order[idx])
     doc.specials.order.splice(idx, 1)
-    delete doc.specials.lists[id]
+    delete doc.specials.lists[normalizedListId]
 
-    for (let item of items) {
+    for (const item of items) {
       deleteItem(doc, item)
     }
   }

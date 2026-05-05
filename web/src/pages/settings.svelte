@@ -28,6 +28,31 @@
   import type { AutomergeUrl } from '@automerge/automerge-repo'
   import { addAutomergePrefix } from '$src/utils'
 
+  type SavePickerWindow = Window & {
+    showSaveFilePicker?: (options?: {
+      suggestedName?: string
+      types?: Array<{
+        description?: string
+        accept: Record<string, string[]>
+      }>
+    }) => Promise<{
+      createWritable: () => Promise<{
+        write: (data: string) => Promise<void>
+        close: () => Promise<void>
+      }>
+    }>
+  }
+
+  type OpenPickerWindow = Window & {
+    showOpenFilePicker?: (options?: {
+      multiple?: boolean
+      types?: Array<{
+        description?: string
+        accept: Record<string, string[]>
+      }>
+    }) => Promise<Array<{ getFile: () => Promise<File> }>>
+  }
+
   const { needRefresh, updateServiceWorker } = useRegisterSW({})
 
   interface Props {
@@ -241,18 +266,19 @@
     }, 3000)
   }
 
-  async function exportLists() {
+  async function exportListMap() {
     const payload = {
       syncServerUrl: $syncServerUrl,
-      savedLists: getRootDocLinks()
+      listMap: getRootDocLinks()
     }
 
-    const fileName = 'onlygrocieries-backup.json'
+    const fileName = 'onlygrocieries-list-map.json'
     const contents = JSON.stringify(payload, null, 2)
 
     try {
-      if ('showSaveFilePicker' in window) {
-        const handle = await window.showSaveFilePicker({
+      const win = window as SavePickerWindow
+      if (typeof win.showSaveFilePicker === 'function') {
+        const handle = await win.showSaveFilePicker({
           suggestedName: fileName,
           types: [
             {
@@ -277,17 +303,17 @@
         URL.revokeObjectURL(blobUrl)
       }
 
-      toast.success('Lists exported successfully')
+      toast.success('List map exported successfully')
     } catch (error: unknown) {
       if ((error as DOMException)?.name === 'AbortError') {
         return
       }
 
-      toast.error(`Export failed: ${(error as Error)?.message || 'Unknown error'}`)
+      toast.error(`List map export failed: ${(error as Error)?.message || 'Unknown error'}`)
     }
   }
 
-  async function importLists() {
+  async function importListMap() {
     try {
       const contents = await selectImportFileContents()
       if (!contents) {
@@ -296,6 +322,7 @@
 
       const parsed = JSON.parse(contents) as {
         syncServerUrl?: unknown
+        listMap?: unknown
         savedLists?: unknown
       }
 
@@ -303,11 +330,15 @@
         throw new Error('Backup is missing a valid syncServerUrl')
       }
 
-      if (!Array.isArray(parsed.savedLists)) {
-        throw new Error('Backup is missing a valid savedLists array')
+      const importedRawLinks = Array.isArray(parsed.listMap)
+        ? parsed.listMap
+        : parsed.savedLists
+
+      if (!Array.isArray(importedRawLinks)) {
+        throw new Error('Backup is missing a valid list map array')
       }
 
-      const importedLinks = parsed.savedLists.filter(
+      const importedLinks = importedRawLinks.filter(
         (link): link is RootDocLink =>
           Boolean(link) &&
           typeof link === 'object' &&
@@ -327,19 +358,20 @@
         newRootId = activeLink.url
       }
 
-      toast.success('Lists imported successfully')
+      toast.success('List map imported successfully')
     } catch (error: unknown) {
       if ((error as DOMException)?.name === 'AbortError') {
         return
       }
 
-      toast.error(`Import failed: ${(error as Error)?.message || 'Unknown error'}`)
+      toast.error(`List map import failed: ${(error as Error)?.message || 'Unknown error'}`)
     }
   }
 
   async function selectImportFileContents(): Promise<string | null> {
-    if ('showOpenFilePicker' in window) {
-      const [handle] = await window.showOpenFilePicker({
+    const win = window as OpenPickerWindow
+    if (typeof win.showOpenFilePicker === 'function') {
+      const [handle] = await win.showOpenFilePicker({
         multiple: false,
         types: [
           {
@@ -536,7 +568,7 @@
                       style:transform={confirmingDeleteKey === getSavedListKey(link, index)
                         ? 'translateX(0)'
                         : 'translateX(100%)'}
-                    />
+                    ></span>
                     <Trash2
                       class={`relative z-10 size-4 transition-colors duration-200 ${confirmingDeleteKey ===
                       getSavedListKey(link, index)
@@ -553,11 +585,11 @@
     </section>
 
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-      <Button class="w-full" variant="secondary" onclick={importLists}
-        ><Upload />Import Lists</Button
+      <Button class="w-full" variant="secondary" onclick={importListMap}
+        ><Upload />Import List Map</Button
       >
-      <Button class="w-full" variant="secondary" onclick={exportLists}
-        ><Download />Export Lists</Button
+      <Button class="w-full" variant="secondary" onclick={exportListMap}
+        ><Download />Export List Map</Button
       >
     </div>
   </section>
