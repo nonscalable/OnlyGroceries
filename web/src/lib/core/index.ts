@@ -51,6 +51,7 @@ export function togglePurchased(doc: Root, itemId: string) {
 
 export function toggleInCart(doc: Root, id: string) {
   doc.items[id].inCart = !doc.items[id].inCart
+  doc.items[id].purchased = false
 }
 
 // Special Lists
