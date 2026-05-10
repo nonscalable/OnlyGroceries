@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
-    "preview": "npm run build && wrangler dev --host 0.0.0.0 --port 5173",
+    "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json",
     "deploy": "npm run build && wrangler deploy"
   },

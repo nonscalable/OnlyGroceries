@@ -39,7 +39,7 @@ COPY --from=builder /app/server/node_modules ./server/node_modules
 COPY --from=builder /app/web/dist ./web/dist
 COPY --from=builder /app/server/dist ./server/dist
 
-# Copy web source and config files needed for rebuild (preview runs npm run build && wrangler dev)
+# Copy web source and config files needed for rebuild (preview runs vite preview)
 COPY web/src ./web/src
 COPY web/vite.config.ts ./web/
 COPY web/vite.config.d.ts ./web/
