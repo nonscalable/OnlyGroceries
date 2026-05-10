@@ -56,4 +56,4 @@ EXPOSE 5173
 EXPOSE 8080
 
 # Start both the web preview server and the sync server
-CMD ["sh", "-c", "pnpm --filter @onlygroceries/web preview --port 5173 & pnpm --filter @onlygroceries/server preview"]
+CMD ["sh", "-c", "pnpm --filter @onlygroceries/web preview & pnpm --filter @onlygroceries/server preview"]
