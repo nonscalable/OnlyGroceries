@@ -37,6 +37,7 @@
   let staples = $derived(
     $root?.globalOrder.filter(id => isStaple($root.items[id])) || []
   )
+  let staplesRenderKey = $derived(staples.join('|'))
 
   let moveDrawerOpen = $state(false)
   let movingItemId = $state<string | null>(null)
@@ -79,6 +80,40 @@
   let regularCartIds = $derived(
     cartIds.filter(id => $root?.items[id].kind !== 'special')
   )
+  let regularCartRenderKey = $derived(regularCartIds.join('|'))
+
+  type AddItemSuggestion = {
+    id: string
+    text: string
+    sourceName: string
+  }
+
+  let addItemSuggestions = $derived.by<AddItemSuggestion[]>(() => {
+    if (!$root) return []
+
+    const suggestions: AddItemSuggestion[] = []
+    for (const [id, item] of Object.entries($root.items)) {
+      if (item.kind !== 'staple' && item.kind !== 'special') {
+        continue
+      }
+
+      const trimmed = item.text.trim()
+      if (!trimmed) continue
+
+      const sourceName =
+        item.kind === 'staple'
+          ? 'Staples'
+          : ($root.specials.lists[item.specialId]?.name ?? 'Special list')
+
+      suggestions.push({
+        id,
+        text: trimmed,
+        sourceName
+      })
+    }
+
+    return suggestions
+  })
 
   type SpecialGroup = { listId: string; name: string; ids: string[] }
   let specialCartGroups = $derived.by<SpecialGroup[]>(() => {
@@ -133,8 +168,13 @@
     })
   }
 
-  function addItem(text: string) {
+  function addItem(text: string, sourceItemId?: string) {
     root?.change(doc => {
+      if (sourceItemId && doc.items[sourceItemId]) {
+        doc.items[sourceItemId].inCart = true
+        return
+      }
+
       if (activeTab == 'staple') {
         createItem(doc, {
           text: text,
@@ -157,14 +197,18 @@
 {#if $root}
   <div class="container pt-2">
     <Tabs.Root bind:value={activeTab}>
-      <AddItemBlock addToCart={addItem} {activeTab} />
+      <AddItemBlock
+        addToCart={addItem}
+        {activeTab}
+        suggestionSource={addItemSuggestions}
+      />
 
       <Tabs.Content value="staple">
         <!-- #key is a workaround to prevent errors when users do dnd
       https://github.com/sveltejs/svelte/issues/11826. it fixes "Illegal
       invocation" bug, app crash when item drops out of the parent, when peers
       do dnd at the same time -->
-        {#key staples}
+        {#key staplesRenderKey}
           <ul use:sortable={options} class="grid gap-2">
             {#each staples as id, i (id)}
               <li>
@@ -194,7 +238,7 @@
                 >{regularCartIds.length}</span
               >
             </summary>
-            {#key regularCartIds}
+            {#key regularCartRenderKey}
               <ul use:sortable={options} class="mt-1 grid gap-2 pl-2">
                 {#each regularCartIds as id, i (id)}
                   <CartItem

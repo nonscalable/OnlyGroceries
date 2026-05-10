@@ -54,6 +54,7 @@
   let specials = $derived(
     $root?.globalOrder.filter(id => isSpecial($root.items[id], listId)) || []
   )
+  let specialsRenderKey = $derived(specials.join('|'))
 
   let movingItemId = $state<string | null>(null)
   let moveDrawerOpen = $state(false)
@@ -179,7 +180,7 @@
     <Button class="mt-3" onclick={addSpecial} size="lg">Add</Button>
   </div>
 
-  {#key specials}
+  {#key specialsRenderKey}
     <ul use:sortable={options} class="grid gap-2">
       {#each specials as id (id)}
         <li>
