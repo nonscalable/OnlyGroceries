@@ -1,7 +1,7 @@
 {
   "name": "@onlygroceries/web",
   "private": true,
-  "version": "0.0.18",
+  "version": "0.0.20",
   "type": "module",
   "size-limit": [
     {
@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
-    "preview": "npm run build && wrangler dev",
+    "preview": "npm run build && wrangler dev --host 0.0.0.0 --port 5173",
     "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json",
     "deploy": "npm run build && wrangler deploy"
   },
