@@ -5,8 +5,6 @@ import path from 'path'
 import { readFileSync } from 'fs'
 import { VitePWA } from 'vite-plugin-pwa'
 
-import { cloudflare } from "@cloudflare/vite-plugin";
-
 const time = JSON.stringify(
   (() => {
     const now = new Date()
@@ -24,24 +22,19 @@ const time = JSON.stringify(
 const appVersion = JSON.stringify(
   JSON.parse(readFileSync(path.resolve('../package.json'), 'utf-8')).version
 )
+const useCloudflarePlugin = process.env.VITE_USE_CLOUDFLARE_PLUGIN === 'true'
+
+const cloudflarePlugin =
+  useCloudflarePlugin && process.env.npm_lifecycle_event !== 'check'
+    ? (await import('@cloudflare/vite-plugin')).cloudflare()
+    : null
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-
-  return {
-    define: {
-      __BUILD_TIME__: time,
-      __APP_VERSION__: appVersion
-    },
-
-    server: {
-      host: true,
-      allowedHosts: process.env.VITE_ALLOWED_HOSTS
-        ? process.env.VITE_ALLOWED_HOSTS.split(',').map(h => h.trim())
-        : true
-      },
-
-    plugins: [wasm(), svelte(), VitePWA({
+  const plugins = [
+    wasm(),
+    svelte(),
+    VitePWA({
       strategies: 'injectManifest',
       srcDir: 'src',
       filename: 'sw.ts',
@@ -57,13 +50,16 @@ export default defineConfig(({ mode }) => {
         theme_color: '#ffffff',
         icons: [
           {
-            src: '/icon-512.png',
-            type: 'image/png',
+            src: '/pwa-sidebar-icon.svg',
+            type: 'image/svg+xml',
             purpose: 'maskable',
-            sizes: '512x512'
+            sizes: 'any'
           },
-          { src: '/icon-512.png', type: 'image/png', sizes: '512x512' },
-          { src: '/icon-192.png', type: 'image/png', sizes: '192x192' }
+          {
+            src: '/pwa-sidebar-icon.svg',
+            type: 'image/svg+xml',
+            sizes: 'any'
+          }
         ]
       },
 
@@ -77,7 +73,28 @@ export default defineConfig(({ mode }) => {
         navigateFallback: 'index.html',
         type: 'module'
       }
-    }), cloudflare()],
+    })
+  ]
+
+  // Cloudflare plugin requires web APIs (e.g. File) unavailable in this check runtime.
+  if (cloudflarePlugin) {
+    plugins.push(cloudflarePlugin)
+  }
+
+  return {
+    define: {
+      __BUILD_TIME__: time,
+      __APP_VERSION__: appVersion
+    },
+
+    server: {
+      host: true,
+      allowedHosts: process.env.VITE_ALLOWED_HOSTS
+        ? process.env.VITE_ALLOWED_HOSTS.split(',').map(h => h.trim())
+        : true
+      },
+
+    plugins,
 
     build: {
       sourcemap: true,
@@ -96,5 +113,5 @@ export default defineConfig(({ mode }) => {
       format: 'es',
       plugins: () => [wasm()]
     }
-  };
+  }
 })

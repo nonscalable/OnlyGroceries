@@ -128,7 +128,7 @@
       <span
         class="absolute inset-0 bg-red-500 transition-transform duration-200 ease-out"
         style:transform={confirming ? 'translateX(0)' : 'translateX(100%)'}
-      />
+      ></span>
       <Trash2 class="relative z-10 size-4" />
     </button>
   {/if}
