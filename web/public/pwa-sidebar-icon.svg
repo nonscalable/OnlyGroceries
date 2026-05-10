@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="OnlyGroceries icon">
+  <rect x="32" y="32" width="448" height="448" rx="96" fill="#101828" />
+  <path
+    d="M320 128v256a64 64 0 1 0 64-64H128a64 64 0 1 0 64 64V128a64 64 0 1 0-64 64h256a64 64 0 1 0-64-64"
+    fill="none"
+    stroke="#f8fafc"
+    stroke-width="42"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>
