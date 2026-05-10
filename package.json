@@ -2,6 +2,7 @@
   "name": "onlygroceries",
   "private": true,
   "version": "0.0.20",
+  "packageManager": "pnpm@11.0.9",
   "type": "module",
   "scripts": {
     "dev": "pnpm run -F web -F server dev",

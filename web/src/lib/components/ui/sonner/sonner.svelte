@@ -8,7 +8,7 @@
   let restProps: SonnerProps = $props()
 </script>
 
-<Sonner theme={$mode} class="toaster group" {...restProps} />
+<Sonner theme={mode.current ?? 'system'} class="toaster group" {...restProps} />
 
 <!-- toastOptions={{
     classes: {
