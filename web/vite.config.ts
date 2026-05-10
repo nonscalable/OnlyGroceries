@@ -93,7 +93,10 @@ export default defineConfig(({ mode }) => {
         ? process.env.VITE_ALLOWED_HOSTS.split(',').map(h => h.trim())
         : true
       },
-
+    preview: {
+      host: true,
+      port: 5173
+    },
     plugins,
 
     build: {
