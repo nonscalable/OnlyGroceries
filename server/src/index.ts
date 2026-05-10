@@ -114,9 +114,9 @@ function parseEnvConfig(): Config {
   }
 
   // tokens
-  let tokens = []
+  let tokens: string[] = []
   for (let [env, value] of Object.entries(process.env)) {
-    if (env.startsWith('ALLOWED_TOKEN')) {
+    if (env.startsWith('ALLOWED_TOKEN') && typeof value === 'string') {
       tokens.push(value)
     }
   }

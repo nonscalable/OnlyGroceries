@@ -9,12 +9,12 @@
     "preview": "pnpm run -r preview"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2.9.6",
-    "prettier-plugin-svelte": "^3.3.2",
-    "prettier-plugin-tailwindcss": "^0.6.9",
+    "@tauri-apps/cli": "^2.11.1",
+    "prettier-plugin-svelte": "^3.5.1",
+    "prettier-plugin-tailwindcss": "^0.8.0",
     "web": "^0.0.2"
   },
   "dependencies": {
-    "pnpm": "^10.33.2"
+    "pnpm": "^11.0.9"
   }
 }

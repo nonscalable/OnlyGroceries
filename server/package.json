@@ -13,18 +13,18 @@
   "keywords": [],
   "author": "",
   "dependencies": {
-    "@automerge/automerge-repo": "^2.5.1",
-    "@automerge/automerge-repo-network-websocket": "^2.5.1",
-    "@automerge/automerge-repo-storage-nodefs": "^1.2.1",
-    "dotenv": "^16.4.7",
-    "eventemitter3": "^5.0.1",
+    "@automerge/automerge-repo": "^2.5.5",
+    "@automerge/automerge-repo-network-websocket": "^2.5.5",
+    "@automerge/automerge-repo-storage-nodefs": "^2.5.5",
+    "dotenv": "^17.4.2",
+    "eventemitter3": "^5.0.4",
     "express": "^5.2.1",
-    "ws": "^8.18.0"
+    "ws": "^8.20.0"
   },
   "devDependencies": {
-    "@types/express": "^5.0.0",
-    "@types/ws": "^8.5.13",
+    "@types/express": "^5.0.6",
+    "@types/ws": "^8.18.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.2"
+    "typescript": "^6.0.3"
   }
 }
