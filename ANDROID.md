@@ -8,7 +8,7 @@ to develop for it (without Android Studio)
 Enter the Nix development environment first:
 
 ```bash
-nix develop
+nix develop .#android
 ```
 
 ## Create Emulator Virtual Device
@@ -37,9 +37,18 @@ pnpm tauri android dev
 pnpm tauri android build
 
 # If you're not in nix shell, but have nix installed, run
-nix develop -c pnpm tauri android build
+nix develop .#android -c pnpm tauri android build
 
 # By default, the APK file's path is ./src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk
+
+# If you don't want to pollute your computer with android things, build purely with Nix
+# Debug
+nix build .#android
+
+# Release
+nix build .#android-release
+
+# In this case, the built APK will be at ./result/onlygroceries-arm64-release-unsigned.apk
 ```
 
 ## Install APK from Terminal
@@ -51,17 +60,17 @@ To make android to install the built APK, it has to be signed.
 Generate keystore:
 
 ```bash
-keytool -genkey -v -keystore ~/upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+nix develop .#signing --command keytool -genkey -v -keystore ~/nonscalable-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias nonscalable
 ```
 
-### Configure Signing: 
+### Sing the APK: 
 
-Create `src-tauri/gen/android/keystore.properties` (gitignored) with keystore details.
-
-```properties
-password=<password>
-keyAlias=upload
-storeFile=/abs/path/to/upload-keystore.jks
+```bash
+nix develop .#signing --command apksigner sign \
+    --ks "$HOME/nonscalable-keystore.jks" \
+    --ks-key-alias nonscalable \
+    --out onlygroceries-release.apk \
+    onlygroceries-release-aligned.apk
 ```
 
 ### Transfer to Device
@@ -90,22 +99,3 @@ adb uninstall coop.nonscalable.onlygroceries
 pnpm tauri icon ./web/public/icon-512.png
 ```
 
-### Build APK in Docker
-
-First, I wanted to build the APK in Nix only, but it turned out harder than I thought because of Gradle:
-
-- https://nixos.org/manual/nixpkgs/unstable/#gradle - At the time, Gradle didn't have proper dependencies lock (AFAIK), so Nix had to implement a MITM proxy to capture its traffic and generate a lockfile for Gradle (lol)
-- https://github.com/NixOS/nixpkgs/issues/381969 - Then Gradle got proper lockfile mechanism, but
-- https://github.com/gradle/gradle/issues/32739 - Still does not work with Nix
-
-So, here's a nix-shell-in-docker Dockerfile
-
-Run it as
-
-```sh
-docker build \
-    --secret id=jks,src=$HOME/upload-keystore.jks \
-    --secret id=properties,src=$PWD/src-tauri/gen/android/keystore.properties --tag onlygroceries-apk .
-
-docker cp $(docker create onlygroceries-apk:latest --name onlygroceries-apk):/dist/app.apk ./app.apk
-```

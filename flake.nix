@@ -41,39 +41,80 @@
             system-images-android-36-google-apis-x86-64
             ndk-29-0-14206865
           ]);
-      in {
-        packages.android = pkgs.callPackage ./nix/android.nix {
-          inherit pkgs android-nixpkgs;
+
+        signingSdk = android-nixpkgs.sdk.${system} (sdkPkgs:
+          with sdkPkgs; [
+            build-tools-36-0-0
+            cmdline-tools-latest
+          ]);
+
+        commonPackages = with pkgs; [
+          pnpm_10
+          nodejs_22
+
+          pkg-config
+          gobject-introspection
+          cargo
+        ];
+
+        rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
+        androidRustToolchain = rustToolchain.override {
+          targets = [
+            "aarch64-linux-android"
+            "armv7-linux-androideabi"
+            "x86_64-linux-android"
+            "i686-linux-android"
+          ];
         };
 
-        devShells.default = pkgs.mkShell rec {
-          packages = with pkgs; [
-            androidSdk
-            zulu # for app signing
+        frontend = pkgs.callPackage ./nix/frontend.nix {};
+      in {
+        packages = {
+          inherit frontend;
+          android = pkgs.callPackage ./nix/android.nix {
+            inherit pkgs android-nixpkgs frontend;
+          };
+          android-release = pkgs.callPackage ./nix/android.nix {
+            inherit pkgs android-nixpkgs frontend;
+            release = true;
+          };
+        };
 
-            pnpm_10
-            nodejs_22
+        devShells = {
+          default = pkgs.mkShell {
+            packages = commonPackages ++ [rustToolchain];
+          };
 
-            pkg-config
-            gobject-introspection
-            cargo
-            (rust-bin.stable.latest.minimal.override
-              {
-                targets = [
-                  "aarch64-linux-android"
-                  "armv7-linux-androideabi"
-                  "x86_64-linux-android"
-                  "i686-linux-android"
-                ];
-              })
-          ];
+          android = pkgs.mkShell rec {
+            packages =
+              commonPackages
+              ++ [
+                androidSdk
+                pkgs.zulu # for app signing
+                androidRustToolchain
+              ];
 
-          JAVA_HOME = "${pkgs.jdk17}";
-          ANDROID_SKD_ROOT = "${androidSdk}/share/android-sdk";
-          ANDROID_HOME = "${androidSdk}/share/android-sdk";
-          NDK_HOME = "${ANDROID_HOME}/ndk/29.0.14206865";
-          ANDROID_AVD_HOME = "/home/threetimeslazy/.config/.android/avd";
-          GRADLE_OPTS = "-Dorg.gradle.project.android.aapt2FromMavenOverride=${androidSdk}/share/android-sdk/build-tools/35.0.0/aapt2";
+            JAVA_HOME = "${pkgs.jdk17}";
+            ANDROID_SDK_ROOT = "${androidSdk}/share/android-sdk";
+            ANDROID_HOME = ANDROID_SDK_ROOT;
+            NDK_HOME = "${ANDROID_HOME}/ndk/29.0.14206865";
+            GRADLE_OPTS = "-Dorg.gradle.project.android.aapt2FromMavenOverride=${androidSdk}/share/android-sdk/build-tools/35.0.0/aapt2";
+          };
+
+          signing = pkgs.mkShell {
+            packages = [
+              signingSdk
+              pkgs.jdk17
+            ];
+
+            ANDROID_SDK_ROOT = "${signingSdk}/share/android-sdk";
+            ANDROID_HOME = "${signingSdk}/share/android-sdk";
+
+            shellHook = ''
+              export PATH="$ANDROID_SDK_ROOT/build-tools/36.0.0:$PATH"
+              export ANDROID_AVD_HOME="$HOME/.config/.android/avd"
+            '';
+          };
         };
       }
     );
